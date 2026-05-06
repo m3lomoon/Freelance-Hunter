@@ -1,0 +1,33 @@
+name: 每日接案搜尋
+
+on:
+  schedule:
+    # 每天台灣時間早上 8:00（UTC+8 = UTC 00:00）
+    - cron: '0 0 * * *'
+  workflow_dispatch:  # 允許手動觸發
+
+jobs:
+  search:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: 取得程式碼
+        uses: actions/checkout@v4
+
+      - name: 安裝 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 安裝套件
+        run: |
+          pip install requests beautifulsoup4 anthropic playwright
+          playwright install chromium --with-deps
+
+      - name: 執行搜尋
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python main.py
