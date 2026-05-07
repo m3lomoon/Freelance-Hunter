@@ -1,0 +1,230 @@
+import os
+import re
+import tempfile
+
+import yt_dlp
+
+
+# ── 影片元數據 ──────────────────────────────────────────────────────────────
+
+def get_video_info(url: str) -> dict:
+    ydl_opts = {"quiet": True, "no_warnings": True, "skip_download": True}
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=False)
+    except Exception as e:
+        return {"error": str(e)}
+
+    if not info:
+        return {"error": "無法取得影片資訊"}
+
+    return {
+        "title": info.get("title", ""),
+        "description": info.get("description", ""),
+        "view_count": info.get("view_count") or 0,
+        "like_count": info.get("like_count") or 0,
+        "comment_count": info.get("comment_count") or 0,
+        "duration": info.get("duration") or 0,
+        "channel": info.get("channel") or info.get("uploader", ""),
+        "channel_url": info.get("channel_url") or info.get("uploader_url", ""),
+        "channel_follower_count": info.get("channel_follower_count") or 0,
+        "upload_date": info.get("upload_date", ""),
+        "thumbnail": info.get("thumbnail", ""),
+        "webpage_url": info.get("webpage_url") or url,
+        "platform": info.get("extractor_key", ""),
+        "available_subtitles": list(info.get("subtitles", {}).keys()),
+        "available_auto_captions": list(info.get("automatic_captions", {}).keys()),
+    }
+
+
+# ── 逐字稿 ─────────────────────────────────────────────────────────────────
+
+def _extract_youtube_id(url: str) -> str:
+    for pattern in [
+        r"(?:youtube\.com/watch\?v=|youtu\.be/)([a-zA-Z0-9_-]{11})",
+        r"youtube\.com/(?:embed|shorts)/([a-zA-Z0-9_-]{11})",
+    ]:
+        m = re.search(pattern, url)
+        if m:
+            return m.group(1)
+    return ""
+
+
+def get_transcript(url: str, preferred_langs: list[str] | None = None) -> tuple[list[dict], str]:
+    """
+    回傳 (entries, detected_lang)
+    entries: [{"start": float, "duration": float, "text": str}]
+    """
+    if preferred_langs is None:
+        preferred_langs = ["zh-Hant", "zh-TW", "zh-Hans", "zh", "en", "ja", "ko"]
+
+    # YouTube → 優先用 youtube-transcript-api（快且準）
+    video_id = _extract_youtube_id(url)
+    if video_id:
+        entries, lang = _transcript_via_api(video_id, preferred_langs)
+        if entries:
+            return entries, lang
+
+    # 其他平台或備援 → yt-dlp 下載字幕
+    return _transcript_via_ytdlp(url, preferred_langs)
+
+
+def _transcript_via_api(video_id: str, preferred_langs: list[str]) -> tuple[list[dict], str]:
+    try:
+        from youtube_transcript_api import YouTubeTranscriptApi, TranscriptsDisabled
+    except ImportError:
+        return [], ""
+
+    try:
+        tlist = YouTubeTranscriptApi.list_transcripts(video_id)
+    except TranscriptsDisabled:
+        return [], ""
+    except Exception:
+        return [], ""
+
+    def _fetch(transcript) -> list[dict]:
+        data = transcript.fetch()
+        return [{"start": e["start"], "duration": e.get("duration", 0), "text": e["text"]} for e in data]
+
+    # 手動字幕優先
+    for lang in preferred_langs:
+        try:
+            return _fetch(tlist.find_manually_created_transcript([lang])), lang
+        except Exception:
+            continue
+
+    # 自動字幕
+    for lang in preferred_langs:
+        try:
+            return _fetch(tlist.find_generated_transcript([lang])), f"{lang}（自動）"
+        except Exception:
+            continue
+
+    # 任意可用字幕
+    try:
+        all_t = list(tlist._manually_created_transcripts.values()) + \
+                list(tlist._generated_transcripts.values())
+        if all_t:
+            t = all_t[0]
+            return _fetch(t), t.language_code
+    except Exception:
+        pass
+
+    return [], ""
+
+
+def _transcript_via_ytdlp(url: str, preferred_langs: list[str]) -> tuple[list[dict], str]:
+    with tempfile.TemporaryDirectory() as tmpdir:
+        ydl_opts = {
+            "quiet": True,
+            "writesubtitles": True,
+            "writeautomaticsub": True,
+            "subtitleslangs": preferred_langs[:6],
+            "subtitlesformat": "vtt",
+            "skip_download": True,
+            "outtmpl": os.path.join(tmpdir, "%(id)s.%(ext)s"),
+        }
+        try:
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                info = ydl.extract_info(url, download=True)
+                video_id = info.get("id", "video")
+        except Exception:
+            return [], ""
+
+        for lang in preferred_langs:
+            path = os.path.join(tmpdir, f"{video_id}.{lang}.vtt")
+            if os.path.exists(path):
+                return _parse_vtt(path), lang
+
+        for f in os.listdir(tmpdir):
+            if f.endswith(".vtt"):
+                parts = f.rsplit(".", 2)
+                lang = parts[1] if len(parts) >= 3 else "unknown"
+                return _parse_vtt(os.path.join(tmpdir, f)), lang
+
+    return [], ""
+
+
+def _parse_vtt(filepath: str) -> list[dict]:
+    with open(filepath, encoding="utf-8") as f:
+        content = f.read()
+
+    entries = []
+    ts_pat = re.compile(
+        r"(\d{2}):(\d{2}):(\d{2})\.(\d{3}) --> (\d{2}):(\d{2}):(\d{2})\.(\d{3})"
+    )
+
+    for block in re.split(r"\n\n+", content):
+        lines = block.strip().splitlines()
+        ts_line = next((l for l in lines if ts_pat.match(l)), None)
+        if not ts_line:
+            continue
+
+        m = ts_pat.match(ts_line)
+        start = int(m.group(1)) * 3600 + int(m.group(2)) * 60 + int(m.group(3)) + int(m.group(4)) / 1000
+        end   = int(m.group(5)) * 3600 + int(m.group(6)) * 60 + int(m.group(7)) + int(m.group(8)) / 1000
+
+        text_parts = []
+        for l in lines:
+            if ts_pat.match(l) or l.startswith("WEBVTT") or re.match(r"^\d+$", l) or l.startswith("NOTE"):
+                continue
+            clean = re.sub(r"<[^>]+>", "", l).strip()
+            if clean:
+                text_parts.append(clean)
+
+        if text_parts:
+            entries.append({"start": start, "duration": end - start, "text": " ".join(text_parts)})
+
+    # 去掉完全重複的相鄰段落
+    deduped = []
+    for e in entries:
+        if not deduped or e["text"] != deduped[-1]["text"]:
+            deduped.append(e)
+    return deduped
+
+
+# ── Whisper 語音辨識（備援，無字幕時使用）──────────────────────────────────
+
+def transcribe_with_whisper(audio_path: str, model_size: str = "base") -> tuple[list[dict], str]:
+    try:
+        from faster_whisper import WhisperModel
+    except ImportError:
+        raise RuntimeError("請先安裝 faster-whisper：pip install faster-whisper")
+
+    model = WhisperModel(model_size, device="cpu", compute_type="int8")
+    segments, info = model.transcribe(audio_path, beam_size=5)
+
+    entries = [
+        {"start": seg.start, "duration": seg.end - seg.start, "text": seg.text.strip()}
+        for seg in segments
+    ]
+    return entries, info.language
+
+
+# ── 音頻下載 ────────────────────────────────────────────────────────────────
+
+def download_audio(url: str, output_dir: str) -> str:
+    """下載音頻為 MP3，回傳檔案路徑。需要 ffmpeg。"""
+    ydl_opts = {
+        "quiet": True,
+        "format": "bestaudio/best",
+        "postprocessors": [{
+            "key": "FFmpegExtractAudio",
+            "preferredcodec": "mp3",
+            "preferredquality": "128",
+        }],
+        "outtmpl": os.path.join(output_dir, "%(id)s.%(ext)s"),
+    }
+
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=True)
+            video_id = info.get("id", "audio")
+    except Exception as e:
+        raise RuntimeError(f"音頻下載失敗：{e}")
+
+    for fname in os.listdir(output_dir):
+        if fname.startswith(video_id):
+            return os.path.join(output_dir, fname)
+
+    raise RuntimeError("找不到下載的音頻檔案")
