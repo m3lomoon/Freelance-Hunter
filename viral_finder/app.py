@@ -9,6 +9,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 from search import search_videos, format_count, format_duration, format_date, PLATFORMS
 from analyzer import get_video_info, get_transcript, download_audio, transcribe_with_whisper
 from translator import translate_text, LANGUAGES
+from templates import analyze_and_generate_templates, generate_custom_hook
 
 
 # ── 共用：翻譯區塊 ──────────────────────────────────────────────────────────
@@ -115,10 +116,15 @@ with st.sidebar:
     st.markdown("1. **搜尋** 關鍵字找爆款")
     st.markdown("2. **分析** 貼連結取逐字稿")
     st.markdown("3. **翻譯** 一鍵多國語言")
+    st.markdown("4. **模板** 生成拍攝模板與鉤子")
 
 # ── 主區域 Tab ──────────────────────────────────────────────────────────────
 
-tab_search, tab_analyze = st.tabs(["🔍 搜尋爆款影片", "📊 分析影片連結"])
+tab_search, tab_analyze, tab_template = st.tabs([
+    "🔍 搜尋爆款影片",
+    "📊 分析影片連結",
+    "🎬 模板生成器",
+])
 
 # ════════════════════════════════════════════════════════════
 # TAB 1 · 搜尋爆款影片
@@ -350,3 +356,149 @@ with tab_analyze:
 
     elif analyze_btn:
         st.warning("請輸入影片連結")
+
+# ════════════════════════════════════════════════════════════
+# TAB 3 · 模板生成器
+# ════════════════════════════════════════════════════════════
+
+with tab_template:
+    st.markdown("### 🎬 從爆款影片生成拍攝模板")
+    st.caption("貼上任何爆款連結，AI 幫你分析爆款原因並生成可複製的鉤子與拍攝模板")
+
+    col_url, col_platform = st.columns([3, 1])
+    with col_url:
+        tmpl_url = st.text_input(
+            "爆款影片連結",
+            placeholder="貼上 YouTube / TikTok / Instagram / Bilibili 連結…",
+            label_visibility="collapsed",
+            key="tmpl_url",
+        )
+    with col_platform:
+        tmpl_platform = st.selectbox(
+            "平台",
+            ["YouTube", "YouTube Shorts", "TikTok", "Instagram Reels", "Bilibili"],
+            label_visibility="collapsed",
+            key="tmpl_platform",
+        )
+
+    tmpl_niche = st.text_input(
+        "你的創作主題（選填）",
+        placeholder="例如：科技開箱、健身教學、個人理財… 填了會生成更貼近你的模板",
+        key="tmpl_niche",
+    )
+
+    tmpl_btn = st.button("🚀 生成模板", type="primary", use_container_width=True)
+
+    if tmpl_btn:
+        if not tmpl_url.strip():
+            st.warning("請輸入影片連結")
+        elif not os.environ.get("ANTHROPIC_API_KEY"):
+            st.error("請先在左側欄輸入 Anthropic API Key")
+        else:
+            with st.spinner("正在讀取影片資訊…"):
+                info = get_video_info(tmpl_url.strip())
+
+            if "error" in info:
+                st.error(f"無法讀取影片：{info['error']}")
+            else:
+                with st.spinner("正在取得逐字稿…"):
+                    entries, _ = get_transcript(tmpl_url.strip())
+                    transcript_text = " ".join(e["text"] for e in entries) if entries else ""
+
+                if not transcript_text:
+                    st.info("找不到字幕，將只根據標題和元數據分析")
+
+                with st.spinner("AI 正在分析爆款原因並生成模板…約需 15-30 秒"):
+                    try:
+                        result = analyze_and_generate_templates(
+                            title=info["title"],
+                            transcript=transcript_text,
+                            view_count=info["view_count"],
+                            like_count=info["like_count"],
+                            channel=info["channel"],
+                            platform=tmpl_platform,
+                            user_niche=tmpl_niche.strip(),
+                        )
+
+                        st.success(f"分析完成！影片：{info['title'][:50]}…")
+                        st.caption(f"👁 {format_count(info['view_count'])} 觀看 · 👍 {format_count(info['like_count'])} 按讚")
+                        st.divider()
+
+                        tab_r1, tab_r2, tab_r3, tab_r4, tab_r5, tab_r6 = st.tabs([
+                            "🔥 爆款原因",
+                            "🪝 鉤子模板",
+                            "🎬 拍攝模板",
+                            "✂️ 剪輯建議",
+                            "📐 標題公式",
+                            "💡 主題靈感",
+                        ])
+
+                        with tab_r1:
+                            st.markdown(result["virality_reasons"] or result["raw"])
+                        with tab_r2:
+                            st.markdown(result["hooks"])
+                        with tab_r3:
+                            st.markdown(result["shooting_template"])
+                        with tab_r4:
+                            st.markdown(result["editing_tips"])
+                        with tab_r5:
+                            st.markdown(result["title_formulas"])
+                        with tab_r6:
+                            st.markdown(result["topic_ideas"])
+
+                        st.divider()
+                        full_report = result["raw"]
+                        st.download_button(
+                            "⬇ 下載完整模板報告",
+                            full_report,
+                            file_name="viral_template.md",
+                            mime="text/markdown",
+                            use_container_width=True,
+                        )
+
+                    except Exception as e:
+                        st.error(f"生成失敗：{e}")
+
+    st.divider()
+
+    # ── 自訂鉤子生成器 ──
+    st.markdown("### 🪝 自訂鉤子生成器")
+    st.caption("不需要影片連結，直接輸入主題就能生成開場鉤子")
+
+    hk_col1, hk_col2, hk_col3 = st.columns([3, 1, 1])
+    with hk_col1:
+        hk_topic = st.text_input(
+            "影片主題",
+            placeholder="例如：我用 AI 一個月賺了 10 萬",
+            label_visibility="collapsed",
+            key="hk_topic",
+        )
+    with hk_col2:
+        hk_platform = st.selectbox(
+            "平台",
+            ["TikTok", "YouTube Shorts", "Instagram Reels", "YouTube"],
+            label_visibility="collapsed",
+            key="hk_platform",
+        )
+    with hk_col3:
+        hk_style = st.selectbox(
+            "風格",
+            ["好奇心", "震驚開場", "痛點共鳴", "反直覺", "數字衝擊"],
+            label_visibility="collapsed",
+            key="hk_style",
+        )
+
+    hk_btn = st.button("🪝 生成鉤子", use_container_width=True)
+
+    if hk_btn:
+        if not hk_topic.strip():
+            st.warning("請輸入影片主題")
+        elif not os.environ.get("ANTHROPIC_API_KEY"):
+            st.error("請先在左側欄輸入 Anthropic API Key")
+        else:
+            with st.spinner("正在生成鉤子…"):
+                try:
+                    hooks = generate_custom_hook(hk_topic.strip(), hk_platform, hk_style)
+                    st.markdown(hooks)
+                except Exception as e:
+                    st.error(f"生成失敗：{e}")
