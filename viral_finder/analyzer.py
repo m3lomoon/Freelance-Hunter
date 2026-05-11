@@ -7,8 +7,14 @@ import yt_dlp
 
 # ── 影片元數據 ──────────────────────────────────────────────────────────────
 
-def get_video_info(url: str) -> dict:
-    ydl_opts = {"quiet": True, "no_warnings": True, "skip_download": True}
+def _build_ydl_opts(base: dict, ig_session: str = "") -> dict:
+    if ig_session:
+        base["http_headers"] = {"Cookie": f"sessionid={ig_session.strip()}"}
+    return base
+
+
+def get_video_info(url: str, ig_session: str = "") -> dict:
+    ydl_opts = _build_ydl_opts({"quiet": True, "no_warnings": True, "skip_download": True}, ig_session)
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
@@ -50,7 +56,7 @@ def _extract_youtube_id(url: str) -> str:
     return ""
 
 
-def get_transcript(url: str, preferred_langs: list[str] | None = None) -> tuple[list[dict], str]:
+def get_transcript(url: str, preferred_langs: list[str] | None = None, ig_session: str = "") -> tuple[list[dict], str]:
     """
     回傳 (entries, detected_lang)
     entries: [{"start": float, "duration": float, "text": str}]
@@ -66,7 +72,7 @@ def get_transcript(url: str, preferred_langs: list[str] | None = None) -> tuple[
             return entries, lang
 
     # 其他平台或備援 → yt-dlp 下載字幕
-    return _transcript_via_ytdlp(url, preferred_langs)
+    return _transcript_via_ytdlp(url, preferred_langs, ig_session)
 
 
 def _transcript_via_api(video_id: str, preferred_langs: list[str]) -> tuple[list[dict], str]:
@@ -113,9 +119,9 @@ def _transcript_via_api(video_id: str, preferred_langs: list[str]) -> tuple[list
     return [], ""
 
 
-def _transcript_via_ytdlp(url: str, preferred_langs: list[str]) -> tuple[list[dict], str]:
+def _transcript_via_ytdlp(url: str, preferred_langs: list[str], ig_session: str = "") -> tuple[list[dict], str]:
     with tempfile.TemporaryDirectory() as tmpdir:
-        ydl_opts = {
+        ydl_opts = _build_ydl_opts({
             "quiet": True,
             "writesubtitles": True,
             "writeautomaticsub": True,
@@ -123,7 +129,7 @@ def _transcript_via_ytdlp(url: str, preferred_langs: list[str]) -> tuple[list[di
             "subtitlesformat": "vtt",
             "skip_download": True,
             "outtmpl": os.path.join(tmpdir, "%(id)s.%(ext)s"),
-        }
+        }, ig_session)
         try:
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 info = ydl.extract_info(url, download=True)

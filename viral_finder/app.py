@@ -10,6 +10,7 @@ from search import search_videos, format_count, format_duration, format_date, PL
 from analyzer import get_video_info, get_transcript, download_audio, transcribe_with_whisper
 from translator import translate_text, LANGUAGES
 from templates import analyze_and_generate_templates, generate_custom_hook
+from recreate import generate_recreation_guide
 
 
 # ── 共用：翻譯區塊 ──────────────────────────────────────────────────────────
@@ -96,6 +97,16 @@ with st.sidebar:
     if api_key:
         os.environ["ANTHROPIC_API_KEY"] = api_key
 
+    st.divider()
+    st.markdown("#### 📸 Instagram 設定")
+    ig_session = st.text_input(
+        "Instagram Session ID",
+        type="password",
+        placeholder="貼上 sessionid cookie 值",
+        help="Instagram 需要登入才能抓取。在瀏覽器開發者工具 → Application → Cookies → sessionid",
+        key="ig_session",
+    )
+
     whisper_model = st.selectbox(
         "Whisper 模型大小",
         ["tiny", "base", "small", "medium"],
@@ -120,10 +131,11 @@ with st.sidebar:
 
 # ── 主區域 Tab ──────────────────────────────────────────────────────────────
 
-tab_search, tab_analyze, tab_template = st.tabs([
+tab_search, tab_analyze, tab_template, tab_recreate = st.tabs([
     "🔍 搜尋爆款影片",
     "📊 分析影片連結",
     "🎬 模板生成器",
+    "🎥 重現指南",
 ])
 
 # ════════════════════════════════════════════════════════════
@@ -224,8 +236,9 @@ with tab_analyze:
         url = url_input.strip()
 
         # ── 影片基本資訊 ──
+        ig_session = st.session_state.get("ig_session", "")
         with st.spinner("正在讀取影片資訊…"):
-            info = get_video_info(url)
+            info = get_video_info(url, ig_session)
 
         if "error" in info:
             st.error(f"無法讀取影片：{info['error']}")
@@ -283,7 +296,7 @@ with tab_analyze:
         # 字幕逐字稿
         if get_sub_btn:
             with st.spinner("正在取得字幕逐字稿…"):
-                entries, lang = get_transcript(url)
+                entries, lang = get_transcript(url, ig_session=ig_session)
 
             if not entries:
                 st.warning("找不到字幕，可嘗試「Whisper 語音辨識」")
@@ -502,3 +515,113 @@ with tab_template:
                     st.markdown(hooks)
                 except Exception as e:
                     st.error(f"生成失敗：{e}")
+
+# ════════════════════════════════════════════════════════════
+# TAB 4 · 重現指南
+# ════════════════════════════════════════════════════════════
+
+with tab_recreate:
+    st.markdown("### 🎥 影片重現指南")
+    st.caption("貼上任何影片連結，AI 告訴你怎麼拍出一樣效果 + 生成 AI 影片工具 Prompt")
+
+    rc_col1, rc_col2 = st.columns([3, 1])
+    with rc_col1:
+        rc_url = st.text_input(
+            "影片連結",
+            placeholder="YouTube / TikTok / Instagram Reels / Bilibili…",
+            label_visibility="collapsed",
+            key="rc_url",
+        )
+    with rc_col2:
+        rc_platform = st.selectbox(
+            "平台",
+            ["YouTube", "YouTube Shorts", "TikTok", "Instagram Reels", "Bilibili"],
+            label_visibility="collapsed",
+            key="rc_platform",
+        )
+
+    rc_tools = st.text_input(
+        "你有哪些器材？（選填）",
+        placeholder="例如：iPhone 15、環形燈、DJI Osmo、剪映… 不填也沒關係",
+        key="rc_tools",
+    )
+
+    rc_btn = st.button("🎥 生成重現指南", type="primary", use_container_width=True)
+
+    if rc_btn:
+        if not rc_url.strip():
+            st.warning("請輸入影片連結")
+        elif not os.environ.get("ANTHROPIC_API_KEY"):
+            st.error("請先在左側欄輸入 Anthropic API Key")
+        else:
+            _ig = st.session_state.get("ig_session", "")
+            with st.spinner("正在讀取影片資訊…"):
+                rc_info = get_video_info(rc_url.strip(), _ig)
+
+            if "error" in rc_info:
+                st.error(f"無法讀取影片：{rc_info['error']}")
+                if "instagram" in rc_url.lower() or "instagram" in rc_info.get("error","").lower():
+                    st.info("Instagram 影片需要登入 Cookie。請在左側欄「Instagram 設定」貼上你的 Session ID。\n\n取得方法：瀏覽器登入 Instagram → 開發者工具（F12）→ Application → Cookies → 找 `sessionid` 複製值")
+            else:
+                with st.spinner("正在取得逐字稿…"):
+                    rc_entries, _ = get_transcript(rc_url.strip(), ig_session=_ig)
+                    rc_transcript = " ".join(e["text"] for e in rc_entries) if rc_entries else ""
+
+                with st.spinner("AI 正在生成完整重現指南…約需 20-30 秒"):
+                    try:
+                        rc_result = generate_recreation_guide(
+                            title=rc_info["title"],
+                            transcript=rc_transcript,
+                            description=rc_info.get("description", ""),
+                            view_count=rc_info["view_count"],
+                            platform=rc_platform,
+                            thumbnail_url=rc_info.get("thumbnail", ""),
+                            user_tools=rc_tools.strip(),
+                        )
+
+                        st.success(f"指南生成完成：{rc_info['title'][:50]}…")
+
+                        if rc_info.get("thumbnail"):
+                            st.image(rc_info["thumbnail"], width=300)
+
+                        st.divider()
+
+                        t1, t2, t3, t4, t5, t6, t7, t8 = st.tabs([
+                            "📱 拍攝設置",
+                            "💡 燈光場景",
+                            "📝 腳本結構",
+                            "✂️ 剪輯",
+                            "🎵 音樂",
+                            "📦 器材",
+                            "🤖 AI Prompt",
+                            "🪜 重現步驟",
+                        ])
+
+                        with t1:
+                            st.markdown(rc_result["filming_setup"])
+                        with t2:
+                            st.markdown(rc_result["lighting_scene"])
+                        with t3:
+                            st.markdown(rc_result["script_breakdown"])
+                        with t4:
+                            st.markdown(rc_result["editing"])
+                        with t5:
+                            st.markdown(rc_result["music"])
+                        with t6:
+                            st.markdown(rc_result["equipment"])
+                        with t7:
+                            st.markdown(rc_result["ai_prompts"])
+                        with t8:
+                            st.markdown(rc_result["steps"])
+
+                        st.divider()
+                        st.download_button(
+                            "⬇ 下載完整重現指南",
+                            rc_result["raw"],
+                            file_name="recreation_guide.md",
+                            mime="text/markdown",
+                            use_container_width=True,
+                        )
+
+                    except Exception as e:
+                        st.error(f"生成失敗：{e}")
