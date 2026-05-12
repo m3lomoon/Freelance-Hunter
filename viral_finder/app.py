@@ -26,23 +26,22 @@ from storage import (
 
 def _render_translation(text: str, target_lang: str):
     st.markdown("### 🌐 翻譯")
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        st.caption("🆓 免費模式：使用 Google 翻譯 · 輸入 API Key 可切換至 Claude 高品質翻譯")
     if st.button(f"翻譯為「{target_lang}」", type="primary", use_container_width=True):
-        if not os.environ.get("ANTHROPIC_API_KEY"):
-            st.error("請先在左側欄輸入 Anthropic API Key")
-        else:
-            with st.spinner(f"正在翻譯為 {target_lang}…"):
-                try:
-                    result = translate_text(text, target_lang)
-                    st.text_area(f"翻譯結果（{target_lang}）", result, height=320)
-                    fname = f"translation_{target_lang.replace(' ', '_')}.txt"
-                    st.download_button(
-                        "⬇ 下載翻譯文字",
-                        result,
-                        file_name=fname,
-                        mime="text/plain",
-                        use_container_width=True,
-                    )
-                except Exception as e:
+        with st.spinner(f"正在翻譯為 {target_lang}…"):
+            try:
+                result = translate_text(text, target_lang)
+                st.text_area(f"翻譯結果（{target_lang}）", result, height=320)
+                fname = f"translation_{target_lang.replace(' ', '_')}.txt"
+                st.download_button(
+                    "⬇ 下載翻譯文字",
+                    result,
+                    file_name=fname,
+                    mime="text/plain",
+                    use_container_width=True,
+                )
+            except Exception as e:
                     st.error(f"翻譯失敗：{e}")
 
 # ── 頁面設定 ────────────────────────────────────────────────────────────────
