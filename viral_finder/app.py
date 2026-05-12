@@ -11,6 +11,15 @@ from analyzer import get_video_info, get_transcript, download_audio, transcribe_
 from translator import translate_text, LANGUAGES
 from templates import analyze_and_generate_templates, generate_custom_hook
 from recreate import generate_recreation_guide
+from content_tools import (
+    generate_ab_titles, generate_thumbnail_copy, generate_content_calendar,
+    adapt_for_platforms, analyze_best_posting_time, analyze_competitor,
+)
+from batch import batch_analyze, results_to_dataframe, dataframe_to_excel
+from storage import (
+    add_history, get_history, clear_history,
+    add_favorite, get_favorites, remove_favorite, clear_favorites, FAVORITE_TYPES,
+)
 
 
 # ── 共用：翻譯區塊 ──────────────────────────────────────────────────────────
@@ -131,11 +140,14 @@ with st.sidebar:
 
 # ── 主區域 Tab ──────────────────────────────────────────────────────────────
 
-tab_search, tab_analyze, tab_template, tab_recreate = st.tabs([
+tab_search, tab_analyze, tab_template, tab_recreate, tab_tools, tab_batch, tab_saved = st.tabs([
     "🔍 搜尋爆款影片",
     "📊 分析影片連結",
     "🎬 模板生成器",
     "🎥 重現指南",
+    "✍️ 內容工具",
+    "📦 批次分析",
+    "⭐ 收藏 & 歷史",
 ])
 
 # ════════════════════════════════════════════════════════════
@@ -625,3 +637,225 @@ with tab_recreate:
 
                     except Exception as e:
                         st.error(f"生成失敗：{e}")
+
+
+# ════════════════════════════════════════════════════════════
+# TAB 5 · 內容工具
+# ════════════════════════════════════════════════════════════
+
+with tab_tools:
+    tool_choice = st.radio(
+        "選擇工具",
+        ["🔤 A/B 標題測試", "🖼 縮圖文案", "📅 30天內容日曆", "🔄 平台適配器", "⏰ 最佳發布時間", "🕵️ 競爭對手分析"],
+        horizontal=True,
+        label_visibility="collapsed",
+    )
+    st.divider()
+
+    def _tool_result(label, result, fav_type):
+        st.markdown(result)
+        c1, c2 = st.columns(2)
+        with c1:
+            st.download_button("⬇ 下載", result, file_name=f"{label}.txt", mime="text/plain", use_container_width=True, key=f"dl_{label}_{len(result)}")
+        with c2:
+            if st.button("⭐ 收藏", key=f"fav_{label}_{len(result)}", use_container_width=True):
+                add_favorite(fav_type, label, result)
+                st.success("已加入收藏！")
+
+    if tool_choice == "🔤 A/B 標題測試":
+        st.markdown("### 🔤 A/B 標題測試")
+        t1, t2 = st.columns([3, 1])
+        with t1:
+            ab_topic = st.text_input("影片主題", placeholder="例如：我花30天只吃麥當勞的結果", key="ab_topic")
+        with t2:
+            ab_platform = st.selectbox("平台", list(PLATFORMS.keys()), key="ab_plat")
+        if st.button("生成 5 個標題變體", type="primary", use_container_width=True):
+            if not ab_topic:
+                st.warning("請輸入主題")
+            elif not os.environ.get("ANTHROPIC_API_KEY"):
+                st.error("請輸入 API Key")
+            else:
+                with st.spinner("生成中…"):
+                    _r = generate_ab_titles(ab_topic, ab_platform)
+                _tool_result(f"AB標題_{ab_topic[:20]}", _r, "title")
+
+    elif tool_choice == "🖼 縮圖文案":
+        st.markdown("### 🖼 縮圖文案生成器")
+        tc1, tc2 = st.columns([3, 1])
+        with tc1:
+            tc_topic = st.text_input("影片主題", placeholder="例如：月薪3萬如何存到第一桶金", key="tc_topic")
+        with tc2:
+            tc_style = st.selectbox("風格", ["震驚", "好奇", "情緒", "數字", "對比"], key="tc_style")
+        if st.button("生成縮圖文案", type="primary", use_container_width=True):
+            if not tc_topic:
+                st.warning("請輸入主題")
+            elif not os.environ.get("ANTHROPIC_API_KEY"):
+                st.error("請輸入 API Key")
+            else:
+                with st.spinner("生成中…"):
+                    _r = generate_thumbnail_copy(tc_topic, tc_style)
+                _tool_result(f"縮圖_{tc_topic[:20]}", _r, "other")
+
+    elif tool_choice == "📅 30天內容日曆":
+        st.markdown("### 📅 30天內容日曆")
+        cal1, cal2 = st.columns([3, 1])
+        with cal1:
+            cal_niche = st.text_input("你的創作主題", placeholder="例如：個人理財、健身、AI工具", key="cal_niche")
+        with cal2:
+            cal_platform = st.selectbox("平台", list(PLATFORMS.keys()), key="cal_plat")
+        if st.button("生成30天日曆", type="primary", use_container_width=True):
+            if not cal_niche:
+                st.warning("請輸入主題")
+            elif not os.environ.get("ANTHROPIC_API_KEY"):
+                st.error("請輸入 API Key")
+            else:
+                with st.spinner("生成中…約需30秒"):
+                    _r = generate_content_calendar(cal_niche, cal_platform)
+                _tool_result(f"30天日曆_{cal_niche[:20]}", _r, "calendar")
+
+    elif tool_choice == "🔄 平台適配器":
+        st.markdown("### 🔄 平台適配器")
+        pa_content = st.text_area("貼上你的影片腳本或主題描述", height=150, placeholder="貼上你已有的內容，AI 幫你改寫成各平台版本", key="pa_content")
+        pa_platform = st.selectbox("原始平台", list(PLATFORMS.keys()), key="pa_platform")
+        if st.button("轉換為各平台版本", type="primary", use_container_width=True):
+            if not pa_content:
+                st.warning("請輸入內容")
+            elif not os.environ.get("ANTHROPIC_API_KEY"):
+                st.error("請輸入 API Key")
+            else:
+                with st.spinner("生成中…"):
+                    _r = adapt_for_platforms(pa_content, pa_platform)
+                _tool_result("平台適配", _r, "template")
+
+    elif tool_choice == "⏰ 最佳發布時間":
+        st.markdown("### ⏰ 最佳發布時間分析")
+        pt1, pt2, pt3 = st.columns(3)
+        with pt1:
+            pt_niche = st.text_input("創作主題", placeholder="科技開箱", key="pt_niche")
+        with pt2:
+            pt_audience = st.text_input("目標受眾", placeholder="18-35歲台灣男性", key="pt_audience")
+        with pt3:
+            pt_platform = st.selectbox("平台", list(PLATFORMS.keys()), key="pt_platform")
+        if st.button("分析最佳時段", type="primary", use_container_width=True):
+            if not pt_niche or not pt_audience:
+                st.warning("請填寫主題和受眾")
+            elif not os.environ.get("ANTHROPIC_API_KEY"):
+                st.error("請輸入 API Key")
+            else:
+                with st.spinner("分析中…"):
+                    _r = analyze_best_posting_time(pt_niche, pt_audience, pt_platform)
+                _tool_result("最佳發布時間", _r, "other")
+
+    elif tool_choice == "🕵️ 競爭對手分析":
+        st.markdown("### 🕵️ 競爭對手分析")
+        comp1, comp2 = st.columns([2, 1])
+        with comp1:
+            comp_url = st.text_input("競爭對手頻道網址", placeholder="https://www.youtube.com/@channelname", key="comp_url")
+        with comp2:
+            comp_niche = st.text_input("你的主題", placeholder="個人理財", key="comp_niche")
+        if st.button("分析競爭對手", type="primary", use_container_width=True):
+            if not comp_url or not comp_niche:
+                st.warning("請填寫頻道網址和你的主題")
+            elif not os.environ.get("ANTHROPIC_API_KEY"):
+                st.error("請輸入 API Key")
+            else:
+                with st.spinner("分析中…"):
+                    _r = analyze_competitor(comp_url, comp_niche)
+                _tool_result("競爭對手分析", _r, "other")
+
+# ════════════════════════════════════════════════════════════
+# TAB 6 · 批次分析
+# ════════════════════════════════════════════════════════════
+
+with tab_batch:
+    st.markdown("### 📦 批次影片分析")
+    st.caption("一次貼多個連結，自動抓取數據後匯出 Excel")
+
+    batch_input = st.text_area(
+        "影片連結（每行一個，最多20個）",
+        height=200,
+        placeholder="https://www.youtube.com/watch?v=...\nhttps://www.youtube.com/watch?v=...\nhttps://www.tiktok.com/...",
+        key="batch_input",
+    )
+
+    if st.button("🚀 開始批次分析", type="primary", use_container_width=True):
+        urls = [u.strip() for u in batch_input.strip().split("\n") if u.strip()]
+        if not urls:
+            st.warning("請貼上至少一個連結")
+        elif len(urls) > 20:
+            st.warning("最多支援 20 個連結")
+        else:
+            _ig = st.session_state.get("ig_session", "")
+            progress_bar = st.progress(0)
+            status_text = st.empty()
+
+            def _progress_cb(i, total, url):
+                progress_bar.progress((i + 1) / total)
+                status_text.text(f"正在分析第 {i+1}/{total} 個：{url[:50]}…")
+
+            results = batch_analyze(urls, _ig, _progress_cb)
+            progress_bar.empty()
+            status_text.empty()
+
+            df = results_to_dataframe(results)
+            success = sum(1 for r in results if not r.get("error"))
+            st.success(f"完成！成功 {success}/{len(results)} 個")
+            st.dataframe(df, use_container_width=True)
+
+            excel_bytes = dataframe_to_excel(df)
+            st.download_button(
+                "⬇ 下載 Excel 報告",
+                excel_bytes,
+                file_name="viral_analysis.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                use_container_width=True,
+            )
+
+# ════════════════════════════════════════════════════════════
+# TAB 7 · 收藏 & 歷史
+# ════════════════════════════════════════════════════════════
+
+with tab_saved:
+    col_fav, col_hist = st.columns(2)
+
+    with col_fav:
+        st.markdown("### ⭐ 我的收藏")
+        favorites = get_favorites()
+        if not favorites:
+            st.info("還沒有收藏，在各工具頁點「⭐ 收藏」即可")
+        else:
+            for i, fav in enumerate(favorites):
+                type_label = FAVORITE_TYPES.get(fav["type"], "📌")
+                with st.expander(f"{type_label} {fav['title']} — {fav['saved_at']}"):
+                    st.markdown(fav["content"][:500] + ("…" if len(fav["content"]) > 500 else ""))
+                    fc1, fc2 = st.columns(2)
+                    with fc1:
+                        st.download_button("⬇ 下載", fav["content"], file_name=f"{fav['title'][:30]}.txt",
+                                           mime="text/plain", key=f"dl_fav_{i}", use_container_width=True)
+                    with fc2:
+                        if st.button("🗑 刪除", key=f"del_fav_{i}", use_container_width=True):
+                            remove_favorite(i)
+                            st.rerun()
+            if st.button("🗑 清空收藏夾", use_container_width=True):
+                clear_favorites()
+                st.rerun()
+
+    with col_hist:
+        st.markdown("### 📋 分析歷史")
+        history = get_history()
+        if not history:
+            st.info("還沒有分析過任何影片")
+        else:
+            for item in history:
+                with st.container(border=True):
+                    hc1, hc2 = st.columns([1, 3])
+                    with hc1:
+                        if item.get("thumbnail"):
+                            st.image(item["thumbnail"], use_container_width=True)
+                    with hc2:
+                        st.markdown(f"**{item['title'][:40]}**")
+                        st.caption(f"👁 {format_count(item['view_count'])} · {item['platform']} · {item['analyzed_at']}")
+                        st.link_button("▶ 重新開啟", item["url"], use_container_width=True)
+            if st.button("🗑 清空歷史", use_container_width=True):
+                clear_history()
+                st.rerun()

@@ -7,19 +7,45 @@ import yt_dlp
 
 # ── 影片元數據 ──────────────────────────────────────────────────────────────
 
+_IG_HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) "
+        "AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1"
+    ),
+    "Accept-Language": "zh-TW,zh;q=0.9,en;q=0.8",
+}
+
+
 def _build_ydl_opts(base: dict, ig_session: str = "") -> dict:
+    is_ig = False
+    for key in ("ig_session",):
+        _ = key  # suppress linter
     if ig_session:
-        base["http_headers"] = {"Cookie": f"sessionid={ig_session.strip()}"}
+        base["http_headers"] = {
+            **_IG_HEADERS,
+            "Cookie": f"sessionid={ig_session.strip()}; ds_user_id=0",
+        }
+        is_ig = True
     return base
 
 
+def _is_instagram(url: str) -> bool:
+    return "instagram.com" in url.lower()
+
+
 def get_video_info(url: str, ig_session: str = "") -> dict:
-    ydl_opts = _build_ydl_opts({"quiet": True, "no_warnings": True, "skip_download": True}, ig_session)
+    base = {"quiet": True, "no_warnings": True, "skip_download": True, "sleep_interval": 1}
+    if _is_instagram(url) and not ig_session:
+        base["http_headers"] = _IG_HEADERS
+    ydl_opts = _build_ydl_opts(base, ig_session)
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
     except Exception as e:
-        return {"error": str(e)}
+        err = str(e)
+        if "429" in err and _is_instagram(url):
+            return {"error": "Instagram 限制存取（429）。請在左側欄輸入你的 Instagram Session ID，或稍後再試。"}
+        return {"error": err}
 
     if not info:
         return {"error": "無法取得影片資訊"}
