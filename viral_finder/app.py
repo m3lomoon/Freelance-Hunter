@@ -25,6 +25,7 @@ from faceless import (
 from security import sanitize_prompt_input
 from survey import render_survey, render_admin_dashboard
 from analytics import track, render_analytics_dashboard
+from i18n import t, SUPPORTED_LANGUAGES
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 頁面設定
@@ -39,7 +40,9 @@ st.set_page_config(
 
 # ── 初始化 session state
 if "dark_mode" not in st.session_state:
-    st.session_state["dark_mode"] = True  # 預設深色模式
+    st.session_state["dark_mode"] = True
+if "ui_lang" not in st.session_state:
+    st.session_state["ui_lang"] = "繁體中文"
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -520,75 +523,97 @@ _inject_theme(st.session_state["dark_mode"])
 with st.sidebar:
     # Logo + 標題
     st.markdown(
-        '<div class="hero-title" style="font-size:1.5rem; padding: 0.5rem 0;">🎯 爆款影片獵手</div>',
+        f'<div class="hero-title" style="font-size:1.5rem; padding: 0.5rem 0;">{t("app_title")}</div>',
         unsafe_allow_html=True,
     )
-    st.caption("為內容創作者打造的爆款分析工具")
+    st.caption(t("sidebar_caption"))
     st.divider()
 
-    # ── 深淺色切換
-    mode_label = "🌙 深色模式" if st.session_state["dark_mode"] else "☀️ 淺色模式"
-    if st.button(mode_label, use_container_width=True):
-        st.session_state["dark_mode"] = not st.session_state["dark_mode"]
-        st.rerun()
+    # ── 深淺色切換 + 語言選擇
+    _col_mode, _col_lang = st.columns([1, 1])
+    with _col_mode:
+        mode_label = t("dark_mode") if st.session_state["dark_mode"] else t("light_mode")
+        if st.button(mode_label, use_container_width=True):
+            st.session_state["dark_mode"] = not st.session_state["dark_mode"]
+            st.rerun()
+    with _col_lang:
+        new_lang = st.selectbox(
+            t("language_label"),
+            list(SUPPORTED_LANGUAGES.keys()),
+            index=list(SUPPORTED_LANGUAGES.keys()).index(st.session_state.get("ui_lang", "繁體中文")),
+            label_visibility="collapsed",
+            key="lang_selector",
+        )
+        if new_lang != st.session_state.get("ui_lang"):
+            st.session_state["ui_lang"] = new_lang
+            st.rerun()
 
     st.divider()
 
     # ── 方案狀態
     if is_unlocked():
-        st.success("✅ 進階版已解鎖", icon="🔓")
-        if st.button("登出進階版", use_container_width=True):
+        st.success(t("pro_unlocked_msg"), icon="🔓")
+        if st.button(t("logout_pro"), use_container_width=True):
             from paywall import lock
             lock()
             st.rerun()
     else:
-        with st.expander("🔒 解鎖進階功能"):
-            code_in = st.text_input("Access Code", placeholder="VH-XXXX-XXXX", key="sidebar_code")
-            if st.button("🔓 解鎖", type="primary", use_container_width=True):
+        with st.expander(t("unlock_expander")):
+            code_in = st.text_input(
+                "Access Code",
+                placeholder=t("access_code_placeholder"),
+                key="sidebar_code",
+            )
+            if st.button(t("unlock_btn"), type="primary", use_container_width=True):
                 from paywall import try_unlock
                 if try_unlock(code_in):
                     track("unlock_pro")
-                    st.success("✅ 解鎖成功！")
+                    st.success(t("unlock_success"))
                     st.rerun()
                 else:
-                    st.error("Code 不正確或已達嘗試上限")
+                    st.error(t("unlock_error"))
+            # Gumroad 購買按鈕
+            _gumroad_url = os.environ.get("GUMROAD_URL", "")
+            if _gumroad_url:
+                st.link_button(t("buy_pro"), _gumroad_url, use_container_width=True)
+                st.caption(t("purchase_hint"))
 
-        st.markdown('<p class="section-header">免費功能</p>', unsafe_allow_html=True)
+        st.markdown(f'<p class="section-header">{t("free_features_header")}</p>', unsafe_allow_html=True)
         for f in PLAN_FEATURES["free"]:
             st.markdown(f)
-        st.markdown('<p class="section-header" style="margin-top:0.75rem;">進階功能 🔥</p>', unsafe_allow_html=True)
+        st.markdown(f'<p class="section-header" style="margin-top:0.75rem;">{t("pro_features_header")}</p>', unsafe_allow_html=True)
         for f in PLAN_FEATURES["pro"]:
             st.markdown(f)
 
     st.divider()
-    st.markdown('<p class="section-header">⚙️ 設定</p>', unsafe_allow_html=True)
+    st.markdown(f'<p class="section-header">{t("settings_header")}</p>', unsafe_allow_html=True)
 
     _env_key = os.environ.get("ANTHROPIC_API_KEY", "")
     if _env_key:
-        st.success("✅ AI 功能已啟用", icon="🤖")
+        st.success(t("ai_enabled"), icon="🤖")
     else:
         api_key = st.text_input(
-            "Anthropic API Key（選填）",
+            t("api_key_label"),
             type="password",
             placeholder="sk-ant-...",
-            help="有填 Key → Claude 翻譯；沒填 → Google 翻譯（免費）",
+            help=t("api_key_help"),
         )
         if api_key:
             os.environ["ANTHROPIC_API_KEY"] = api_key
 
     ig_session = st.text_input(
-        "Instagram Session ID（選填）",
+        t("ig_session_label"),
         type="password",
-        placeholder="貼上 sessionid cookie 值",
-        help="分析 Instagram Reels 需要",
+        placeholder="sessionid=...",
+        help=t("ig_session_help"),
         key="ig_session",
     )
 
     whisper_model = st.selectbox(
-        "🎙 Whisper 模型",
+        t("whisper_model_label"),
         ["tiny", "base", "small", "medium"],
         index=1,
-        help="模型越大越準確，但速度較慢",
+        help=t("whisper_model_help"),
     )
 
     st.divider()
@@ -596,10 +621,14 @@ with st.sidebar:
     # ── 管理員工具
     _admin_key = os.environ.get("ADMIN_KEY", "")
     if _admin_key:
-        with st.expander("🔧 管理員工具"):
-            admin_input = st.text_input("管理員密碼", type="password", key="admin_pw")
+        with st.expander(t("admin_tools")):
+            admin_input = st.text_input(t("admin_password"), type="password", key="admin_pw")
             if admin_input == _admin_key:
-                admin_tab1, admin_tab2, admin_tab3 = st.tabs(["📊 使用分析", "💬 問卷", "🔑 Access Code"])
+                admin_tab1, admin_tab2, admin_tab3 = st.tabs([
+                    t("admin_tab_analytics"),
+                    t("admin_tab_survey"),
+                    t("admin_tab_codes"),
+                ])
 
                 with admin_tab1:
                     render_analytics_dashboard()
@@ -610,29 +639,29 @@ with st.sidebar:
                 with admin_tab3:
                     import secrets, string
                     num_codes = st.number_input("產生幾組", min_value=1, max_value=50, value=5, step=1)
-                    if st.button("產生 Access Code", use_container_width=True, type="primary"):
+                    if st.button(t("generate_codes_btn"), use_container_width=True, type="primary"):
                         codes = []
                         for _ in range(int(num_codes)):
                             p1 = ''.join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(4))
                             p2 = ''.join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(4))
                             codes.append(f"VH-{p1}-{p2}")
                         st.code("\n".join(codes))
-                        st.caption("複製後加入 Streamlit Secrets 的 ACCESS_CODES（逗號分隔）")
+                        st.caption(t("generate_codes_hint"))
 
             elif admin_input:
-                st.error("密碼錯誤")
+                st.error(t("wrong_password"))
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 主標題區
 # ══════════════════════════════════════════════════════════════════════════════
 
 st.markdown(
-    '<h1 class="hero-title">🎯 爆款影片獵手</h1>',
+    f'<h1 class="hero-title">{t("app_title")}</h1>',
     unsafe_allow_html=True,
 )
 st.markdown(
-    '<p style="font-size:1.05rem; color: var(--text-color, #888); margin-top: 0.2rem; margin-bottom: 1.5rem;">'
-    '找到爆款 → 理解為什麼爆 → 做出你的版本</p>',
+    f'<p style="font-size:1.05rem; color: var(--text-color, #888); margin-top: 0.2rem; margin-bottom: 1.5rem;">'
+    f'{t("app_subtitle")}</p>',
     unsafe_allow_html=True,
 )
 st.divider()
@@ -642,30 +671,30 @@ st.divider()
 # ══════════════════════════════════════════════════════════════════════════════
 
 st.markdown(
-    '<span class="step-badge">STEP 1</span> **找到你的靈感影片**',
+    f'<span class="step-badge">STEP 1</span> **{t("step1_title")}**',
     unsafe_allow_html=True,
 )
 
 input_mode = st.radio(
     "輸入方式",
-    ["🔗 貼上連結", "🔍 關鍵字搜尋"],
+    [t("input_link"), t("input_search")],
     horizontal=True,
     label_visibility="collapsed",
 )
 
 video_url = None
 
-if input_mode == "🔗 貼上連結":
+if input_mode == t("input_link"):
     c1, c2 = st.columns([4, 1])
     with c1:
         url_input = st.text_input(
-            "影片連結",
+            "url",
             value=st.session_state.get("analyze_url", ""),
-            placeholder="貼上 YouTube / TikTok / Instagram / Bilibili 連結…",
+            placeholder=t("url_placeholder"),
             label_visibility="collapsed",
         )
     with c2:
-        go_btn = st.button("分析 →", type="primary", use_container_width=True)
+        go_btn = st.button(t("analyze_btn"), type="primary", use_container_width=True)
 
     if go_btn and url_input.strip():
         video_url = url_input.strip()
@@ -675,24 +704,24 @@ else:
     sc1, sc2, sc3 = st.columns([3, 1.5, 1])
     with sc1:
         keyword = st.text_input(
-            "關鍵字",
-            placeholder="例如：AI副業、健身教學…",
+            "keyword",
+            placeholder=t("keyword_placeholder"),
             label_visibility="collapsed",
         )
     with sc2:
-        platform = st.selectbox("平台", list(PLATFORMS.keys()), label_visibility="collapsed")
+        platform = st.selectbox("platform", list(PLATFORMS.keys()), label_visibility="collapsed")
     with sc3:
-        search_btn = st.button("🔍 搜尋", type="primary", use_container_width=True)
+        search_btn = st.button(t("search_btn"), type="primary", use_container_width=True)
 
     if search_btn and keyword.strip():
         track("search_video", {"platform": platform, "keyword": keyword.strip()})
-        with st.spinner(f"搜尋 {platform} 爆款中…"):
+        with st.spinner(f"{t('searching')} {platform}…"):
             videos = search_videos(keyword.strip(), platform, 9)
 
         if not videos:
-            st.error("沒有找到影片，換個關鍵字試試")
+            st.error(t("no_results"))
         else:
-            st.success(f"✅ 找到 **{len(videos)}** 部影片，點「選這部分析」繼續")
+            st.success(f"✅ {t('search_btn')} **{len(videos)}**")
             cols_per_row = 3
             for row_start in range(0, len(videos), cols_per_row):
                 row = videos[row_start: row_start + cols_per_row]
@@ -707,14 +736,14 @@ else:
                             )
                             st.caption(f"📺 {video['channel']}")
                             m1, m2 = st.columns(2)
-                            m1.metric("👁 觀看", format_count(video["view_count"]))
+                            m1.metric("👁", format_count(video["view_count"]))
                             m2.metric("⏱", format_duration(video["duration"]))
                             col_a, col_b = st.columns(2)
                             with col_a:
-                                st.link_button("▶ 看影片", video["url"], use_container_width=True)
+                                st.link_button(t("watch_btn"), video["url"], use_container_width=True)
                             with col_b:
                                 if st.button(
-                                    "✅ 選這部",
+                                    t("select_btn"),
                                     key=f"sel_{video['id']}",
                                     use_container_width=True,
                                     type="primary",
@@ -735,7 +764,7 @@ if not video_url:
 
 st.divider()
 st.markdown(
-    '<span class="step-badge">STEP 2</span> **分析影片** <span class="free-badge">免費</span>',
+    f'<span class="step-badge">STEP 2</span> **{t("step2_title")}** <span class="free-badge">FREE</span>',
     unsafe_allow_html=True,
 )
 
@@ -747,14 +776,14 @@ def _fetch_info(url, ig):
     return get_video_info(url, ig)
 
 
-with st.spinner("讀取影片資訊中…"):
+with st.spinner(t("loading_info")):
     info = _fetch_info(video_url, _ig)
 
 if "error" in info:
-    st.error(f"❌ 無法讀取影片：{info['error']}")
+    st.error(f"❌ {info['error']}")
     if "429" in info["error"] or "instagram" in video_url.lower():
-        st.info("💡 Instagram 需要 Session ID，請在左側欄「設定」中填入")
-    if st.button("← 換一部影片"):
+        st.info(t("ig_hint"))
+    if st.button(t("change_video")):
         st.session_state.pop("current_url", None)
         st.rerun()
     st.stop()
@@ -768,7 +797,7 @@ col_img, col_meta = st.columns([1, 2])
 with col_img:
     if info["thumbnail"]:
         st.image(info["thumbnail"], use_container_width=True)
-    st.link_button("▶ 觀看原影片", info["webpage_url"], use_container_width=True)
+    st.link_button(t("watch_original"), info["webpage_url"], use_container_width=True)
 
 with col_meta:
     st.markdown(f"## {info['title']}")
@@ -779,91 +808,88 @@ with col_meta:
     )
     st.markdown(f"📺 {ch}")
     if info.get("channel_follower_count"):
-        st.markdown(f"👥 訂閱數：**{format_count(info['channel_follower_count'])}**")
+        st.markdown(f"👥 {t('subscribers')}：**{format_count(info['channel_follower_count'])}**")
     if info.get("upload_date"):
         st.markdown(f"📅 {format_date(info['upload_date'])}")
 
     m1, m2, m3, m4 = st.columns(4)
-    m1.metric("👁 觀看", format_count(info["view_count"]))
-    m2.metric("👍 按讚", format_count(info["like_count"]))
-    m3.metric("💬 留言", format_count(info["comment_count"]))
-    m4.metric("⏱ 時長", format_duration(info["duration"]))
+    m1.metric("👁", format_count(info["view_count"]))
+    m2.metric("👍", format_count(info["like_count"]))
+    m3.metric("💬", format_count(info["comment_count"]))
+    m4.metric("⏱", format_duration(info["duration"]))
 
     if info.get("description"):
-        with st.expander("📝 影片描述"):
+        with st.expander(t("description_expander")):
             st.text(info["description"][:1000])
 
 # ── 逐字稿（免費）
-st.markdown("#### 📜 逐字稿")
+st.markdown(t("transcript_header"))
 sub_col, whisper_col = st.columns(2)
 with sub_col:
-    get_sub = st.button("🗒 取得字幕逐字稿", use_container_width=True)
+    get_sub = st.button(t("get_subtitle_btn"), use_container_width=True)
 with whisper_col:
-    get_whisper = st.button("🎙 Whisper 語音辨識", use_container_width=True, help="需要 ffmpeg")
+    get_whisper = st.button(t("whisper_btn"), use_container_width=True, help=t("whisper_help"))
 
 transcript_text = ""
 
 if get_sub:
     track("get_transcript", {"platform": info.get("platform", "")})
-    with st.spinner("取得逐字稿中…"):
+    with st.spinner(t("getting_transcript")):
         entries, lang = get_transcript(video_url, ig_session=_ig)
     if not entries:
-        st.warning("⚠️ 找不到字幕，試試 Whisper 語音辨識")
+        st.warning(t("no_subtitles"))
     else:
         transcript_text = " ".join(e["text"] for e in entries)
-        st.success(f"✅ 語言：{lang}，共 {len(entries)} 段")
-        st.text_area("逐字稿", transcript_text, height=250)
+        st.success(f"✅ {lang} — {len(entries)} segments")
+        st.text_area("📜", transcript_text, height=250)
         st.session_state["transcript"] = transcript_text
 
 if get_whisper:
     track("whisper_transcribe", {"platform": info.get("platform", "")})
-    with st.spinner("下載音頻中…"):
+    with st.spinner(t("downloading_audio")):
         try:
             tmpdir = tempfile.mkdtemp()
             audio_path = download_audio(video_url, tmpdir)
         except Exception as e:
-            st.error(f"❌ 音頻下載失敗：{e}")
+            st.error(t("audio_fail", e=e))
             audio_path = None
     if audio_path:
-        with st.spinner(f"Whisper 辨識中（{whisper_model}）…"):
+        with st.spinner(f"Whisper ({whisper_model})…"):
             try:
                 entries, lang = transcribe_with_whisper(audio_path, whisper_model)
                 transcript_text = " ".join(e["text"] for e in entries)
-                st.success(f"✅ 辨識語言：{lang}")
-                st.text_area("Whisper 逐字稿", transcript_text, height=250)
+                st.success(f"✅ {lang}")
+                st.text_area("Whisper", transcript_text, height=250)
                 st.session_state["transcript"] = transcript_text
             except Exception as e:
-                st.error(f"❌ Whisper 失敗：{e}")
+                st.error(t("whisper_fail", e=e))
 
 # ── 翻譯
 if st.session_state.get("transcript") or transcript_text:
     _txt = transcript_text or st.session_state.get("transcript", "")
-    st.markdown("#### 🌐 翻譯逐字稿")
+    st.markdown(t("translate_header"))
     if using_free_translation():
-        st.caption("🆓 免費模式：使用 Google 翻譯 · 輸入 Anthropic API Key 切換 Claude 高品質翻譯")
+        st.caption(t("free_translation_notice"))
     lang_choice = st.selectbox(
-        "翻譯語言",
-        list({
-            "繁體中文": "", "简体中文": "", "English": "", "日本語": "",
-            "한국어": "", "Español": "", "Français": "", "Deutsch": "",
-            "ภาษาไทย": "", "Tiếng Việt": "",
-        }),
+        "lang",
+        ["繁體中文", "简体中文", "English", "日本語", "한국어",
+         "Español", "Français", "Deutsch", "ภาษาไทย", "Tiếng Việt"],
         label_visibility="collapsed",
         key="trans_lang",
     )
-    if st.button(f"🌐 翻譯為「{lang_choice}」", use_container_width=True):
+    if st.button(t("translate_btn", lang=lang_choice), use_container_width=True):
         track("translate", {"lang": lang_choice})
-        with st.spinner("翻譯中…"):
+        with st.spinner(t("translating")):
             try:
                 result = translate_text(_txt, lang_choice)
-                st.text_area("翻譯結果", result, height=250)
+                st.text_area("🌐", result, height=250)
                 st.download_button(
-                    "⬇ 下載翻譯", result,
+                    t("download_translation"), result,
                     file_name="translation.txt", mime="text/plain",
                     use_container_width=True,
                 )
             except Exception as e:
-                st.error(f"❌ 翻譯失敗：{e}")
+                st.error(t("translation_fail", e=e))
 
 # ══════════════════════════════════════════════════════════════════════════════
 # STEP 3：進階工具（PRO）
@@ -871,7 +897,7 @@ if st.session_state.get("transcript") or transcript_text:
 
 st.divider()
 st.markdown(
-    '<span class="step-badge">STEP 3</span> **生成你的版本** <span class="pro-badge">PRO</span>',
+    f'<span class="step-badge">STEP 3</span> **{t("step3_title")}** <span class="pro-badge">PRO</span>',
     unsafe_allow_html=True,
 )
 
@@ -881,12 +907,12 @@ if not is_unlocked():
 
 # ── PRO tabs
 pro_tab1, pro_tab2, pro_tab3, pro_tab_faceless, pro_tab4, pro_tab5 = st.tabs([
-    "🔥 爆款分析 + 模板",
-    "🎥 重現指南",
-    "✍️ 內容工具",
-    "🤖 無臉頻道工作坊",
-    "⭐ 我的收藏",
-    "📋 分析歷史",
+    t("tab_analysis"),
+    t("tab_recreation"),
+    t("tab_tools"),
+    t("tab_faceless"),
+    t("tab_favorites"),
+    t("tab_history"),
 ])
 
 _transcript = st.session_state.get("transcript", "")
@@ -894,7 +920,7 @@ _transcript = st.session_state.get("transcript", "")
 
 def _need_key() -> bool:
     if not os.environ.get("ANTHROPIC_API_KEY"):
-        st.error("❌ 此功能需要 Anthropic API Key，請在左側欄填入")
+        st.error(t("need_api_key"))
         return True
     return False
 
@@ -907,12 +933,12 @@ with pro_tab1:
         ["YouTube", "YouTube Shorts", "TikTok", "Instagram Reels", "Bilibili"],
         key="tmpl_p",
     )
-    tmpl_niche = st.text_input("你的創作主題（選填）", placeholder="例如：科技開箱、健身教學", key="tmpl_n")
+    tmpl_niche = st.text_input(t("your_topic"), placeholder="e.g. tech unboxing, fitness", key="tmpl_n")
 
-    if st.button("🚀 生成爆款模板", type="primary", use_container_width=True):
+    if st.button(t("generate_template_btn"), type="primary", use_container_width=True):
         if not _need_key():
             track("generate_template", {"platform": tmpl_platform, "topic": tmpl_niche})
-            with st.spinner("AI 分析中…約需 20 秒"):
+            with st.spinner(t("analyzing")):
                 try:
                     result = analyze_and_generate_templates(
                         title=info["title"], transcript=_transcript,
@@ -933,20 +959,20 @@ with pro_tab1:
                     col_dl, col_fav = st.columns(2)
                     with col_dl:
                         st.download_button(
-                            "⬇ 下載完整模板", result["raw"],
+                            t("download_btn"), result["raw"],
                             file_name="template.md", mime="text/markdown",
                             use_container_width=True,
                         )
                     with col_fav:
-                        if st.button("⭐ 收藏模板", use_container_width=True):
+                        if st.button(t("save_btn"), use_container_width=True, key="fav_tmpl"):
                             add_favorite("template", info["title"][:40], result["raw"])
                             track("add_favorite", {"type": "template"})
-                            st.success("✅ 已收藏！")
+                            st.success(t("saved_msg"))
                 except Exception as e:
-                    st.error(f"❌ 生成失敗：{e}")
+                    st.error(t("gen_fail", e=e))
 
     st.divider()
-    st.markdown("#### 🪝 自訂鉤子生成器")
+    st.markdown("#### 🪝 Hook Generator")
     hk1, hk2, hk3 = st.columns(3)
     with hk1:
         hk_topic = st.text_input("主題", placeholder="我用AI一個月賺10萬", key="hk_t")
@@ -955,15 +981,15 @@ with pro_tab1:
     with hk3:
         hk_style = st.selectbox("風格", ["好奇心", "震驚開場", "痛點共鳴", "反直覺", "數字衝擊"], key="hk_s")
 
-    if st.button("✨ 生成鉤子", type="primary", use_container_width=True):
+    if st.button(t("gen_hook_btn"), type="primary", use_container_width=True):
         if not _need_key():
             track("custom_hook", {"platform": hk_platform, "topic": hk_topic})
-            with st.spinner("生成中…"):
+            with st.spinner(t("generating")):
                 hooks = generate_custom_hook(hk_topic, hk_platform, hk_style)
             st.markdown(hooks)
-            if st.button("⭐ 收藏這組鉤子", key="fav_hook"):
+            if st.button(t("save_btn"), key="fav_hook"):
                 add_favorite("hook", hk_topic[:40], hooks)
-                st.success("✅ 已收藏！")
+                st.success(t("saved_msg"))
 
 
 # ── PRO TAB 2：重現指南
@@ -974,12 +1000,12 @@ with pro_tab2:
         ["YouTube", "YouTube Shorts", "TikTok", "Instagram Reels", "Bilibili"],
         key="rc_p",
     )
-    rc_tools = st.text_input("你有哪些器材？", placeholder="iPhone 15、環形燈、剪映…", key="rc_t")
+    rc_tools = st.text_input(t("your_gear"), placeholder=t("gear_placeholder"), key="rc_t")
 
-    if st.button("🎥 生成重現指南", type="primary", use_container_width=True):
+    if st.button(t("gen_recreation_btn"), type="primary", use_container_width=True):
         if not _need_key():
             track("recreation_guide", {"platform": rc_platform})
-            with st.spinner("AI 生成中…約需 25 秒"):
+            with st.spinner(t("generating")):
                 try:
                     rc_result = generate_recreation_guide(
                         title=info["title"], transcript=_transcript,
@@ -1003,24 +1029,25 @@ with pro_tab2:
                     col_dl2, col_fav2 = st.columns(2)
                     with col_dl2:
                         st.download_button(
-                            "⬇ 下載指南", rc_result["raw"],
+                            t("download_btn"), rc_result["raw"],
                             file_name="recreation.md", mime="text/markdown",
                             use_container_width=True,
                         )
                     with col_fav2:
-                        if st.button("⭐ 收藏指南", use_container_width=True):
+                        if st.button(t("save_btn"), use_container_width=True, key="fav_rc"):
                             add_favorite("recreation", info["title"][:40], rc_result["raw"])
-                            st.success("✅ 已收藏！")
+                            st.success(t("saved_msg"))
                 except Exception as e:
-                    st.error(f"❌ 生成失敗：{e}")
+                    st.error(t("gen_fail", e=e))
 
 
 # ── PRO TAB 3：內容工具
 with pro_tab3:
     tool = st.radio(
-        "工具",
-        ["🔤 A/B 標題", "🖼 縮圖文案", "📅 30天日曆", "🔄 平台適配", "⏰ 最佳時段"],
+        "tool",
+        [t("ab_title"), t("thumbnail_copy"), t("calendar_30"), t("platform_adapt"), t("best_time")],
         horizontal=True,
+        label_visibility="collapsed",
     )
     st.divider()
 
@@ -1028,70 +1055,69 @@ with pro_tab3:
         if _need_key():
             return
         track(event_type, details)
-        with st.spinner("生成中…"):
+        with st.spinner(t("generating")):
             r = fn(*args, **kwargs)
         st.markdown(r)
         c1, c2 = st.columns(2)
         with c1:
             st.download_button(
-                "⬇ 下載", r,
+                t("download_btn"), r,
                 file_name=f"{label}.txt", mime="text/plain",
                 use_container_width=True, key=f"dl_{label}",
             )
         with c2:
-            if st.button("⭐ 收藏", key=f"sv_{label}_{len(r)}", use_container_width=True):
+            if st.button(t("save_btn"), key=f"sv_{label}_{len(r)}", use_container_width=True):
                 add_favorite(fav_type, label, r)
-                st.success("✅ 已收藏！")
+                st.success(t("saved_msg"))
 
-    if tool == "🔤 A/B 標題":
-        ab_t = st.text_input("影片主題", value=info["title"], key="ab_t2")
-        ab_p = st.selectbox("平台", list(PLATFORMS.keys()), key="ab_p2")
-        if st.button("✨ 生成標題變體", type="primary", use_container_width=True):
-            _gen_result("AB標題", generate_ab_titles, "title", "ab_titles",
+    if tool == t("ab_title"):
+        ab_t = st.text_input("t", value=info["title"], key="ab_t2", label_visibility="collapsed")
+        ab_p = st.selectbox("p", list(PLATFORMS.keys()), key="ab_p2", label_visibility="collapsed")
+        if st.button(f"✨ {t('ab_title')}", type="primary", use_container_width=True):
+            _gen_result("AB", generate_ab_titles, "title", "ab_titles",
                         {"platform": ab_p, "topic": ab_t[:20]}, ab_t, ab_p)
 
-    elif tool == "🖼 縮圖文案":
-        tc_t = st.text_input("影片主題", value=info["title"], key="tc_t2")
-        tc_s = st.selectbox("風格", ["震驚", "好奇", "情緒", "數字", "對比"], key="tc_s2")
-        if st.button("✨ 生成縮圖文案", type="primary", use_container_width=True):
-            _gen_result("縮圖文案", generate_thumbnail_copy, "other", "thumbnail_copy",
+    elif tool == t("thumbnail_copy"):
+        tc_t = st.text_input("t", value=info["title"], key="tc_t2", label_visibility="collapsed")
+        tc_s = st.selectbox("s", ["震驚", "好奇", "情緒", "數字", "對比"], key="tc_s2", label_visibility="collapsed")
+        if st.button(f"✨ {t('thumbnail_copy')}", type="primary", use_container_width=True):
+            _gen_result("thumbnail", generate_thumbnail_copy, "other", "thumbnail_copy",
                         {"topic": tc_t[:20]}, tc_t, tc_s)
 
-    elif tool == "📅 30天日曆":
-        cal_n = st.text_input("你的創作主題", placeholder="個人理財、健身…", key="cal_n2")
-        cal_p = st.selectbox("平台", list(PLATFORMS.keys()), key="cal_p2")
-        if st.button("📅 生成30天日曆", type="primary", use_container_width=True):
-            _gen_result("30天日曆", generate_content_calendar, "calendar", "content_calendar",
+    elif tool == t("calendar_30"):
+        cal_n = st.text_input("n", placeholder="個人理財、健身…", key="cal_n2", label_visibility="collapsed")
+        cal_p = st.selectbox("p", list(PLATFORMS.keys()), key="cal_p2", label_visibility="collapsed")
+        if st.button(f"📅 {t('calendar_30')}", type="primary", use_container_width=True):
+            _gen_result("calendar", generate_content_calendar, "calendar", "content_calendar",
                         {"platform": cal_p, "topic": cal_n[:20]}, cal_n, cal_p)
 
-    elif tool == "🔄 平台適配":
+    elif tool == t("platform_adapt"):
         pa_c = st.text_area(
-            "腳本或主題描述",
-            value=_transcript[:500] if _transcript else "",
-            height=120, key="pa_c2",
+            "c", value=_transcript[:500] if _transcript else "",
+            height=120, key="pa_c2", label_visibility="collapsed",
         )
-        pa_p = st.selectbox("原始平台", list(PLATFORMS.keys()), key="pa_p2")
-        if st.button("🔄 轉換各平台版本", type="primary", use_container_width=True):
-            _gen_result("平台適配", adapt_for_platforms, "template", "platform_adapt",
+        pa_p = st.selectbox("p", list(PLATFORMS.keys()), key="pa_p2", label_visibility="collapsed")
+        if st.button(f"🔄 {t('platform_adapt')}", type="primary", use_container_width=True):
+            _gen_result("adapt", adapt_for_platforms, "template", "platform_adapt",
                         {"platform": pa_p}, pa_c, pa_p)
 
-    elif tool == "⏰ 最佳時段":
+    elif tool == t("best_time"):
         pt1, pt2, pt3 = st.columns(3)
-        with pt1: pt_n = st.text_input("主題", placeholder="科技開箱", key="pt_n2")
-        with pt2: pt_a = st.text_input("目標受眾", placeholder="18-35歲台灣男性", key="pt_a2")
-        with pt3: pt_p = st.selectbox("平台", list(PLATFORMS.keys()), key="pt_p2")
-        if st.button("⏰ 分析最佳時段", type="primary", use_container_width=True):
-            _gen_result("最佳時段", analyze_best_posting_time, "other", "posting_time",
+        with pt1: pt_n = st.text_input("n", placeholder="Tech", key="pt_n2", label_visibility="collapsed")
+        with pt2: pt_a = st.text_input("a", placeholder="18-35", key="pt_a2", label_visibility="collapsed")
+        with pt3: pt_p = st.selectbox("p", list(PLATFORMS.keys()), key="pt_p2", label_visibility="collapsed")
+        if st.button(f"⏰ {t('best_time')}", type="primary", use_container_width=True):
+            _gen_result("best_time", analyze_best_posting_time, "other", "posting_time",
                         {"platform": pt_p, "topic": pt_n[:20]}, pt_n, pt_a, pt_p)
 
 
 # ── PRO TAB：無臉頻道工作坊
 with pro_tab_faceless:
-    st.caption("從找利基、寫腳本、SEO 到分鏡，一站式無臉頻道製作流程")
+    st.caption(t("faceless_caption"))
 
     faceless_tool = st.radio(
-        "選擇工具",
-        ["🔍 利基市場發現器", "📝 AI 腳本生成", "🔑 SEO 優化包", "🖼 縮圖 Prompt", "🎬 AI 分鏡腳本"],
+        "faceless_tool",
+        [t("niche_finder"), t("script_gen"), t("seo_package"), t("thumbnail_prompt"), t("storyboard")],
         horizontal=True,
         label_visibility="collapsed",
     )
@@ -1107,12 +1133,12 @@ with pro_tab_faceless:
                 use_container_width=True, key=f"dl_f_{label}",
             )
         with c2:
-            if st.button("⭐ 收藏", key=f"sv_f_{label}_{len(result)}", use_container_width=True):
+            if st.button(t("save_btn"), key=f"sv_f_{label}_{len(result)}", use_container_width=True):
                 add_favorite(fav_type, label, result)
-                st.success("✅ 已收藏！")
+                st.success(t("saved_msg"))
 
     # 利基市場發現器
-    if faceless_tool == "🔍 利基市場發現器":
+    if faceless_tool == t("niche_finder"):
         st.markdown("### 🔍 利基市場發現器")
         st.caption("找出適合華語市場的高獲利無臉頻道主題")
         nc1, nc2 = st.columns([2, 1])
@@ -1128,79 +1154,79 @@ with pro_tab_faceless:
                 _faceless_result(f"利基市場_{niche_cat}", r, "other")
 
     # AI 腳本生成
-    elif faceless_tool == "📝 AI 腳本生成":
-        st.markdown("### 📝 AI 腳本生成器")
-        sc1 = st.text_input("影片主題或點子", placeholder="例如：古埃及法老最神秘的詛咒", key="sc_topic")
+    elif faceless_tool == t("script_gen"):
+        st.markdown(f"### {t('script_gen')}")
+        sc1 = st.text_input("topic", placeholder="例如：古埃及法老最神秘的詛咒", key="sc_topic", label_visibility="collapsed")
         sc2, sc3, sc4 = st.columns(3)
         with sc2:
-            sc_length = st.selectbox("影片長度", list(SCRIPT_LENGTHS.keys()), index=1, key="sc_len")
+            sc_length = st.selectbox("len", list(SCRIPT_LENGTHS.keys()), index=1, key="sc_len", label_visibility="collapsed")
         with sc3:
-            sc_style = st.selectbox("腳本風格", SCRIPT_STYLES, key="sc_style")
+            sc_style = st.selectbox("style", SCRIPT_STYLES, key="sc_style", label_visibility="collapsed")
         with sc4:
-            sc_lang = st.selectbox("語言", ["繁體中文", "简体中文", "English"], key="sc_lang")
-        if st.button("📝 生成完整腳本", type="primary", use_container_width=True):
+            sc_lang = st.selectbox("lang", ["繁體中文", "简体中文", "English"], key="sc_lang", label_visibility="collapsed")
+        if st.button(f"📝 {t('script_gen')}", type="primary", use_container_width=True):
             if not sc1:
-                st.warning("⚠️ 請輸入影片主題")
+                st.warning("⚠️")
             elif not _need_key():
                 track("generate_script", {"topic": sc1[:30], "length": sc_length})
-                with st.spinner("AI 撰寫腳本中…約需 25 秒"):
+                with st.spinner(t("generating")):
                     r = generate_script(sc1, sc_length, sc_style, sc_lang)
                 st.session_state["faceless_script"] = r
                 st.session_state["faceless_topic"] = sc1
-                _faceless_result(f"腳本_{sc1[:20]}", r, "template")
-                st.info("💡 腳本已生成！可直接切換到「SEO 優化包」或「AI 分鏡腳本」繼續製作")
+                _faceless_result(f"script_{sc1[:20]}", r, "template")
+                st.info("💡 Script generated! Switch to SEO Package or AI Storyboard to continue.")
 
     # SEO 優化包
-    elif faceless_tool == "🔑 SEO 優化包":
-        st.markdown("### 🔑 SEO 優化包")
+    elif faceless_tool == t("seo_package"):
+        st.markdown(f"### {t('seo_package')}")
         seo_topic = st.text_input(
-            "影片主題",
+            "topic",
             value=st.session_state.get("faceless_topic", ""),
             placeholder="例如：古埃及法老最神秘的詛咒",
-            key="seo_topic",
+            key="seo_topic", label_visibility="collapsed",
         )
         seo_script = st.text_area(
-            "腳本內容（選填，有了更準確）",
+            "script",
             value=st.session_state.get("faceless_script", "")[:300],
-            height=80, key="seo_script",
+            height=80, key="seo_script", label_visibility="collapsed",
         )
-        seo_lang = st.selectbox("輸出語言", ["繁體中文", "简体中文"], key="seo_lang")
-        if st.button("🔑 生成 SEO 優化包", type="primary", use_container_width=True):
+        seo_lang = st.selectbox("lang", ["繁體中文", "简体中文"], key="seo_lang", label_visibility="collapsed")
+        if st.button(f"🔑 {t('seo_package')}", type="primary", use_container_width=True):
             if not seo_topic:
-                st.warning("⚠️ 請輸入影片主題")
+                st.warning("⚠️")
             elif not _need_key():
                 track("seo_package", {"topic": seo_topic[:30]})
-                with st.spinner("AI 生成 SEO 優化包中…"):
+                with st.spinner(t("generating")):
                     r = generate_seo_package(seo_topic, seo_script, seo_lang)
                 _faceless_result(f"SEO_{seo_topic[:20]}", r, "other")
 
     # 縮圖 Prompt
-    elif faceless_tool == "🖼 縮圖 Prompt":
-        st.markdown("### 🖼 縮圖生成 Prompt")
-        st.caption("生成可貼入 Midjourney / DALL-E / Stable Diffusion 的縮圖提示詞")
+    elif faceless_tool == t("thumbnail_prompt"):
+        st.markdown(f"### {t('thumbnail_prompt')}")
+        st.caption("Midjourney / DALL-E / Stable Diffusion")
         th1, th2 = st.columns([3, 1])
         with th1:
             th_topic = st.text_input(
-                "影片主題",
+                "topic",
                 value=st.session_state.get("faceless_topic", ""),
                 placeholder="例如：古埃及法老最神秘的詛咒",
-                key="th_topic",
+                key="th_topic", label_visibility="collapsed",
             )
         with th2:
-            th_style = st.selectbox("縮圖風格", THUMBNAIL_STYLES, key="th_style")
-        if st.button("🖼 生成縮圖 Prompt", type="primary", use_container_width=True):
+            th_style = st.selectbox("style", THUMBNAIL_STYLES, key="th_style", label_visibility="collapsed")
+        if st.button(f"🖼 {t('thumbnail_prompt')}", type="primary", use_container_width=True):
             if not th_topic:
-                st.warning("⚠️ 請輸入影片主題")
+                st.warning("⚠️")
             elif not _need_key():
                 track("thumbnail_prompt", {"topic": th_topic[:30], "style": th_style})
-                with st.spinner("AI 設計縮圖方案中…"):
+                with st.spinner(t("generating")):
                     r = generate_thumbnail_prompts(th_topic, th_style)
-                _faceless_result(f"縮圖_{th_topic[:20]}", r, "other")
+                _faceless_result(f"thumbnail_{th_topic[:20]}", r, "other")
 
     # AI 分鏡腳本
-    elif faceless_tool == "🎬 AI 分鏡腳本":
-        st.markdown("### 🎬 AI 分鏡腳本")
-        st.caption("將腳本拆解成逐場景分鏡，每場景附 Kling / Sora / Runway 可用的 AI 影片 Prompt")
+    elif faceless_tool == t("storyboard"):
+        st.markdown(f"### {t('storyboard')}")
+        st.caption("Kling / Sora / Runway AI Video Prompt")
         sb_script = st.text_area(
             "貼上你的影片腳本",
             value=st.session_state.get("faceless_script", ""),
@@ -1213,24 +1239,24 @@ with pro_tab_faceless:
             ["AI 動畫風格", "電影紀錄片風格", "真實感攝影風格", "暗黑奇幻風", "科幻未來風", "古典歷史風"],
             key="sb_style",
         )
-        if st.button("🎬 生成 AI 分鏡腳本", type="primary", use_container_width=True):
+        if st.button(f"🎬 {t('storyboard')}", type="primary", use_container_width=True):
             if not sb_script.strip():
-                st.warning("⚠️ 請貼上腳本內容")
+                st.warning("⚠️")
             elif not _need_key():
                 track("storyboard", {"style": sb_style})
-                with st.spinner("AI 生成分鏡腳本中…約需 30 秒"):
+                with st.spinner(t("generating")):
                     r = generate_storyboard(sb_script, sb_style)
-                _faceless_result("AI分鏡腳本", r, "template")
-                st.info("💡 複製每個場景的 AI Prompt，貼入 Kling AI / Runway Gen-3 / Sora 即可生成影片片段")
+                _faceless_result("storyboard", r, "template")
+                st.info("💡 Copy each scene's AI Prompt → paste into Kling AI / Runway Gen-3 / Sora")
 
 
 # ── PRO TAB 4：收藏
 with pro_tab4:
     favs = get_favorites()
     if not favs:
-        st.info("💡 還沒有收藏，在各工具頁點「⭐ 收藏」即可")
+        st.info(t("no_favorites"))
     else:
-        st.caption(f"共 {len(favs)} 個收藏")
+        st.caption(t("fav_count", n=len(favs)))
         for i, fav in enumerate(favs):
             type_label = FAVORITE_TYPES.get(fav["type"], "📌")
             with st.expander(f"{type_label} {fav['title']} — {fav['saved_at']}"):
@@ -1238,15 +1264,15 @@ with pro_tab4:
                 fc1, fc2 = st.columns(2)
                 with fc1:
                     st.download_button(
-                        "⬇ 下載", fav["content"],
+                        t("download_btn"), fav["content"],
                         file_name=f"{fav['title'][:30]}.txt", mime="text/plain",
                         key=f"dl_fav_{i}", use_container_width=True,
                     )
                 with fc2:
-                    if st.button("🗑 刪除", key=f"del_fav_{i}", use_container_width=True):
+                    if st.button(t("delete_btn"), key=f"del_fav_{i}", use_container_width=True):
                         remove_favorite(i)
                         st.rerun()
-        if st.button("🗑 清空所有收藏", use_container_width=True):
+        if st.button(t("clear_favorites"), use_container_width=True):
             from storage import clear_favorites
             clear_favorites()
             st.rerun()
@@ -1256,9 +1282,9 @@ with pro_tab4:
 with pro_tab5:
     history = get_history()
     if not history:
-        st.info("💡 還沒有分析過任何影片")
+        st.info(t("no_history"))
     else:
-        st.caption(f"最近分析了 {len(history)} 部影片（最多保留 50 筆）")
+        st.caption(t("history_count", n=len(history)))
         for item in history:
             with st.container(border=True):
                 hc1, hc2 = st.columns([1, 4])
@@ -1272,13 +1298,13 @@ with pro_tab5:
                         f"{item['platform']} · {item['analyzed_at']}"
                     )
                     if st.button(
-                        "🔄 重新分析",
+                        t("reanalyze_btn"),
                         key=f"re_{item['url'][:30]}",
                         use_container_width=True,
                     ):
                         st.session_state["current_url"] = item["url"]
                         st.rerun()
-        if st.button("🗑 清空歷史", use_container_width=True):
+        if st.button(t("clear_history"), use_container_width=True):
             clear_history()
             st.rerun()
 
@@ -1288,5 +1314,5 @@ with pro_tab5:
 # ══════════════════════════════════════════════════════════════════════════════
 
 st.divider()
-with st.expander("💬 分享你的使用體驗（只需 1 分鐘）", expanded=False):
+with st.expander(t("survey_expander"), expanded=False):
     render_survey()

@@ -1,22 +1,50 @@
 import os
-import hashlib
+import re
 import time
 import streamlit as st
 
 _MAX_ATTEMPTS = 5
 _COOLDOWN_SECONDS = 300  # 5分鐘冷卻
 
-
 # 內建的 Beta 測試碼（不需要 env var 也能使用）
 _BUILTIN_CODES: set[str] = {
     "MELOMOONJUSTFORYOU",
 }
+
+# Gumroad 授權碼格式：XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX
+_GUMROAD_KEY_RE = re.compile(
+    r'^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{8}-[0-9A-Fa-f]{8}-[0-9A-Fa-f]{8}$'
+)
 
 
 def _load_valid_codes() -> set[str]:
     raw = os.environ.get("ACCESS_CODES", "")
     env_codes = {c.strip().upper() for c in raw.split(",") if c.strip()}
     return env_codes | _BUILTIN_CODES
+
+
+def _verify_gumroad(license_key: str) -> bool:
+    """透過 Gumroad API 驗證授權碼，需要設定 GUMROAD_PRODUCT_PERMALINK env var"""
+    permalink = os.environ.get("GUMROAD_PRODUCT_PERMALINK", "")
+    if not permalink or not _GUMROAD_KEY_RE.match(license_key):
+        return False
+    try:
+        import requests
+        resp = requests.post(
+            "https://api.gumroad.com/v2/licenses/verify",
+            data={
+                "product_permalink": permalink,
+                "license_key": license_key,
+                "increment_uses_count": "false",
+            },
+            timeout=8,
+        )
+        if resp.status_code == 200:
+            data = resp.json()
+            return bool(data.get("success"))
+    except Exception:
+        pass
+    return False
 
 
 def is_unlocked() -> bool:
@@ -40,25 +68,36 @@ def _is_rate_limited() -> tuple[bool, int]:
 
 
 def try_unlock(code: str) -> bool:
-    # 防止暴力破解
+    """驗證 Access Code 或 Gumroad 授權碼，成功回傳 True"""
     limited, remaining = _is_rate_limited()
     if limited:
         raise ValueError(f"嘗試次數過多，請等待 {remaining} 秒後再試")
 
-    # 驗證格式：只允許字母、數字、連字號
-    import re
-    if not re.match(r'^[A-Za-z0-9\-]{4,32}$', code.strip()):
+    code = code.strip()
+
+    # 先嘗試 Gumroad 授權碼（UUID 格式）
+    if _GUMROAD_KEY_RE.match(code):
+        if _verify_gumroad(code):
+            st.session_state["pro_unlocked"] = True
+            st.session_state["unlock_attempts"] = 0
+            return True
+        # Gumroad 驗證失敗仍計入嘗試次數
+        st.session_state["unlock_attempts"] = st.session_state.get("unlock_attempts", 0) + 1
+        st.session_state["unlock_last_fail"] = time.time()
+        return False
+
+    # 一般 Access Code：只允許字母、數字、連字號
+    if not re.match(r'^[A-Za-z0-9\-]{4,50}$', code):
         st.session_state["unlock_attempts"] = st.session_state.get("unlock_attempts", 0) + 1
         st.session_state["unlock_last_fail"] = time.time()
         return False
 
     valid = _load_valid_codes()
-    if code.strip().upper() in valid:
+    if code.upper() in valid:
         st.session_state["pro_unlocked"] = True
         st.session_state["unlock_attempts"] = 0
         return True
 
-    # 記錄失敗次數（用固定時間比較防止時序攻擊）
     st.session_state["unlock_attempts"] = st.session_state.get("unlock_attempts", 0) + 1
     st.session_state["unlock_last_fail"] = time.time()
     return False
@@ -106,7 +145,13 @@ def render_unlock_prompt(feature_name: str = "進階功能"):
             except ValueError as e:
                 st.error(str(e))
 
-    st.markdown("**購買方式：** 請聯絡我們取得 Access Code")
+    # Gumroad 購買按鈕（若設定了 URL）
+    gumroad_url = os.environ.get("GUMROAD_URL", "")
+    if gumroad_url:
+        st.link_button("🛒 購買 PRO 進階版", gumroad_url, use_container_width=True)
+        st.caption("購買後你會收到授權碼，輸入上方欄位即可解鎖")
+    else:
+        st.markdown("**購買方式：** 請聯絡我們取得 Access Code")
     return False
 
 
