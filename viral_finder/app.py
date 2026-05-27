@@ -96,15 +96,21 @@ with st.sidebar:
 
     st.divider()
     st.markdown("#### ⚙️ 設定")
-    api_key = st.text_input(
-        "Anthropic API Key（選填）",
-        type="password",
-        value=os.environ.get("ANTHROPIC_API_KEY", ""),
-        placeholder="sk-ant-...",
-        help="有填 Key → Claude 翻譯；沒填 → Google 翻譯（免費）",
-    )
-    if api_key:
-        os.environ["ANTHROPIC_API_KEY"] = api_key
+
+    _env_key = os.environ.get("ANTHROPIC_API_KEY", "")
+    if _env_key:
+        # Key 已由管理員設定，不顯示輸入框
+        st.success("✅ AI 功能已啟用", icon="🤖")
+    else:
+        # 本機開發或用戶自填
+        api_key = st.text_input(
+            "Anthropic API Key（選填）",
+            type="password",
+            placeholder="sk-ant-...",
+            help="有填 Key → Claude 翻譯；沒填 → Google 翻譯（免費）",
+        )
+        if api_key:
+            os.environ["ANTHROPIC_API_KEY"] = api_key
 
     ig_session = st.text_input(
         "Instagram Session ID（選填）",
