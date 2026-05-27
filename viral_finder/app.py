@@ -17,6 +17,11 @@ from content_tools import (
 )
 from storage import add_history, get_history, clear_history, add_favorite, get_favorites, remove_favorite, FAVORITE_TYPES
 from paywall import is_unlocked, render_unlock_prompt, PLAN_FEATURES
+from faceless import (
+    find_niches, generate_script, generate_seo_package,
+    generate_thumbnail_prompts, generate_storyboard,
+    NICHE_CATEGORIES, SCRIPT_STYLES, SCRIPT_LENGTHS, THUMBNAIL_STYLES,
+)
 
 # ── 頁面設定 ────────────────────────────────────────────────────────────────
 
@@ -315,10 +320,11 @@ if not is_unlocked():
     st.stop()
 
 # 進階功能 tabs
-pro_tab1, pro_tab2, pro_tab3, pro_tab4, pro_tab5 = st.tabs([
+pro_tab1, pro_tab2, pro_tab3, pro_tab_faceless, pro_tab4, pro_tab5 = st.tabs([
     "🔥 爆款分析 + 模板",
     "🎥 重現指南",
     "✍️ 內容工具",
+    "🤖 無臉頻道工作坊",
     "⭐ 我的收藏",
     "📋 分析歷史",
 ])
@@ -472,6 +478,144 @@ with pro_tab3:
         with pt3: pt_p = st.selectbox("平台", list(PLATFORMS.keys()), key="pt_p2")
         if st.button("分析最佳時段", type="primary", use_container_width=True):
             _gen_result("最佳時段", analyze_best_posting_time, "other", pt_n, pt_a, pt_p)
+
+# ── PRO TAB：無臉頻道工作坊 ──────────────────────────────────────────────────
+
+with pro_tab_faceless:
+    st.caption("從找利基、寫腳本、SEO 到分鏡，一站式無臉頻道製作流程")
+
+    faceless_tool = st.radio(
+        "選擇工具",
+        ["🔍 利基市場發現器", "📝 AI 腳本生成", "🔑 SEO 優化包", "🖼 縮圖 Prompt", "🎬 AI 分鏡腳本"],
+        horizontal=True,
+        label_visibility="collapsed",
+    )
+    st.divider()
+
+    def _faceless_result(label, result, fav_type="other"):
+        st.markdown(result)
+        c1, c2 = st.columns(2)
+        with c1:
+            st.download_button("⬇ 下載", result, file_name=f"{label}.txt",
+                               mime="text/plain", use_container_width=True, key=f"dl_f_{label}")
+        with c2:
+            if st.button("⭐ 收藏", key=f"sv_f_{label}_{len(result)}", use_container_width=True):
+                add_favorite(fav_type, label, result)
+                st.success("已收藏！")
+
+    def _need_key():
+        if not os.environ.get("ANTHROPIC_API_KEY"):
+            st.error("此功能需要 Anthropic API Key，請在左側欄填入")
+            return True
+        return False
+
+    # 利基市場發現器
+    if faceless_tool == "🔍 利基市場發現器":
+        st.markdown("### 🔍 利基市場發現器")
+        st.caption("找出適合華語市場的高獲利無臉頻道主題")
+        nc1, nc2 = st.columns([2, 1])
+        with nc1:
+            niche_cat = st.selectbox("類別偏好", NICHE_CATEGORIES, key="niche_cat")
+        with nc2:
+            niche_lang = st.selectbox("輸出語言", ["繁體中文", "简体中文"], key="niche_lang")
+        if st.button("🔍 發現利基市場", type="primary", use_container_width=True):
+            if not _need_key():
+                with st.spinner("AI 分析熱門無臉頻道利基中…約需20秒"):
+                    r = find_niches(niche_cat, niche_lang)
+                _faceless_result(f"利基市場_{niche_cat}", r, "other")
+
+    # AI 腳本生成
+    elif faceless_tool == "📝 AI 腳本生成":
+        st.markdown("### 📝 AI 腳本生成器")
+        sc1 = st.text_input("影片主題或點子", placeholder="例如：古埃及法老最神秘的詛咒", key="sc_topic")
+        sc2, sc3, sc4 = st.columns(3)
+        with sc2:
+            sc_length = st.selectbox("影片長度", list(SCRIPT_LENGTHS.keys()), index=1, key="sc_len")
+        with sc3:
+            sc_style = st.selectbox("腳本風格", SCRIPT_STYLES, key="sc_style")
+        with sc4:
+            sc_lang = st.selectbox("語言", ["繁體中文", "简体中文", "English"], key="sc_lang")
+        if st.button("📝 生成完整腳本", type="primary", use_container_width=True):
+            if not sc1:
+                st.warning("請輸入影片主題")
+            elif not _need_key():
+                with st.spinner("AI 撰寫腳本中…約需25秒"):
+                    r = generate_script(sc1, sc_length, sc_style, sc_lang)
+                st.session_state["faceless_script"] = r
+                st.session_state["faceless_topic"] = sc1
+                _faceless_result(f"腳本_{sc1[:20]}", r, "template")
+                st.info("💡 腳本已生成！可直接使用「SEO 優化包」或「AI 分鏡腳本」繼續製作")
+
+    # SEO 優化包
+    elif faceless_tool == "🔑 SEO 優化包":
+        st.markdown("### 🔑 SEO 優化包")
+        seo_topic = st.text_input(
+            "影片主題",
+            value=st.session_state.get("faceless_topic", ""),
+            placeholder="例如：古埃及法老最神秘的詛咒",
+            key="seo_topic",
+        )
+        seo_script = st.text_area(
+            "腳本內容（選填，有了更準確）",
+            value=st.session_state.get("faceless_script", "")[:300],
+            height=80,
+            key="seo_script",
+        )
+        seo_lang = st.selectbox("輸出語言", ["繁體中文", "简体中文"], key="seo_lang")
+        if st.button("🔑 生成 SEO 優化包", type="primary", use_container_width=True):
+            if not seo_topic:
+                st.warning("請輸入影片主題")
+            elif not _need_key():
+                with st.spinner("AI 生成 SEO 優化包中…"):
+                    r = generate_seo_package(seo_topic, seo_script, seo_lang)
+                _faceless_result(f"SEO_{seo_topic[:20]}", r, "other")
+
+    # 縮圖 Prompt
+    elif faceless_tool == "🖼 縮圖 Prompt":
+        st.markdown("### 🖼 縮圖生成 Prompt")
+        st.caption("生成可貼入 Midjourney / DALL-E / Stable Diffusion 的縮圖提示詞")
+        th1, th2 = st.columns([3, 1])
+        with th1:
+            th_topic = st.text_input(
+                "影片主題",
+                value=st.session_state.get("faceless_topic", ""),
+                placeholder="例如：古埃及法老最神秘的詛咒",
+                key="th_topic",
+            )
+        with th2:
+            th_style = st.selectbox("縮圖風格", THUMBNAIL_STYLES, key="th_style")
+        if st.button("🖼 生成縮圖 Prompt", type="primary", use_container_width=True):
+            if not th_topic:
+                st.warning("請輸入影片主題")
+            elif not _need_key():
+                with st.spinner("AI 設計縮圖方案中…"):
+                    r = generate_thumbnail_prompts(th_topic, th_style)
+                _faceless_result(f"縮圖_{th_topic[:20]}", r, "other")
+
+    # AI 分鏡腳本
+    elif faceless_tool == "🎬 AI 分鏡腳本":
+        st.markdown("### 🎬 AI 分鏡腳本")
+        st.caption("將腳本拆解成逐場景分鏡，每場景附 Kling/Sora/Runway 可用的 AI 影片 Prompt")
+        sb_script = st.text_area(
+            "貼上你的影片腳本",
+            value=st.session_state.get("faceless_script", ""),
+            height=200,
+            placeholder="貼上用「AI 腳本生成」產生的腳本，或自己撰寫的腳本",
+            key="sb_script",
+        )
+        sb_style = st.selectbox(
+            "視覺風格",
+            ["AI 動畫風格", "電影紀錄片風格", "真實感攝影風格", "暗黑奇幻風", "科幻未來風", "古典歷史風"],
+            key="sb_style",
+        )
+        if st.button("🎬 生成 AI 分鏡腳本", type="primary", use_container_width=True):
+            if not sb_script.strip():
+                st.warning("請貼上腳本內容")
+            elif not _need_key():
+                with st.spinner("AI 生成分鏡腳本中…約需30秒"):
+                    r = generate_storyboard(sb_script, sb_style)
+                _faceless_result("AI分鏡腳本", r, "template")
+                st.info("💡 複製每個場景的 AI Prompt，貼入 Kling AI / Runway Gen-3 / Sora 即可生成影片片段")
 
 # ── PRO TAB 4：收藏 ─────────────────────────────────────────────────────────
 
