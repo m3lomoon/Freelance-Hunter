@@ -2,6 +2,13 @@ import os
 import anthropic
 
 
+_MAX_INPUT = 3000
+
+
+def _sanitize(text: str, max_len: int = 300) -> str:
+    return text[:max_len].strip()
+
+
 def _claude(prompt: str, max_tokens: int = 3000) -> str:
     api_key = os.environ.get("ANTHROPIC_API_KEY", "")
     if not api_key:
@@ -78,6 +85,7 @@ def generate_script(
     style: str = "紀錄片旁白",
     language: str = "繁體中文",
 ) -> str:
+    topic = _sanitize(topic, 200)
     word_count = SCRIPT_LENGTHS.get(length_label, 450)
 
     return _claude(f"""你是一位頂尖的 YouTube 腳本作家，專門為無臉頻道撰寫高留存率的影片腳本。
@@ -131,6 +139,7 @@ def generate_script(
 # ── 3. SEO 優化包 ────────────────────────────────────────────────────────────
 
 def generate_seo_package(topic: str, script_excerpt: str = "", language: str = "繁體中文") -> str:
+    topic = _sanitize(topic, 200)
     script_part = f"\n腳本摘要：\n{script_excerpt[:500]}" if script_excerpt else ""
 
     return _claude(f"""你是 YouTube SEO 專家。請為以下影片生成完整的 SEO 優化包，用{language}輸出。
@@ -223,7 +232,7 @@ def generate_thumbnail_prompts(topic: str, style: str = "震驚表情 + 大字�
 # ── 5. AI 分鏡腳本 ──────────────────────────────────────────────────────────
 
 def generate_storyboard(script: str, video_style: str = "AI 動畫風格") -> str:
-    script_excerpt = script[:2000]
+    script_excerpt = _sanitize(script, 2000)
 
     return _claude(f"""你是一位 AI 影片導演，專門為無臉 YouTube 頻道製作分鏡腳本。
 

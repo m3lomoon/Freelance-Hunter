@@ -2,6 +2,14 @@ import os
 import anthropic
 
 
+_MAX_INPUT = 3000  # 使用者輸入字元上限
+
+
+def _sanitize(text: str, max_len: int = _MAX_INPUT) -> str:
+    """限制輸入長度，避免過長內容造成 API 費用爆炸"""
+    return text[:max_len].strip()
+
+
 def _claude(prompt: str, max_tokens: int = 2000) -> str:
     api_key = os.environ.get("ANTHROPIC_API_KEY", "")
     if not api_key:
@@ -18,6 +26,7 @@ def _claude(prompt: str, max_tokens: int = 2000) -> str:
 # ── A/B 標題測試 ────────────────────────────────────────────────────────────
 
 def generate_ab_titles(topic: str, platform: str = "YouTube", count: int = 5) -> str:
+    topic = _sanitize(topic, 200)
     return _claude(f"""Generate {count} completely different title variations in Traditional Chinese (繁體中文) for this video topic:
 
 Topic: {topic}
@@ -40,6 +49,7 @@ Keep titles under 30 characters for short-form, 50 for long-form.""", 1500)
 # ── 縮圖文案生成器 ──────────────────────────────────────────────────────────
 
 def generate_thumbnail_copy(topic: str, style: str = "震驚") -> str:
+    topic = _sanitize(topic, 200)
     styles = {
         "震驚": "shocking, bold, creates disbelief",
         "好奇": "teases information, creates curiosity gap",
@@ -72,6 +82,7 @@ Use ALL CAPS feel, power words, and emotional triggers.""", 1200)
 # ── 30天內容日曆 ───────────────────────────────────────────────────────────
 
 def generate_content_calendar(niche: str, platform: str = "YouTube", days: int = 30) -> str:
+    niche = _sanitize(niche, 200)
     return _claude(f"""Create a {days}-day viral content calendar in Traditional Chinese (繁體中文) for:
 
 Niche/Topic: {niche}
@@ -98,6 +109,7 @@ Be specific with actual video ideas, not generic placeholders.""", 3000)
 # ── 平台適配器 ─────────────────────────────────────────────────────────────
 
 def adapt_for_platforms(content: str, original_platform: str = "YouTube") -> str:
+    content = _sanitize(content, 2000)
     return _claude(f"""Adapt this video concept/script for multiple platforms in Traditional Chinese (繁體中文):
 
 Original content ({original_platform}):

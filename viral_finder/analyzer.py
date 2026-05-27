@@ -4,6 +4,55 @@ import tempfile
 
 import yt_dlp
 
+# 允許的影片平台白名單（防止 SSRF）
+_ALLOWED_DOMAINS = {
+    "youtube.com", "youtu.be", "www.youtube.com",
+    "bilibili.com", "www.bilibili.com",
+    "tiktok.com", "www.tiktok.com", "vm.tiktok.com",
+    "instagram.com", "www.instagram.com",
+    "twitter.com", "x.com", "www.twitter.com", "www.x.com",
+    "facebook.com", "www.facebook.com", "fb.watch",
+    "twitch.tv", "www.twitch.tv",
+    "vimeo.com", "www.vimeo.com",
+    "nicovideo.jp", "www.nicovideo.jp",
+}
+
+
+def validate_url(url: str) -> str:
+    """驗證 URL 是否來自允許的平台，回傳清理後的 URL 或 raise ValueError"""
+    url = url.strip()
+    if not url.startswith(("http://", "https://")):
+        raise ValueError("連結必須以 http:// 或 https:// 開頭")
+
+    try:
+        from urllib.parse import urlparse
+        parsed = urlparse(url)
+        domain = parsed.netloc.lower().lstrip("www.")
+        # 移除 port
+        domain = domain.split(":")[0]
+
+        full_domain = parsed.netloc.lower()
+        if full_domain not in _ALLOWED_DOMAINS and domain not in _ALLOWED_DOMAINS:
+            raise ValueError(
+                f"不支援的平台：{full_domain}\n"
+                "支援：YouTube、Bilibili、TikTok、Instagram、Twitter/X、Facebook、Twitch、Vimeo"
+            )
+    except ValueError:
+        raise
+    except Exception:
+        raise ValueError("無效的連結格式")
+
+    return url
+
+
+def _sanitize_ig_session(session: str) -> str:
+    """清理 Instagram session ID，只保留字母數字底線（防止 Header Injection）"""
+    # Instagram session ID 格式：數字%3A字串 或純數字字母底線
+    cleaned = re.sub(r'[^\w%]', '', session.strip())
+    if len(cleaned) > 200:
+        cleaned = cleaned[:200]
+    return cleaned
+
 
 # ── 影片元數據 ──────────────────────────────────────────────────────────────
 
@@ -17,15 +66,13 @@ _IG_HEADERS = {
 
 
 def _build_ydl_opts(base: dict, ig_session: str = "") -> dict:
-    is_ig = False
-    for key in ("ig_session",):
-        _ = key  # suppress linter
     if ig_session:
-        base["http_headers"] = {
-            **_IG_HEADERS,
-            "Cookie": f"sessionid={ig_session.strip()}; ds_user_id=0",
-        }
-        is_ig = True
+        safe_session = _sanitize_ig_session(ig_session)
+        if safe_session:
+            base["http_headers"] = {
+                **_IG_HEADERS,
+                "Cookie": f"sessionid={safe_session}; ds_user_id=0",
+            }
     return base
 
 
@@ -34,6 +81,11 @@ def _is_instagram(url: str) -> bool:
 
 
 def get_video_info(url: str, ig_session: str = "") -> dict:
+    try:
+        url = validate_url(url)
+    except ValueError as e:
+        return {"error": str(e)}
+
     base = {"quiet": True, "no_warnings": True, "skip_download": True, "sleep_interval": 1}
     if _is_instagram(url) and not ig_session:
         base["http_headers"] = _IG_HEADERS
