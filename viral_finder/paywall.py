@@ -7,9 +7,16 @@ _MAX_ATTEMPTS = 5
 _COOLDOWN_SECONDS = 300  # 5分鐘冷卻
 
 
+# 內建的 Beta 測試碼（不需要 env var 也能使用）
+_BUILTIN_CODES: set[str] = {
+    "MELOMOONJUSTFORYOU",
+}
+
+
 def _load_valid_codes() -> set[str]:
     raw = os.environ.get("ACCESS_CODES", "")
-    return {c.strip().upper() for c in raw.split(",") if c.strip()}
+    env_codes = {c.strip().upper() for c in raw.split(",") if c.strip()}
+    return env_codes | _BUILTIN_CODES
 
 
 def is_unlocked() -> bool:
