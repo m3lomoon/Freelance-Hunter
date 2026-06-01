@@ -23,11 +23,20 @@ def _load_valid_codes() -> set[str]:
     return env_codes | _BUILTIN_CODES
 
 
-def _verify_gumroad(license_key: str) -> bool:
-    """透過 Gumroad API 驗證授權碼，需要設定 GUMROAD_PRODUCT_PERMALINK env var"""
+_VERIFY_CACHE_TTL = 3600  # 每小時重驗一次訂閱狀態
+
+
+def _verify_gumroad(license_key: str) -> dict:
+    """
+    透過 Gumroad API 驗證月費訂閱狀態。
+    回傳 dict:
+      valid  : True = 有效, False = 無效/過期, None = 網路錯誤（維持現狀）
+      status : "active" | "cancelled" | "payment_failed" | "ended" |
+               "not_found" | "network_error" | "invalid_format"
+    """
     permalink = os.environ.get("GUMROAD_PRODUCT_PERMALINK", "")
     if not permalink or not _GUMROAD_KEY_RE.match(license_key):
-        return False
+        return {"valid": False, "status": "invalid_format"}
     try:
         import requests
         resp = requests.post(
@@ -41,17 +50,63 @@ def _verify_gumroad(license_key: str) -> bool:
         )
         if resp.status_code == 200:
             data = resp.json()
-            return bool(data.get("success"))
+            if not data.get("success"):
+                return {"valid": False, "status": "not_found"}
+
+            purchase = data.get("purchase", {})
+            ended_at     = purchase.get("subscription_ended_at")
+            failed_at    = purchase.get("subscription_failed_at")
+            cancelled_at = purchase.get("subscription_cancelled_at")
+
+            # 訂閱已結束（取消且超過寬限期）
+            if ended_at:
+                return {"valid": False, "status": "ended"}
+
+            # 付款失敗
+            if failed_at:
+                return {"valid": False, "status": "payment_failed", "failed_at": failed_at}
+
+            # 已取消但仍在有效期內 / 正常訂閱中
+            status = "cancelled" if cancelled_at else "active"
+            return {
+                "valid": True,
+                "status": status,
+                "cancelled_at": cancelled_at,
+                "recurrence": purchase.get("recurrence", "monthly"),
+                "charge_count": purchase.get("charge_occurrence_count", 0),
+            }
     except Exception:
-        pass
-    return False
+        # 網路錯誤：不強制登出，維持現有狀態
+        return {"valid": None, "status": "network_error"}
+
+    return {"valid": False, "status": "api_error"}
 
 
 def is_unlocked() -> bool:
     # 環境變數開全功能（課程版 / 內部展示用）
     if os.environ.get("UNLOCK_ALL", "").lower() in ("1", "true", "yes"):
         return True
-    return st.session_state.get("pro_unlocked", False)
+
+    if not st.session_state.get("pro_unlocked"):
+        return False
+
+    # ── 月費訂閱：每小時重驗 Gumroad key ──────────────────────────────────
+    license_key = st.session_state.get("_license_key", "")
+    if license_key and _GUMROAD_KEY_RE.match(license_key):
+        last_ts = st.session_state.get("_verify_ts", 0)
+        if time.time() - last_ts > _VERIFY_CACHE_TTL:
+            result = _verify_gumroad(license_key)
+            if result["valid"] is False:  # 明確失效（非網路錯誤）
+                st.session_state["pro_unlocked"] = False
+                st.session_state["_sub_status"] = result["status"]
+                return False
+            if result["valid"] is True:
+                st.session_state["_sub_status"] = result.get("status", "active")
+            # valid is None（網路錯誤）→ 維持解鎖，不更新 ts（下次還會重試）
+            if result["valid"] is not None:
+                st.session_state["_verify_ts"] = time.time()
+
+    return True
 
 
 def _is_rate_limited() -> tuple[bool, int]:
@@ -78,13 +133,20 @@ def try_unlock(code: str) -> bool:
 
     code = code.strip()
 
-    # 先嘗試 Gumroad 授權碼（UUID 格式）
+    # 先嘗試 Gumroad 授權碼（UUID 格式）——月費訂閱驗證
     if _GUMROAD_KEY_RE.match(code):
-        if _verify_gumroad(code):
+        result = _verify_gumroad(code)
+        if result["valid"] is True:
             st.session_state["pro_unlocked"] = True
+            st.session_state["_license_key"] = code   # 儲存供每小時重驗
+            st.session_state["_verify_ts"] = time.time()
+            st.session_state["_sub_status"] = result.get("status", "active")
             st.session_state["unlock_attempts"] = 0
             return True
-        # Gumroad 驗證失敗仍計入嘗試次數
+        if result["valid"] is None:
+            # 網路錯誤，提示稍後再試，不計入失敗次數
+            raise ValueError("無法連線驗證，請稍後再試")
+        # 驗證失敗計入次數
         st.session_state["unlock_attempts"] = st.session_state.get("unlock_attempts", 0) + 1
         st.session_state["unlock_last_fail"] = time.time()
         return False

@@ -116,10 +116,46 @@ _T: dict[str, dict[str, str]] = {
         "es":    "Funciones PRO 🔥",
     },
     "purchase_hint": {
-        "zh-TW": "購買後你會收到授權碼，輸入即可解鎖",
-        "zh-CN": "购买后你会收到授权码，输入即可解锁",
-        "en":    "After purchase you'll receive a license key — enter it to unlock",
-        "es":    "Tras la compra recibirás una clave de licencia para ingresar",
+        "zh-TW": "訂閱後你會收到授權碼，輸入即可解鎖月費版",
+        "zh-CN": "订阅后你会收到授权码，输入即可解锁月费版",
+        "en":    "After subscribing you'll receive a license key — enter it to unlock",
+        "es":    "Tras suscribirte recibirás una clave de licencia para ingresar",
+    },
+    "buy_pro_monthly": {
+        "zh-TW": "🛒 訂閱月費 PRO",
+        "zh-CN": "🛒 订阅月费 PRO",
+        "en":    "🛒 Subscribe Monthly PRO",
+        "es":    "🛒 Suscribirse PRO Mensual",
+    },
+    "sub_active": {
+        "zh-TW": "✅ 月費訂閱中",
+        "zh-CN": "✅ 月费订阅中",
+        "en":    "✅ Active subscription",
+        "es":    "✅ Suscripción activa",
+    },
+    "sub_cancelled": {
+        "zh-TW": "⚠️ 訂閱已取消，當前週期結束前仍可使用",
+        "zh-CN": "⚠️ 订阅已取消，当前周期结束前仍可使用",
+        "en":    "⚠️ Subscription cancelled — access until end of billing period",
+        "es":    "⚠️ Suscripción cancelada — acceso hasta fin del período",
+    },
+    "sub_payment_failed": {
+        "zh-TW": "❌ 付款失敗，請更新付款方式以繼續使用",
+        "zh-CN": "❌ 付款失败，请更新付款方式以继续使用",
+        "en":    "❌ Payment failed — please update your payment method",
+        "es":    "❌ Pago fallido — actualiza tu método de pago",
+    },
+    "sub_ended": {
+        "zh-TW": "❌ 訂閱已到期，請重新訂閱",
+        "zh-CN": "❌ 订阅已到期，请重新订阅",
+        "en":    "❌ Subscription ended — please resubscribe",
+        "es":    "❌ Suscripción vencida — vuelve a suscribirte",
+    },
+    "manage_sub": {
+        "zh-TW": "管理訂閱",
+        "zh-CN": "管理订阅",
+        "en":    "Manage Subscription",
+        "es":    "Gestionar Suscripción",
     },
 
     # ── Settings ───────────────────────────────────────────────────────────

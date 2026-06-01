@@ -552,12 +552,23 @@ with st.sidebar:
 
     # ── 方案狀態
     _unlock_all = os.environ.get("UNLOCK_ALL", "").lower() in ("1", "true", "yes")
+    _gumroad_url = os.environ.get("GUMROAD_URL", "")
     if is_unlocked():
-        st.success(t("pro_unlocked_msg"), icon="🔓")
+        _sub_status = st.session_state.get("_sub_status", "active")
+        if _sub_status == "cancelled":
+            st.warning(t("sub_cancelled"))
+        elif _sub_status == "payment_failed":
+            st.error(t("sub_payment_failed"))
+            if _gumroad_url:
+                st.link_button(t("manage_sub"), _gumroad_url, use_container_width=True)
+        else:
+            st.success(t("sub_active"), icon="🔓")
         # 全開模式不顯示登出按鈕（課程版不需要）
         if not _unlock_all and st.button(t("logout_pro"), use_container_width=True):
             from paywall import lock
             lock()
+            st.session_state.pop("_license_key", None)
+            st.session_state.pop("_sub_status", None)
             st.rerun()
     else:
         with st.expander(t("unlock_expander")):
@@ -568,16 +579,18 @@ with st.sidebar:
             )
             if st.button(t("unlock_btn"), type="primary", use_container_width=True):
                 from paywall import try_unlock
-                if try_unlock(code_in):
-                    track("unlock_pro")
-                    st.success(t("unlock_success"))
-                    st.rerun()
-                else:
-                    st.error(t("unlock_error"))
-            # Gumroad 購買按鈕
-            _gumroad_url = os.environ.get("GUMROAD_URL", "")
+                try:
+                    if try_unlock(code_in):
+                        track("unlock_pro")
+                        st.success(t("unlock_success"))
+                        st.rerun()
+                    else:
+                        st.error(t("unlock_error"))
+                except ValueError as e:
+                    st.warning(str(e))
+            # Gumroad 訂閱按鈕
             if _gumroad_url:
-                st.link_button(t("buy_pro"), _gumroad_url, use_container_width=True)
+                st.link_button(t("buy_pro_monthly"), _gumroad_url, use_container_width=True)
                 st.caption(t("purchase_hint"))
 
         st.markdown(f'<p class="section-header">{t("free_features_header")}</p>', unsafe_allow_html=True)
