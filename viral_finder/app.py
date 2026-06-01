@@ -551,9 +551,11 @@ with st.sidebar:
     st.divider()
 
     # ── 方案狀態
+    _unlock_all = os.environ.get("UNLOCK_ALL", "").lower() in ("1", "true", "yes")
     if is_unlocked():
         st.success(t("pro_unlocked_msg"), icon="🔓")
-        if st.button(t("logout_pro"), use_container_width=True):
+        # 全開模式不顯示登出按鈕（課程版不需要）
+        if not _unlock_all and st.button(t("logout_pro"), use_container_width=True):
             from paywall import lock
             lock()
             st.rerun()

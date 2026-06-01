@@ -48,6 +48,9 @@ def _verify_gumroad(license_key: str) -> bool:
 
 
 def is_unlocked() -> bool:
+    # 環境變數開全功能（課程版 / 內部展示用）
+    if os.environ.get("UNLOCK_ALL", "").lower() in ("1", "true", "yes"):
+        return True
     return st.session_state.get("pro_unlocked", False)
 
 
