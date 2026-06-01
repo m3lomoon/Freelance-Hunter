@@ -21,6 +21,8 @@ _ALLOWED_DOMAINS = {
 def validate_url(url: str) -> str:
     """驗證 URL 是否來自允許的平台，回傳清理後的 URL 或 raise ValueError"""
     url = url.strip()
+    if len(url) > 2000:
+        raise ValueError("URL 過長（最多 2000 字元）")
     if not url.startswith(("http://", "https://")):
         raise ValueError("連結必須以 http:// 或 https:// 開頭")
 
@@ -46,9 +48,9 @@ def validate_url(url: str) -> str:
 
 
 def _sanitize_ig_session(session: str) -> str:
-    """清理 Instagram session ID，只保留字母數字底線（防止 Header Injection）"""
-    # Instagram session ID 格式：數字%3A字串 或純數字字母底線
-    cleaned = re.sub(r'[^\w%]', '', session.strip())
+    """清理 Instagram session ID — 只保留字母數字底線，防止 CRLF Header Injection"""
+    # 移除 % 等可能用於 CRLF 注入的字元（%0d%0a = \r\n）
+    cleaned = re.sub(r'[^\w]', '', session.strip())
     if len(cleaned) > 200:
         cleaned = cleaned[:200]
     return cleaned
@@ -269,7 +271,12 @@ def _parse_vtt(filepath: str) -> list[dict]:
 
 # ── Whisper 語音辨識（備援，無字幕時使用）──────────────────────────────────
 
+_VALID_WHISPER_MODELS = {"tiny", "base", "small", "medium"}
+
+
 def transcribe_with_whisper(audio_path: str, model_size: str = "base") -> tuple[list[dict], str]:
+    if model_size not in _VALID_WHISPER_MODELS:
+        raise ValueError(f"不支援的 Whisper 模型：{model_size}")
     try:
         from faster_whisper import WhisperModel
     except ImportError:

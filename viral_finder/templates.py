@@ -1,5 +1,6 @@
 import os
 import anthropic
+from security import SYSTEM_GUARD
 
 PLATFORM_STYLES = {
     "TikTok": "short-form vertical video (15-60 seconds), fast cuts, trending audio",
@@ -77,6 +78,7 @@ Specific editing rhythm tips based on this video (cut timing, pacing, transition
     message = client.messages.create(
         model="claude-sonnet-4-6",
         max_tokens=3000,
+        system=SYSTEM_GUARD,
         messages=[{"role": "user", "content": prompt}],
     )
 
@@ -149,6 +151,7 @@ Output format:
     message = client.messages.create(
         model="claude-sonnet-4-6",
         max_tokens=600,
+        system=SYSTEM_GUARD,
         messages=[{"role": "user", "content": prompt}],
     )
     return message.content[0].text

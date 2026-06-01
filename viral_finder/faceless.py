@@ -1,5 +1,6 @@
 import os
 import anthropic
+from security import SYSTEM_GUARD
 
 
 _MAX_INPUT = 3000
@@ -17,6 +18,7 @@ def _claude(prompt: str, max_tokens: int = 3000) -> str:
     msg = client.messages.create(
         model="claude-sonnet-4-6",
         max_tokens=max_tokens,
+        system=SYSTEM_GUARD,
         messages=[{"role": "user", "content": prompt}],
     )
     return msg.content[0].text

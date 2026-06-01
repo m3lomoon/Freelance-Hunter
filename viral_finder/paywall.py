@@ -6,10 +6,8 @@ import streamlit as st
 _MAX_ATTEMPTS = 5
 _COOLDOWN_SECONDS = 300  # 5分鐘冷卻
 
-# 內建的 Beta 測試碼（不需要 env var 也能使用）
-_BUILTIN_CODES: set[str] = {
-    "MELOMOONJUSTFORYOU",
-}
+# 內建 codes 留空 — 所有 code 必須透過 ACCESS_CODES env var 設定
+_BUILTIN_CODES: set[str] = set()
 
 # Gumroad 授權碼格式：XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX
 _GUMROAD_KEY_RE = re.compile(

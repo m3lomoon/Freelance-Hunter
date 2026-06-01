@@ -1,5 +1,6 @@
 import os
 import anthropic
+from security import SYSTEM_GUARD
 
 
 def generate_recreation_guide(
@@ -80,6 +81,7 @@ A numbered step-by-step production checklist from pre-production to publish."""
     message = client.messages.create(
         model="claude-sonnet-4-6",
         max_tokens=3500,
+        system=SYSTEM_GUARD,
         messages=[{"role": "user", "content": prompt}],
     )
 

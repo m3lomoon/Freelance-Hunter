@@ -22,7 +22,7 @@ from faceless import (
     generate_thumbnail_prompts, generate_storyboard,
     NICHE_CATEGORIES, SCRIPT_STYLES, SCRIPT_LENGTHS, THUMBNAIL_STYLES,
 )
-from security import sanitize_prompt_input
+from security import sanitize_prompt_input, is_safe_thumbnail_url
 from survey import render_survey, render_admin_dashboard
 from analytics import track, render_analytics_dashboard
 from i18n import t, SUPPORTED_LANGUAGES
@@ -637,34 +637,57 @@ with st.sidebar:
     _admin_key = os.environ.get("ADMIN_KEY", "")
     if _admin_key:
         with st.expander(t("admin_tools")):
-            admin_input = st.text_input(t("admin_password"), type="password", key="admin_pw")
-            if admin_input == _admin_key:
-                admin_tab1, admin_tab2, admin_tab3 = st.tabs([
-                    t("admin_tab_analytics"),
-                    t("admin_tab_survey"),
-                    t("admin_tab_codes"),
-                ])
+            import time as _time
+            _adm_attempts = st.session_state.get("_adm_attempts", 0)
+            _adm_last_fail = st.session_state.get("_adm_last_fail", 0.0)
+            _ADM_MAX = 3
+            _ADM_COOLDOWN = 300
 
-                with admin_tab1:
-                    render_analytics_dashboard()
+            _adm_locked = (
+                _adm_attempts >= _ADM_MAX
+                and (_time.time() - _adm_last_fail) < _ADM_COOLDOWN
+            )
 
-                with admin_tab2:
-                    render_admin_dashboard()
+            if _adm_locked:
+                _wait = int(_ADM_COOLDOWN - (_time.time() - _adm_last_fail))
+                st.error(f"⛔ 嘗試次數過多，請等待 {_wait} 秒")
+            else:
+                admin_input = st.text_input(t("admin_password"), type="password", key="admin_pw")
+                if admin_input == _admin_key:
+                    # 登入成功：重置計數
+                    st.session_state["_adm_attempts"] = 0
+                    admin_tab1, admin_tab2, admin_tab3 = st.tabs([
+                        t("admin_tab_analytics"),
+                        t("admin_tab_survey"),
+                        t("admin_tab_codes"),
+                    ])
 
-                with admin_tab3:
-                    import secrets, string
-                    num_codes = st.number_input("產生幾組", min_value=1, max_value=50, value=5, step=1)
-                    if st.button(t("generate_codes_btn"), use_container_width=True, type="primary"):
-                        codes = []
-                        for _ in range(int(num_codes)):
-                            p1 = ''.join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(4))
-                            p2 = ''.join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(4))
-                            codes.append(f"VH-{p1}-{p2}")
-                        st.code("\n".join(codes))
-                        st.caption(t("generate_codes_hint"))
+                    with admin_tab1:
+                        render_analytics_dashboard()
 
-            elif admin_input:
-                st.error(t("wrong_password"))
+                    with admin_tab2:
+                        render_admin_dashboard()
+
+                    with admin_tab3:
+                        import secrets, string
+                        num_codes = st.number_input("產生幾組", min_value=1, max_value=50, value=5, step=1)
+                        if st.button(t("generate_codes_btn"), use_container_width=True, type="primary"):
+                            codes = []
+                            for _ in range(int(num_codes)):
+                                p1 = ''.join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(4))
+                                p2 = ''.join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(4))
+                                codes.append(f"VH-{p1}-{p2}")
+                            st.code("\n".join(codes))
+                            st.caption(t("generate_codes_hint"))
+
+                elif admin_input:
+                    st.session_state["_adm_attempts"] = _adm_attempts + 1
+                    st.session_state["_adm_last_fail"] = _time.time()
+                    remaining = _ADM_MAX - st.session_state["_adm_attempts"]
+                    if remaining > 0:
+                        st.error(f"{t('wrong_password')}（剩餘 {remaining} 次）")
+                    else:
+                        st.error(f"⛔ 已鎖定 {_ADM_COOLDOWN // 60} 分鐘")
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 主標題區
@@ -744,7 +767,7 @@ else:
                 for col, video in zip(cols, row):
                     with col:
                         with st.container(border=True):
-                            if video["thumbnail"]:
+                            if is_safe_thumbnail_url(video.get("thumbnail", "")):
                                 st.image(video["thumbnail"], use_container_width=True)
                             st.markdown(
                                 f"**{video['title'][:45]}{'…' if len(video['title'])>45 else ''}**"
@@ -810,7 +833,7 @@ add_history(video_url, info["title"], info["platform"], info["view_count"], info
 # ── 影片資訊卡
 col_img, col_meta = st.columns([1, 2])
 with col_img:
-    if info["thumbnail"]:
+    if is_safe_thumbnail_url(info.get("thumbnail", "")):
         st.image(info["thumbnail"], use_container_width=True)
     st.link_button(t("watch_original"), info["webpage_url"], use_container_width=True)
 
