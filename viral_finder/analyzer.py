@@ -15,6 +15,8 @@ _ALLOWED_DOMAINS = {
     "twitch.tv", "www.twitch.tv",
     "vimeo.com", "www.vimeo.com",
     "nicovideo.jp", "www.nicovideo.jp",
+    # 小紅書（RED）
+    "xiaohongshu.com", "www.xiaohongshu.com", "xhslink.com",
 }
 
 
@@ -37,7 +39,7 @@ def validate_url(url: str) -> str:
         if full_domain not in _ALLOWED_DOMAINS and domain not in _ALLOWED_DOMAINS:
             raise ValueError(
                 f"不支援的平台：{full_domain}\n"
-                "支援：YouTube、Bilibili、TikTok、Instagram、Twitter/X、Facebook、Twitch、Vimeo"
+                "支援：YouTube、Bilibili、TikTok、Instagram、小紅書、Twitter/X、Facebook、Twitch、Vimeo"
             )
     except ValueError:
         raise
@@ -82,6 +84,11 @@ def _is_instagram(url: str) -> bool:
     return "instagram.com" in url.lower()
 
 
+def _is_xiaohongshu(url: str) -> bool:
+    u = url.lower()
+    return "xiaohongshu.com" in u or "xhslink.com" in u
+
+
 def get_video_info(url: str, ig_session: str = "") -> dict:
     try:
         url = validate_url(url)
@@ -121,6 +128,72 @@ def get_video_info(url: str, ig_session: str = "") -> dict:
         "available_subtitles": list(info.get("subtitles", {}).keys()),
         "available_auto_captions": list(info.get("automatic_captions", {}).keys()),
     }
+
+
+# ── 留言抓取（留言挖掘功能）────────────────────────────────────────────────
+
+def get_comments(url: str, max_comments: int = 100, ig_session: str = "") -> tuple[list[dict], str]:
+    """
+    抓取影片留言，回傳 (comments, error)。
+    comments: [{"text": str, "like_count": int, "author": str}]
+    error: 空字串代表成功，否則為錯誤訊息。
+    依讚數排序，最多回傳 max_comments 則。
+    """
+    try:
+        url = validate_url(url)
+    except ValueError as e:
+        return [], str(e)
+
+    # 限制抓取數量，避免過慢 / 費用問題
+    max_comments = max(10, min(max_comments, 300))
+
+    base = {
+        "quiet": True,
+        "no_warnings": True,
+        "skip_download": True,
+        "getcomments": True,
+        # 只抓頂層留言，依讚數排序，限制數量
+        "extractor_args": {
+            "youtube": {
+                "comment_sort": ["top"],
+                "max_comments": [str(max_comments), "0", "0", "0"],
+            }
+        },
+    }
+    if _is_instagram(url) and not ig_session:
+        base["http_headers"] = _IG_HEADERS
+    ydl_opts = _build_ydl_opts(base, ig_session)
+
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=False)
+    except Exception as e:
+        err = str(e)
+        if "429" in err:
+            return [], "平台限制存取（429），請稍後再試"
+        return [], f"無法取得留言：{err}"
+
+    if not info:
+        return [], "無法取得影片資訊"
+
+    raw = info.get("comments") or []
+    if not raw:
+        return [], "這部影片沒有留言，或平台不開放留言存取"
+
+    comments = []
+    for c in raw:
+        text = (c.get("text") or "").strip()
+        if not text:
+            continue
+        comments.append({
+            "text": text,
+            "like_count": c.get("like_count") or 0,
+            "author": c.get("author") or "匿名",
+        })
+
+    # 依讚數排序，取前 max_comments
+    comments.sort(key=lambda x: x["like_count"], reverse=True)
+    return comments[:max_comments], ""
 
 
 # ── 逐字稿 ─────────────────────────────────────────────────────────────────

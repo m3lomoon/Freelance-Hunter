@@ -7,7 +7,8 @@ import streamlit as st
 sys.path.insert(0, os.path.dirname(__file__))
 
 from search import search_videos, format_count, format_duration, format_date, PLATFORMS
-from analyzer import get_video_info, get_transcript, download_audio, transcribe_with_whisper
+from analyzer import get_video_info, get_transcript, download_audio, transcribe_with_whisper, get_comments
+from comment_miner import mine_comments
 from translator import translate_text, using_free_translation
 from templates import analyze_and_generate_templates, generate_custom_hook
 from recreate import generate_recreation_guide
@@ -944,9 +945,10 @@ if not is_unlocked():
     st.stop()
 
 # ── PRO tabs
-pro_tab1, pro_tab2, pro_tab3, pro_tab_faceless, pro_tab4, pro_tab5 = st.tabs([
+pro_tab1, pro_tab2, pro_tab_comments, pro_tab3, pro_tab_faceless, pro_tab4, pro_tab5 = st.tabs([
     t("tab_analysis"),
     t("tab_recreation"),
+    t("tab_comments"),
     t("tab_tools"),
     t("tab_faceless"),
     t("tab_favorites"),
@@ -968,7 +970,7 @@ with pro_tab1:
     st.caption("AI 分析爆款原因，生成可複製的鉤子與拍攝模板")
     tmpl_platform = st.selectbox(
         "平台",
-        ["YouTube", "YouTube Shorts", "TikTok", "Instagram Reels", "Bilibili"],
+        ["YouTube", "YouTube Shorts", "TikTok", "Instagram Reels", "小紅書", "Bilibili"],
         key="tmpl_p",
     )
     tmpl_niche = st.text_input(t("your_topic"), placeholder="e.g. tech unboxing, fitness", key="tmpl_n")
@@ -1035,7 +1037,7 @@ with pro_tab2:
     st.caption("AI 告訴你怎麼拍出一樣效果，含 Sora / Kling AI 生成 Prompt")
     rc_platform = st.selectbox(
         "平台",
-        ["YouTube", "YouTube Shorts", "TikTok", "Instagram Reels", "Bilibili"],
+        ["YouTube", "YouTube Shorts", "TikTok", "Instagram Reels", "小紅書", "Bilibili"],
         key="rc_p",
     )
     rc_tools = st.text_input(t("your_gear"), placeholder=t("gear_placeholder"), key="rc_t")
@@ -1077,6 +1079,68 @@ with pro_tab2:
                             st.success(t("saved_msg"))
                 except Exception as e:
                     st.error(t("gen_fail", e=e))
+
+
+# ── PRO TAB：留言挖掘 → 內容點子
+with pro_tab_comments:
+    st.caption(t("comments_caption"))
+
+    cm_c1, cm_c2 = st.columns([2, 1])
+    with cm_c1:
+        cm_max = st.slider(t("max_comments_label"), 30, 200, 100, 10, key="cm_max")
+    with cm_c2:
+        cm_lang = st.selectbox(
+            "lang",
+            ["繁體中文", "简体中文", "English", "Español"],
+            label_visibility="collapsed",
+            key="cm_lang",
+        )
+
+    if st.button(t("fetch_comments_btn"), type="primary", use_container_width=True):
+        if not _need_key():
+            track("mine_comments", {"platform": info.get("platform", ""), "max": cm_max})
+            with st.spinner(t("fetching_comments")):
+                comments, err = get_comments(video_url, cm_max, ig_session=_ig)
+
+            if err or not comments:
+                st.warning(t("no_comments", e=err or "沒有留言"))
+            else:
+                st.success(t("comments_found", n=len(comments)))
+                st.session_state["mined_comments"] = comments
+
+                with st.expander(t("top_comments_expander")):
+                    for c in comments[:20]:
+                        st.markdown(f"**👍 {format_count(c['like_count'])}** · {c['text'][:200]}")
+
+                with st.spinner(t("mining_comments")):
+                    try:
+                        cm_result = mine_comments(comments, info.get("title", ""), cm_lang)
+
+                        ct1, ct2, ct3, ct4 = st.tabs([
+                            "🎯 風向", "😣 痛點", "❓ 疑問", "💡 影片點子",
+                        ])
+                        with ct1: st.markdown(cm_result["sentiment"] or cm_result["raw"])
+                        with ct2: st.markdown(cm_result["pain_points"])
+                        with ct3: st.markdown(cm_result["questions"])
+                        with ct4: st.markdown(cm_result["ideas"])
+
+                        st.divider()
+                        with st.expander("📄 完整分析報告"):
+                            st.markdown(cm_result["raw"])
+
+                        col_cd, col_cf = st.columns(2)
+                        with col_cd:
+                            st.download_button(
+                                t("download_btn"), cm_result["raw"],
+                                file_name="comment_insights.md", mime="text/markdown",
+                                use_container_width=True, key="dl_cm",
+                            )
+                        with col_cf:
+                            if st.button(t("save_btn"), use_container_width=True, key="fav_cm"):
+                                add_favorite("other", f"留言挖掘_{info['title'][:30]}", cm_result["raw"])
+                                st.success(t("saved_msg"))
+                    except Exception as e:
+                        st.error(t("gen_fail", e=e))
 
 
 # ── PRO TAB 3：內容工具

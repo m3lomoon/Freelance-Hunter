@@ -276,10 +276,10 @@ _T: dict[str, dict[str, str]] = {
         "es":    "🔍 Búsqueda",
     },
     "url_placeholder": {
-        "zh-TW": "貼上 YouTube / TikTok / Instagram / Bilibili 連結…",
-        "zh-CN": "粘贴 YouTube / TikTok / Instagram / Bilibili 链接…",
-        "en":    "Paste YouTube / TikTok / Instagram / Bilibili link…",
-        "es":    "Pega el enlace de YouTube / TikTok / Instagram / Bilibili…",
+        "zh-TW": "貼上 YouTube / TikTok / Instagram / 小紅書 / Bilibili 連結…",
+        "zh-CN": "粘贴 YouTube / TikTok / Instagram / 小红书 / Bilibili 链接…",
+        "en":    "Paste YouTube / TikTok / Instagram / RED / Bilibili link…",
+        "es":    "Pega enlace de YouTube / TikTok / Instagram / RED / Bilibili…",
     },
     "analyze_btn": {
         "zh-TW": "分析 →",
@@ -708,6 +708,62 @@ _T: dict[str, dict[str, str]] = {
         "zh-CN": "🎬 AI 分镜脚本",
         "en":    "🎬 AI Storyboard",
         "es":    "🎬 Storyboard IA",
+    },
+
+    # ── 留言挖掘 Comment Mining ─────────────────────────────────────────────
+    "tab_comments": {
+        "zh-TW": "💬 留言挖掘 → 內容點子",
+        "zh-CN": "💬 评论挖掘 → 内容点子",
+        "en":    "💬 Comment Mining → Ideas",
+        "es":    "💬 Minería de Comentarios",
+    },
+    "comments_caption": {
+        "zh-TW": "分析觀眾留言，挖出他們真正想看的內容 → 直接變成你的下一支影片點子",
+        "zh-CN": "分析观众评论，挖出他们真正想看的内容 → 直接变成你的下一支视频点子",
+        "en":    "Analyze viewer comments to uncover what they really want → turn it into your next video",
+        "es":    "Analiza los comentarios para descubrir qué quiere tu audiencia → tu próximo video",
+    },
+    "fetch_comments_btn": {
+        "zh-TW": "💬 抓取並分析留言",
+        "zh-CN": "💬 抓取并分析评论",
+        "en":    "💬 Fetch & Analyze Comments",
+        "es":    "💬 Obtener y Analizar Comentarios",
+    },
+    "fetching_comments": {
+        "zh-TW": "抓取留言中…熱門影片可能需要 20~40 秒",
+        "zh-CN": "抓取评论中…热门视频可能需要 20~40 秒",
+        "en":    "Fetching comments… popular videos may take 20-40s",
+        "es":    "Obteniendo comentarios… puede tardar 20-40s",
+    },
+    "mining_comments": {
+        "zh-TW": "AI 分析觀眾需求中…",
+        "zh-CN": "AI 分析观众需求中…",
+        "en":    "AI analyzing audience demand…",
+        "es":    "IA analizando la demanda…",
+    },
+    "comments_found": {
+        "zh-TW": "✅ 抓到 {n} 則留言，依讚數排序分析中",
+        "zh-CN": "✅ 抓到 {n} 条评论，依赞数排序分析中",
+        "en":    "✅ Got {n} comments, analyzing top by likes",
+        "es":    "✅ {n} comentarios obtenidos, analizando por likes",
+    },
+    "no_comments": {
+        "zh-TW": "⚠️ {e}",
+        "zh-CN": "⚠️ {e}",
+        "en":    "⚠️ {e}",
+        "es":    "⚠️ {e}",
+    },
+    "max_comments_label": {
+        "zh-TW": "分析留言數量",
+        "zh-CN": "分析评论数量",
+        "en":    "Comments to analyze",
+        "es":    "Comentarios a analizar",
+    },
+    "top_comments_expander": {
+        "zh-TW": "📋 查看抓到的熱門留言",
+        "zh-CN": "📋 查看抓到的热门评论",
+        "en":    "📋 View fetched top comments",
+        "es":    "📋 Ver comentarios obtenidos",
     },
 }
 
