@@ -765,6 +765,68 @@ _T: dict[str, dict[str, str]] = {
         "en":    "📋 View fetched top comments",
         "es":    "📋 Ver comentarios obtenidos",
     },
+
+    # ── 廣告投放顧問 Ad Advisor ─────────────────────────────────────────────
+    "tab_ads": {
+        "zh-TW": "📢 廣告投放顧問",
+        "zh-CN": "📢 广告投放顾问",
+        "en":    "📢 Ad Strategy Advisor",
+        "es":    "📢 Asesor de Anuncios",
+    },
+    "ads_caption": {
+        "zh-TW": "把這支影片變成付費廣告 → AI 產出平台分配、受眾鎖定、廣告文案、預算與預期 ROAS",
+        "zh-CN": "把这支视频变成付费广告 → AI 产出平台分配、受众锁定、广告文案、预算与预期 ROAS",
+        "en":    "Turn this video into paid ads → AI generates platform split, targeting, ad copy, budget & expected ROAS",
+        "es":    "Convierte este video en anuncios → IA genera plataformas, segmentación, textos y ROAS esperado",
+    },
+    "ad_goal_label": {
+        "zh-TW": "廣告目標",
+        "zh-CN": "广告目标",
+        "en":    "Campaign Goal",
+        "es":    "Objetivo",
+    },
+    "ad_product_label": {
+        "zh-TW": "你要推廣的產品／服務（選填）",
+        "zh-CN": "你要推广的产品／服务（选填）",
+        "en":    "Product / service to promote (optional)",
+        "es":    "Producto / servicio a promocionar (opcional)",
+    },
+    "ad_product_placeholder": {
+        "zh-TW": "例如：線上剪輯課程、精品咖啡訂閱、接案服務…",
+        "zh-CN": "例如：在线剪辑课程、精品咖啡订阅、接案服务…",
+        "en":    "e.g. online editing course, coffee subscription, freelance service…",
+        "es":    "ej. curso de edición, suscripción de café, servicio freelance…",
+    },
+    "ad_market_label": {
+        "zh-TW": "目標市場／地區",
+        "zh-CN": "目标市场／地区",
+        "en":    "Target market / region",
+        "es":    "Mercado / región objetivo",
+    },
+    "ad_budget_label": {
+        "zh-TW": "每月廣告預算",
+        "zh-CN": "每月广告预算",
+        "en":    "Monthly ad budget",
+        "es":    "Presupuesto mensual",
+    },
+    "ad_currency_label": {
+        "zh-TW": "幣別",
+        "zh-CN": "币别",
+        "en":    "Currency",
+        "es":    "Moneda",
+    },
+    "gen_ad_strategy_btn": {
+        "zh-TW": "📢 生成廣告投放策略",
+        "zh-CN": "📢 生成广告投放策略",
+        "en":    "📢 Generate Ad Strategy",
+        "es":    "📢 Generar Estrategia",
+    },
+    "generating_ads": {
+        "zh-TW": "AI 廣告策略師規劃中…約需 30 秒",
+        "zh-CN": "AI 广告策略师规划中…约需 30 秒",
+        "en":    "AI media strategist planning… about 30 seconds",
+        "es":    "Estratega IA planificando… unos 30 segundos",
+    },
 }
 
 

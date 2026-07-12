@@ -9,6 +9,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 from search import search_videos, format_count, format_duration, format_date, PLATFORMS
 from analyzer import get_video_info, get_transcript, download_audio, transcribe_with_whisper, get_comments
 from comment_miner import mine_comments
+from ad_advisor import generate_ad_strategy, GOAL_OPTIONS, CURRENCY_OPTIONS
 from translator import translate_text, using_free_translation
 from templates import analyze_and_generate_templates, generate_custom_hook
 from recreate import generate_recreation_guide
@@ -945,10 +946,12 @@ if not is_unlocked():
     st.stop()
 
 # ── PRO tabs
-pro_tab1, pro_tab2, pro_tab_comments, pro_tab3, pro_tab_faceless, pro_tab4, pro_tab5 = st.tabs([
+(pro_tab1, pro_tab2, pro_tab_comments, pro_tab_ads, pro_tab3,
+ pro_tab_faceless, pro_tab4, pro_tab5) = st.tabs([
     t("tab_analysis"),
     t("tab_recreation"),
     t("tab_comments"),
+    t("tab_ads"),
     t("tab_tools"),
     t("tab_faceless"),
     t("tab_favorites"),
@@ -1141,6 +1144,97 @@ with pro_tab_comments:
                                 st.success(t("saved_msg"))
                     except Exception as e:
                         st.error(t("gen_fail", e=e))
+
+
+# ── PRO TAB：廣告投放顧問
+with pro_tab_ads:
+    st.caption(t("ads_caption"))
+
+    ad_r1c1, ad_r1c2 = st.columns(2)
+    with ad_r1c1:
+        ad_platform = st.selectbox(
+            "platform",
+            ["YouTube", "YouTube Shorts", "TikTok", "Instagram Reels", "小紅書", "Facebook", "Bilibili"],
+            key="ad_platform", label_visibility="collapsed",
+        )
+    with ad_r1c2:
+        ad_goal = st.selectbox(t("ad_goal_label"), GOAL_OPTIONS, index=3, key="ad_goal")
+
+    ad_product = st.text_input(
+        t("ad_product_label"),
+        placeholder=t("ad_product_placeholder"),
+        key="ad_product",
+    )
+
+    ad_r2c1, ad_r2c2, ad_r2c3 = st.columns([1.4, 1, 1])
+    with ad_r2c1:
+        ad_market = st.text_input(t("ad_market_label"), value="台灣", key="ad_market")
+    with ad_r2c2:
+        ad_budget = st.text_input(t("ad_budget_label"), value="10000", key="ad_budget")
+    with ad_r2c3:
+        ad_currency = st.selectbox(t("ad_currency_label"), CURRENCY_OPTIONS, key="ad_currency")
+
+    ad_lang = st.selectbox(
+        "ad_lang",
+        ["繁體中文", "简体中文", "English", "Español"],
+        label_visibility="collapsed", key="ad_lang",
+    )
+
+    if st.button(t("gen_ad_strategy_btn"), type="primary", use_container_width=True):
+        if not _need_key():
+            track("ad_strategy", {"platform": ad_platform, "goal": ad_goal, "budget": ad_budget})
+            with st.spinner(t("generating_ads")):
+                try:
+                    ad_result = generate_ad_strategy(
+                        title=info["title"], transcript=_transcript,
+                        description=info.get("description", ""),
+                        platform=ad_platform, goal=ad_goal,
+                        monthly_budget=ad_budget, currency=ad_currency,
+                        product=ad_product, target_market=ad_market,
+                        output_lang=ad_lang,
+                    )
+
+                    at1, at2, at3, at4, at5, at6 = st.tabs([
+                        "📊 總覽 + 平台", "👥 受眾", "✍️ 文案 + 素材",
+                        "💰 預算出價", "📈 KPI + 路線圖", "⚠️ 避雷 + 清單",
+                    ])
+                    with at1:
+                        st.markdown(ad_result["overview"] or ad_result["raw"])
+                        st.markdown(ad_result["platform_split"])
+                    with at2:
+                        st.markdown(ad_result["targeting"])
+                    with at3:
+                        st.markdown(ad_result["ad_copy"])
+                        st.divider()
+                        st.markdown(ad_result["creative"])
+                    with at4:
+                        st.markdown(ad_result["bidding"])
+                    with at5:
+                        st.markdown(ad_result["kpi"])
+                        st.divider()
+                        st.markdown(ad_result["roadmap"])
+                    with at6:
+                        st.markdown(ad_result["mistakes"])
+                        st.divider()
+                        st.markdown(ad_result["checklist"])
+
+                    st.divider()
+                    with st.expander("📄 完整廣告策略報告"):
+                        st.markdown(ad_result["raw"])
+
+                    col_ad, col_af = st.columns(2)
+                    with col_ad:
+                        st.download_button(
+                            t("download_btn"), ad_result["raw"],
+                            file_name="ad_strategy.md", mime="text/markdown",
+                            use_container_width=True, key="dl_ad",
+                        )
+                    with col_af:
+                        if st.button(t("save_btn"), use_container_width=True, key="fav_ad"):
+                            add_favorite("other", f"廣告策略_{info['title'][:30]}", ad_result["raw"])
+                            st.success(t("saved_msg"))
+                except Exception as e:
+                    st.error(t("gen_fail", e=e))
 
 
 # ── PRO TAB 3：內容工具
