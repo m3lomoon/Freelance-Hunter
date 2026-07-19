@@ -61,6 +61,11 @@ def generate_ad_strategy(
     """
     產出完整廣告投放策略，回傳結構化 dict（每個 key 對應一個 UI 分頁）。
     """
+    # 試玩模式：回傳範例策略（不需 API Key）
+    from demo import is_demo, DEMO_AD_STRATEGY
+    if is_demo() and not os.environ.get("ANTHROPIC_API_KEY"):
+        return dict(DEMO_AD_STRATEGY)
+
     title = _sanitize(title, 300)
     transcript = _sanitize(transcript, 1500)
     description = _sanitize(description, 500)

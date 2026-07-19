@@ -50,6 +50,11 @@ def mine_comments(
     if not comments:
         raise ValueError("沒有留言可供分析")
 
+    # 試玩模式：回傳範例分析（不需 API Key）
+    from demo import is_demo, DEMO_COMMENT_MINING
+    if is_demo() and not os.environ.get("ANTHROPIC_API_KEY"):
+        return dict(DEMO_COMMENT_MINING)
+
     formatted = _format_comments(comments)
     total = len(comments)
 

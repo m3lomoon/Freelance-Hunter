@@ -90,6 +90,11 @@ def _is_xiaohongshu(url: str) -> bool:
 
 
 def get_video_info(url: str, ig_session: str = "") -> dict:
+    # 試玩模式：回傳範例影片
+    from demo import is_demo, is_demo_url, DEMO_VIDEO
+    if is_demo() and is_demo_url(url):
+        return dict(DEMO_VIDEO)
+
     try:
         url = validate_url(url)
     except ValueError as e:
@@ -139,6 +144,11 @@ def get_comments(url: str, max_comments: int = 100, ig_session: str = "") -> tup
     error: 空字串代表成功，否則為錯誤訊息。
     依讚數排序，最多回傳 max_comments 則。
     """
+    # 試玩模式：回傳範例留言
+    from demo import is_demo, is_demo_url, DEMO_COMMENTS
+    if is_demo() and is_demo_url(url):
+        return list(DEMO_COMMENTS), ""
+
     try:
         url = validate_url(url)
     except ValueError as e:
@@ -214,6 +224,11 @@ def get_transcript(url: str, preferred_langs: list[str] | None = None, ig_sessio
     回傳 (entries, detected_lang)
     entries: [{"start": float, "duration": float, "text": str}]
     """
+    # 試玩模式：回傳範例逐字稿
+    from demo import is_demo, is_demo_url, DEMO_TRANSCRIPT_ENTRIES
+    if is_demo() and is_demo_url(url):
+        return list(DEMO_TRANSCRIPT_ENTRIES), "zh-TW"
+
     if preferred_langs is None:
         preferred_langs = ["zh-Hant", "zh-TW", "zh-Hans", "zh", "en", "ja", "ko"]
 

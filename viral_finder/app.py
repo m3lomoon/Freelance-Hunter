@@ -715,6 +715,14 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+# 試玩模式：橫幅 + 一鍵載入範例影片
+from demo import is_demo, DEMO_URL
+if is_demo():
+    st.info(t("demo_banner"))
+    if st.button(t("demo_load_btn"), type="primary"):
+        st.session_state["current_url"] = DEMO_URL
+        st.rerun()
+
 input_mode = st.radio(
     "輸入方式",
     [t("input_link"), t("input_search")],

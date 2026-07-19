@@ -827,6 +827,20 @@ _T: dict[str, dict[str, str]] = {
         "en":    "AI media strategist planning… about 30 seconds",
         "es":    "Estratega IA planificando… unos 30 segundos",
     },
+
+    # ── 試玩模式 Demo Mode ──────────────────────────────────────────────────
+    "demo_banner": {
+        "zh-TW": "🎬 試玩模式：以下皆為範例資料，讓你免 API Key 體驗完整流程。正式使用請部署後貼上真實連結。",
+        "zh-CN": "🎬 试玩模式：以下皆为范例数据，让你免 API Key 体验完整流程。正式使用请部署后粘贴真实链接。",
+        "en":    "🎬 Demo Mode: sample data below, so you can experience the full flow without an API key. Deploy and paste a real link for live use.",
+        "es":    "🎬 Modo Demo: datos de ejemplo para probar el flujo sin API key. Despliega y pega un enlace real para uso en vivo.",
+    },
+    "demo_load_btn": {
+        "zh-TW": "🎬 載入範例影片試玩",
+        "zh-CN": "🎬 载入范例视频试玩",
+        "en":    "🎬 Load Sample Video",
+        "es":    "🎬 Cargar Video de Ejemplo",
+    },
 }
 
 

@@ -20,6 +20,11 @@ def analyze_and_generate_templates(
     platform: str = "YouTube",
     user_niche: str = "",
 ) -> dict:
+    # 試玩模式：回傳範例模板（不需 API Key）
+    from demo import is_demo, DEMO_TEMPLATE
+    if is_demo() and not os.environ.get("ANTHROPIC_API_KEY"):
+        return dict(DEMO_TEMPLATE)
+
     api_key = os.environ.get("ANTHROPIC_API_KEY", "")
     if not api_key:
         raise ValueError("請先在左側欄輸入 Anthropic API Key")
