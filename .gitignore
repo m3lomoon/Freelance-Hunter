@@ -3,3 +3,7 @@ seen_jobs.json
 __pycache__/
 *.pyc
 .DS_Store
+
+# 點數帳本（執行期產生，勿進版控）
+viral_finder/.credits_ledger.json
+viral_finder/.credits_ledger.json.tmp

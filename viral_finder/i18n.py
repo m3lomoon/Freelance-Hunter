@@ -841,6 +841,50 @@ _T: dict[str, dict[str, str]] = {
         "en":    "🎬 Load Sample Video",
         "es":    "🎬 Cargar Video de Ejemplo",
     },
+
+    # ── 點數系統 Credits ────────────────────────────────────────────────────
+    "credits_balance": {
+        "zh-TW": "🪙 點數餘額",
+        "zh-CN": "🪙 点数余额",
+        "en":    "🪙 Credit Balance",
+        "es":    "🪙 Saldo de Créditos",
+    },
+    "credits_this_action": {
+        "zh-TW": "本次消耗 {cost} 點",
+        "zh-CN": "本次消耗 {cost} 点",
+        "en":    "Costs {cost} credits",
+        "es":    "Cuesta {cost} créditos",
+    },
+    "credits_remaining": {
+        "zh-TW": "剩餘 {bal} 點",
+        "zh-CN": "剩余 {bal} 点",
+        "en":    "{bal} credits left",
+        "es":    "{bal} créditos restantes",
+    },
+    "insufficient_credits": {
+        "zh-TW": "🪙 點數不足：此功能需要 {cost} 點，你目前只剩 {bal} 點。點數每月 1 號自動更新，或購買加購包。",
+        "zh-CN": "🪙 点数不足：此功能需要 {cost} 点，你目前只剩 {bal} 点。点数每月 1 号自动更新，或购买加购包。",
+        "en":    "🪙 Not enough credits: this needs {cost}, you have {bal}. Credits renew monthly, or buy a top-up.",
+        "es":    "🪙 Créditos insuficientes: necesita {cost}, tienes {bal}. Se renuevan mensualmente o compra un paquete.",
+    },
+    "credits_charged": {
+        "zh-TW": "🪙 已扣 {cost} 點，剩餘 {bal} 點",
+        "zh-CN": "🪙 已扣 {cost} 点，剩余 {bal} 点",
+        "en":    "🪙 −{cost} credits · {bal} left",
+        "es":    "🪙 −{cost} créditos · {bal} restantes",
+    },
+    "credits_unlimited": {
+        "zh-TW": "♾️ 無限點數（課程版）",
+        "zh-CN": "♾️ 无限点数（课程版）",
+        "en":    "♾️ Unlimited (course mode)",
+        "es":    "♾️ Ilimitado (modo curso)",
+    },
+    "admin_tab_credits": {
+        "zh-TW": "🪙 點數用量",
+        "zh-CN": "🪙 点数用量",
+        "en":    "🪙 Credit Usage",
+        "es":    "🪙 Uso de Créditos",
+    },
 }
 
 

@@ -137,6 +137,7 @@ def try_unlock(code: str) -> bool:
         if result["valid"] is True:
             st.session_state["pro_unlocked"] = True
             st.session_state["_license_key"] = code   # 儲存供每小時重驗
+            st.session_state["_unlock_id"] = code      # 點數帳號身分
             st.session_state["_verify_ts"] = time.time()
             st.session_state["_sub_status"] = result.get("status", "active")
             st.session_state["unlock_attempts"] = 0
@@ -158,6 +159,7 @@ def try_unlock(code: str) -> bool:
     valid = _load_valid_codes()
     if code.upper() in valid:
         st.session_state["pro_unlocked"] = True
+        st.session_state["_unlock_id"] = code.upper()   # 點數帳號身分
         st.session_state["unlock_attempts"] = 0
         return True
 

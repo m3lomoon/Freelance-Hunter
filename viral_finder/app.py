@@ -28,6 +28,7 @@ from security import sanitize_prompt_input, is_safe_thumbnail_url
 from survey import render_survey, render_admin_dashboard
 from analytics import track, render_analytics_dashboard
 from i18n import t, SUPPORTED_LANGUAGES
+import credits
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 頁面設定
@@ -565,6 +566,14 @@ with st.sidebar:
                 st.link_button(t("manage_sub"), _gumroad_url, use_container_width=True)
         else:
             st.success(t("sub_active"), icon="🔓")
+
+        # ── 點數餘額
+        _bal = credits.balance()
+        if _bal < 0:
+            st.caption(t("credits_unlimited"))
+        else:
+            st.metric(t("credits_balance"), f"{_bal:,}")
+
         # 全開模式不顯示登出按鈕（課程版不需要）
         if not _unlock_all and st.button(t("logout_pro"), use_container_width=True):
             from paywall import lock
@@ -658,10 +667,11 @@ with st.sidebar:
                 if admin_input == _admin_key:
                     # 登入成功：重置計數
                     st.session_state["_adm_attempts"] = 0
-                    admin_tab1, admin_tab2, admin_tab3 = st.tabs([
+                    admin_tab1, admin_tab2, admin_tab3, admin_tab4 = st.tabs([
                         t("admin_tab_analytics"),
                         t("admin_tab_survey"),
                         t("admin_tab_codes"),
+                        t("admin_tab_credits"),
                     ])
 
                     with admin_tab1:
@@ -681,6 +691,27 @@ with st.sidebar:
                                 codes.append(f"VH-{p1}-{p2}")
                             st.code("\n".join(codes))
                             st.caption(t("generate_codes_hint"))
+
+                    with admin_tab4:
+                        stats = credits.usage_stats()
+                        c1, c2, c3 = st.columns(3)
+                        c1.metric("付費帳號", stats["total_users"])
+                        c2.metric("累計消耗點數", f"{stats['total_spent']:,}")
+                        c3.metric("剩餘點數總額", f"{stats['total_balance']:,}")
+                        if stats["accounts"]:
+                            rows = [
+                                {
+                                    "帳號": uid[:8] + "…",
+                                    "方案": a.get("plan", "-"),
+                                    "餘額": a.get("balance", 0),
+                                    "已用": a.get("spent_total", 0),
+                                    "週期": a.get("period", "-"),
+                                }
+                                for uid, a in stats["accounts"].items()
+                            ]
+                            st.dataframe(rows, use_container_width=True, hide_index=True)
+                        else:
+                            st.caption("尚無付費帳號用量紀錄")
 
                 elif admin_input:
                     st.session_state["_adm_attempts"] = _adm_attempts + 1
@@ -926,18 +957,23 @@ if st.session_state.get("transcript") or transcript_text:
         key="trans_lang",
     )
     if st.button(t("translate_btn", lang=lang_choice), use_container_width=True):
-        track("translate", {"lang": lang_choice})
-        with st.spinner(t("translating")):
-            try:
-                result = translate_text(_txt, lang_choice)
-                st.text_area("🌐", result, height=250)
-                st.download_button(
-                    t("download_translation"), result,
-                    file_name="translation.txt", mime="text/plain",
-                    use_container_width=True,
-                )
-            except Exception as e:
-                st.error(t("translation_fail", e=e))
+        # Google 免費翻譯不計費；Claude 翻譯才扣點
+        _free_trans = using_free_translation()
+        if _free_trans or _gate("translate_claude"):
+            track("translate", {"lang": lang_choice})
+            with st.spinner(t("translating")):
+                try:
+                    result = translate_text(_txt, lang_choice)
+                    if not _free_trans:
+                        _charge("translate_claude")
+                    st.text_area("🌐", result, height=250)
+                    st.download_button(
+                        t("download_translation"), result,
+                        file_name="translation.txt", mime="text/plain",
+                        use_container_width=True,
+                    )
+                except Exception as e:
+                    st.error(t("translation_fail", e=e))
 
 # ══════════════════════════════════════════════════════════════════════════════
 # STEP 3：進階工具（PRO）
@@ -976,6 +1012,26 @@ def _need_key() -> bool:
     return False
 
 
+def _gate(feature: str) -> bool:
+    """執行 AI 功能前檢查點數。付得起回 True；不足則顯示錯誤回 False。"""
+    ok, cost, bal = credits.can_afford(feature)
+    if not ok:
+        st.error(t("insufficient_credits").format(cost=cost, bal=bal))
+        return False
+    return True
+
+
+def _charge(feature: str):
+    """AI 成功產出後扣點，並顯示扣點提示（未計費模式不動作）。"""
+    try:
+        remaining = credits.charge(feature)
+        if remaining >= 0:
+            cost = credits.CREDIT_COSTS.get(feature, 10)
+            st.caption(t("credits_charged").format(cost=cost, bal=remaining))
+    except credits.InsufficientCredits:
+        pass
+
+
 # ── PRO TAB 1：爆款分析 + 模板
 with pro_tab1:
     st.caption("AI 分析爆款原因，生成可複製的鉤子與拍攝模板")
@@ -987,7 +1043,7 @@ with pro_tab1:
     tmpl_niche = st.text_input(t("your_topic"), placeholder="e.g. tech unboxing, fitness", key="tmpl_n")
 
     if st.button(t("generate_template_btn"), type="primary", use_container_width=True):
-        if not _need_key():
+        if not _need_key() and _gate("template"):
             track("generate_template", {"platform": tmpl_platform, "topic": tmpl_niche})
             with st.spinner(t("analyzing")):
                 try:
@@ -997,6 +1053,7 @@ with pro_tab1:
                         channel=info["channel"], platform=tmpl_platform,
                         user_niche=tmpl_niche,
                     )
+                    _charge("template")
                     t1, t2, t3, t4, t5, t6 = st.tabs([
                         "🔥 爆款原因", "🪝 鉤子", "🎬 拍攝模板", "✂️ 剪輯", "📐 標題公式", "💡 主題靈感",
                     ])
@@ -1033,10 +1090,11 @@ with pro_tab1:
         hk_style = st.selectbox("風格", ["好奇心", "震驚開場", "痛點共鳴", "反直覺", "數字衝擊"], key="hk_s")
 
     if st.button(t("gen_hook_btn"), type="primary", use_container_width=True):
-        if not _need_key():
+        if not _need_key() and _gate("custom_hook"):
             track("custom_hook", {"platform": hk_platform, "topic": hk_topic})
             with st.spinner(t("generating")):
                 hooks = generate_custom_hook(hk_topic, hk_platform, hk_style)
+            _charge("custom_hook")
             st.markdown(hooks)
             if st.button(t("save_btn"), key="fav_hook"):
                 add_favorite("hook", hk_topic[:40], hooks)
@@ -1054,7 +1112,7 @@ with pro_tab2:
     rc_tools = st.text_input(t("your_gear"), placeholder=t("gear_placeholder"), key="rc_t")
 
     if st.button(t("gen_recreation_btn"), type="primary", use_container_width=True):
-        if not _need_key():
+        if not _need_key() and _gate("recreation"):
             track("recreation_guide", {"platform": rc_platform})
             with st.spinner(t("generating")):
                 try:
@@ -1064,6 +1122,7 @@ with pro_tab2:
                         view_count=info["view_count"], platform=rc_platform,
                         thumbnail_url=info.get("thumbnail", ""), user_tools=rc_tools,
                     )
+                    _charge("recreation")
                     t1, t2, t3, t4, t5, t6, t7, t8 = st.tabs([
                         "📱 拍攝", "💡 燈光", "📝 腳本", "✂️ 剪輯",
                         "🎵 音樂", "📦 器材", "🤖 AI Prompt", "🪜 步驟",
@@ -1108,7 +1167,7 @@ with pro_tab_comments:
         )
 
     if st.button(t("fetch_comments_btn"), type="primary", use_container_width=True):
-        if not _need_key():
+        if not _need_key() and _gate("comment_mining"):
             track("mine_comments", {"platform": info.get("platform", ""), "max": cm_max})
             with st.spinner(t("fetching_comments")):
                 comments, err = get_comments(video_url, cm_max, ig_session=_ig)
@@ -1126,6 +1185,7 @@ with pro_tab_comments:
                 with st.spinner(t("mining_comments")):
                     try:
                         cm_result = mine_comments(comments, info.get("title", ""), cm_lang)
+                        _charge("comment_mining")
 
                         ct1, ct2, ct3, ct4 = st.tabs([
                             "🎯 風向", "😣 痛點", "❓ 疑問", "💡 影片點子",
@@ -1189,7 +1249,7 @@ with pro_tab_ads:
     )
 
     if st.button(t("gen_ad_strategy_btn"), type="primary", use_container_width=True):
-        if not _need_key():
+        if not _need_key() and _gate("ad_strategy"):
             track("ad_strategy", {"platform": ad_platform, "goal": ad_goal, "budget": ad_budget})
             with st.spinner(t("generating_ads")):
                 try:
@@ -1201,6 +1261,7 @@ with pro_tab_ads:
                         product=ad_product, target_market=ad_market,
                         output_lang=ad_lang,
                     )
+                    _charge("ad_strategy")
 
                     at1, at2, at3, at4, at5, at6 = st.tabs([
                         "📊 總覽 + 平台", "👥 受眾", "✍️ 文案 + 素材",
@@ -1258,9 +1319,12 @@ with pro_tab3:
     def _gen_result(label: str, fn, fav_type: str, event_type: str, details: dict, *args, **kwargs):
         if _need_key():
             return
+        if not _gate(event_type):   # event_type 對應 CREDIT_COSTS 的 key
+            return
         track(event_type, details)
         with st.spinner(t("generating")):
             r = fn(*args, **kwargs)
+        _charge(event_type)
         st.markdown(r)
         c1, c2 = st.columns(2)
         with c1:
@@ -1351,10 +1415,11 @@ with pro_tab_faceless:
         with nc2:
             niche_lang = st.selectbox("輸出語言", ["繁體中文", "简体中文"], key="niche_lang")
         if st.button("🔍 發現利基市場", type="primary", use_container_width=True):
-            if not _need_key():
+            if not _need_key() and _gate("niche_finder"):
                 track("find_niches", {"category": niche_cat})
                 with st.spinner("AI 分析熱門無臉頻道利基中…約需 20 秒"):
                     r = find_niches(niche_cat, niche_lang)
+                _charge("niche_finder")
                 _faceless_result(f"利基市場_{niche_cat}", r, "other")
 
     # AI 腳本生成
@@ -1371,10 +1436,11 @@ with pro_tab_faceless:
         if st.button(f"📝 {t('script_gen')}", type="primary", use_container_width=True):
             if not sc1:
                 st.warning("⚠️")
-            elif not _need_key():
+            elif not _need_key() and _gate("script_gen"):
                 track("generate_script", {"topic": sc1[:30], "length": sc_length})
                 with st.spinner(t("generating")):
                     r = generate_script(sc1, sc_length, sc_style, sc_lang)
+                _charge("script_gen")
                 st.session_state["faceless_script"] = r
                 st.session_state["faceless_topic"] = sc1
                 _faceless_result(f"script_{sc1[:20]}", r, "template")
@@ -1398,10 +1464,11 @@ with pro_tab_faceless:
         if st.button(f"🔑 {t('seo_package')}", type="primary", use_container_width=True):
             if not seo_topic:
                 st.warning("⚠️")
-            elif not _need_key():
+            elif not _need_key() and _gate("seo_package"):
                 track("seo_package", {"topic": seo_topic[:30]})
                 with st.spinner(t("generating")):
                     r = generate_seo_package(seo_topic, seo_script, seo_lang)
+                _charge("seo_package")
                 _faceless_result(f"SEO_{seo_topic[:20]}", r, "other")
 
     # 縮圖 Prompt
@@ -1421,10 +1488,11 @@ with pro_tab_faceless:
         if st.button(f"🖼 {t('thumbnail_prompt')}", type="primary", use_container_width=True):
             if not th_topic:
                 st.warning("⚠️")
-            elif not _need_key():
+            elif not _need_key() and _gate("thumbnail_prompt"):
                 track("thumbnail_prompt", {"topic": th_topic[:30], "style": th_style})
                 with st.spinner(t("generating")):
                     r = generate_thumbnail_prompts(th_topic, th_style)
+                _charge("thumbnail_prompt")
                 _faceless_result(f"thumbnail_{th_topic[:20]}", r, "other")
 
     # AI 分鏡腳本
@@ -1446,10 +1514,11 @@ with pro_tab_faceless:
         if st.button(f"🎬 {t('storyboard')}", type="primary", use_container_width=True):
             if not sb_script.strip():
                 st.warning("⚠️")
-            elif not _need_key():
+            elif not _need_key() and _gate("storyboard"):
                 track("storyboard", {"style": sb_style})
                 with st.spinner(t("generating")):
                     r = generate_storyboard(sb_script, sb_style)
+                _charge("storyboard")
                 _faceless_result("storyboard", r, "template")
                 st.info("💡 Copy each scene's AI Prompt → paste into Kling AI / Runway Gen-3 / Sora")
 
