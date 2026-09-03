@@ -48,8 +48,8 @@ ScaledBorderAndShadow: yes
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Original,{font},{size_primary},&H00FFFFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,3,1,2,60,60,220,1
-Style: Translated,{font},{size_secondary},&H0000D7FF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,2.5,1,2,60,60,110,1
+Style: Original,{font},{size_primary},&H00FFFFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,3,1,2,{margin_lr},{margin_lr},{margin_v_primary},1
+Style: Translated,{font},{size_secondary},&H0000D7FF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,2.5,1,2,{margin_lr},{margin_lr},{margin_v_secondary},1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -64,6 +64,9 @@ def build_ass(lines: List[SubLine]) -> str:
         font=settings.SUB_FONT,
         size_primary=settings.SUB_FONT_SIZE_PRIMARY,
         size_secondary=settings.SUB_FONT_SIZE_SECONDARY,
+        margin_lr=settings.SUB_MARGIN_LR,
+        margin_v_primary=settings.SUB_MARGIN_V_PRIMARY,
+        margin_v_secondary=settings.SUB_MARGIN_V_SECONDARY,
     )
 
     events = []

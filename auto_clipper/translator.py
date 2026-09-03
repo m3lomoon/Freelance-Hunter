@@ -8,6 +8,7 @@ from typing import List
 
 from . import settings
 from .transcriber import Segment
+from .zhconvert import to_traditional
 
 LANG_NAMES = {
     "zh": "繁體中文",
@@ -84,5 +85,8 @@ def translate_segments(
             block.text for block in response.content if hasattr(block, "text")
         )
         translated.extend(_parse_numbered_response(response_text, len(batch)))
+
+    if target_lang.startswith("zh"):
+        translated = [to_traditional(t) for t in translated]
 
     return translated

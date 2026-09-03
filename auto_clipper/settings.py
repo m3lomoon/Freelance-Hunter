@@ -36,12 +36,22 @@ FILLER_KEYWORDS = [
     "um", "uh", "you know", "like i said", "sponsor",
 ]
 
-# ── 輸出影片 ────────────────────────────────────────────
+# ── 輸出影片（預設就是 IG Reels 規格：1080x1920 / 9:16）────
 VERTICAL_OUTPUT = os.environ.get("CLIPPER_VERTICAL", "1") != "0"
 OUTPUT_WIDTH = int(os.environ.get("CLIPPER_OUTPUT_WIDTH", 1080))
 OUTPUT_HEIGHT = int(os.environ.get("CLIPPER_OUTPUT_HEIGHT", 1920))
 
-# ── 雙語字幕樣式 ────────────────────────────────────────
+# ── 雙語字幕樣式（中文一定轉繁體）───────────────────────
+# 中文永遠輸出「繁體中文＋台灣用語」（用 OpenCC s2twp），不管來源是簡體聽打或翻譯結果
+FORCE_TRADITIONAL_CHINESE = os.environ.get("CLIPPER_FORCE_TC", "1") != "0"
+
 SUB_FONT = os.environ.get("CLIPPER_SUB_FONT", "Noto Sans TC")
 SUB_FONT_SIZE_PRIMARY = int(os.environ.get("CLIPPER_SUB_SIZE_PRIMARY", 64))
 SUB_FONT_SIZE_SECONDARY = int(os.environ.get("CLIPPER_SUB_SIZE_SECONDARY", 46))
+
+# IG Reels 畫面安全區：底部有「文字說明／音樂資訊／頭像＋讚留言分享按鈕」，
+# 頂部有「Reels」分頁列，字幕要避開這些區域才不會被 IG 介面擋住。
+# 數字是以 1080x1920 畫布為基準的留白（單位:px），MarginV 是離畫面底部的距離。
+SUB_MARGIN_LR = int(os.environ.get("CLIPPER_SUB_MARGIN_LR", 90))  # 避開右側讚/留言/分享直排按鈕
+SUB_MARGIN_V_PRIMARY = int(os.environ.get("CLIPPER_SUB_MARGIN_V_PRIMARY", 380))  # 原文（上排）
+SUB_MARGIN_V_SECONDARY = int(os.environ.get("CLIPPER_SUB_MARGIN_V_SECONDARY", 270))  # 翻譯（下排）

@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from typing import List, Optional
 
 from . import settings
+from .zhconvert import to_traditional
 
 
 @dataclass
@@ -52,10 +53,14 @@ def transcribe(
         vad_parameters={"min_silence_duration_ms": 400},
     )
 
-    segments = [
-        Segment(start=s.start, end=s.end, text=s.text.strip())
-        for s in segments_iter
-        if s.text.strip()
-    ]
+    is_chinese = (language or info.language).startswith("zh")
+    segments = []
+    for s in segments_iter:
+        text = s.text.strip()
+        if not text:
+            continue
+        if is_chinese:
+            text = to_traditional(text)
+        segments.append(Segment(start=s.start, end=s.end, text=text))
 
     return info.language, segments
