@@ -64,6 +64,68 @@ h1,h2,h3{margin:0;text-wrap:balance;font-weight:700}
 p{margin:0}
 ::selection{background:var(--moon);color:var(--moon-ink)}
 
+
+/* ---------- meditation library ---------- */
+.reccard{display:block;width:100%;text-align:left;border:1px solid var(--line);cursor:pointer;transition:transform .12s}
+.reccard:active{transform:scale(.99)}
+.sosrow{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.sos{display:flex;flex-direction:column;align-items:center;gap:3px;padding:12px 4px;border-radius:var(--r-md);background:var(--raised);border:1px solid transparent;transition:border-color .15s,transform .12s}
+.sos:hover{border-color:var(--moon)}
+.sos:active{transform:scale(.96)}
+.sos span{font-size:20px}
+.sos b{font-size:11px}
+.sos i{font-style:normal;font-family:var(--mono);font-size:9px;color:var(--faint)}
+.brow{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.brow::-webkit-scrollbar{display:none}
+.bchip{flex:none;width:104px;padding:12px 10px;border-radius:var(--r-md);background:var(--raised);border:1px solid transparent;text-align:left;transition:border-color .15s}
+.bchip:hover{border-color:var(--line-strong)}
+.bchip .be{font-size:19px;display:block;margin-bottom:6px}
+.bchip b{display:block;font-size:13px;line-height:1.3}
+.bchip span{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.scards{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.scard{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:14px;border-radius:var(--r-md);background:var(--raised);border:1px solid transparent;text-align:left;transition:border-color .15s,transform .12s;position:relative}
+.scard:hover{border-color:var(--line-strong)}
+.scard:active{transform:scale(.98)}
+.scard.wide{grid-column:1/-1}
+.scard.add{border:1px dashed var(--line-strong);background:transparent}
+.scard .em{font-size:22px;margin-bottom:6px}
+.scard .sc-b{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.scard .sc-b b{font-size:14px}
+.scard .fav{font-style:normal;color:var(--moon);font-size:12px}
+.scard .voiced{font-style:normal;font-size:10px;color:var(--jade);background:var(--jade-ink);padding:1px 6px;border-radius:var(--r-pill)}
+.scard .sc-h{font-size:12px;color:var(--muted);line-height:1.45;margin-top:3px}
+.scard .sc-f{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+.scard .sc-f i{font-style:normal;font-family:var(--mono);font-size:10px;letter-spacing:.03em;color:var(--faint);border:1px solid var(--line);padding:1px 6px;border-radius:var(--r-pill)}
+.scard .sc-f .drop{color:var(--jade);border-color:transparent;background:var(--jade-ink)}
+.whycard{background:transparent;border-left:2px solid var(--jade);padding:2px 0 2px 14px;margin-bottom:18px}
+.whycard p{font-size:13px;color:var(--muted);line-height:1.6;margin-top:5px}
+.effs{display:grid;gap:10px}
+.eff{display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:10px}
+.eff .en{font-size:13px}
+.eff .ebar{height:6px;border-radius:3px;background:var(--raised);overflow:hidden}
+.eff .ebar i{display:block;height:100%;border-radius:3px}
+.eff b{font-family:var(--display);font-size:16px;font-variant-numeric:tabular-nums}
+.eff .ec{font-family:var(--mono);font-size:10px;color:var(--faint)}
+.dots{display:grid;grid-template-columns:repeat(11,1fr);gap:4px}
+.dots button{aspect-ratio:1;border-radius:8px;background:var(--raised);font-family:var(--mono);font-size:11px;color:var(--muted);transition:background .15s}
+.dots button:hover{background:var(--hover)}
+.dots button[aria-pressed="true"]{background:var(--moon);color:var(--moon-ink);font-weight:700}
+.dots.big button{font-size:14px;border-radius:10px}
+.rng{width:100%;accent-color:var(--moon);background:transparent}
+/* breath pacer */
+.pacerwrap{display:grid;place-items:center;padding:26px 0 10px}
+.pacer{position:relative;width:220px;height:220px;display:grid;place-items:center}
+.pring{position:absolute;inset:0;border-radius:50%;border:1px solid var(--line-strong)}
+.pcore{position:absolute;width:200px;height:200px;border-radius:50%;transform:scale(.45);
+  background:radial-gradient(circle at 35% 30%,#fff3e8 0%,var(--moon) 30%,var(--moon-deep) 65%,transparent 78%);
+  box-shadow:0 0 70px var(--glow)}
+.ptext{position:relative;z-index:2;text-align:center;color:var(--moon-ink);mix-blend-mode:normal}
+.ptext b{display:block;font-family:var(--serif);font-size:19px}
+.ptext span{font-family:var(--mono);font-size:11px;opacity:.8}
+.brmeta{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:20px;text-align:center}
+.brmeta b{display:block;font-family:var(--display);font-size:20px;font-weight:800;font-variant-numeric:tabular-nums}
+.brmeta span{font-size:11px;color:var(--muted)}
+
 /* ---------- stage ---------- */
 #sky{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
 .stage{position:relative;z-index:1;min-height:100vh;display:flex;align-items:center;justify-content:center;gap:56px;padding:40px 24px}
@@ -120,7 +182,7 @@ p{margin:0}
 .chip.jade{background:var(--jade-ink);color:var(--jade);border-color:transparent}
 .chip.moon{background:var(--moon-ink);color:var(--moon);border-color:transparent}
 
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 18px;border-radius:var(--r-pill);font-weight:600;font-size:14px;transition:transform .12s ease,background .15s ease}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap;padding:12px 18px;border-radius:var(--r-pill);font-weight:600;font-size:14px;transition:transform .12s ease,background .15s ease}
 .btn:active{transform:scale(.97)}
 .btn.primary{background:var(--moon);color:var(--moon-ink)}
 .btn.primary:hover{background:var(--moon-deep);color:#fff}
@@ -502,6 +564,144 @@ const CONCERNS = {
     sleep:'你的潛意識整晚都在為你收集靈感。'},
 };
 
+/* ---------- breath patterns (the science layer) ---------- */
+const BREATHS = {
+  physio:{name:'生理嘆息',emoji:'💨',hint:'兩段吸氣＋長吐 · 降壓最快的一招',why:'Stanford Huberman lab：兩段吸氣重新撐開肺泡，長吐氣拉高副交感活性，一分鐘內心率就會掉。',
+    steps:[['吸氣',4],['再吸一小口',2],['長長地吐',8]],rounds:5,color:'rose'},
+  box:{name:'方箱呼吸',emoji:'⬜',hint:'4-4-4-4 · 上場前穩住手',why:'海豹部隊與運動員上場前的標準流程，等長的四拍讓注意力有地方放，手抖會停。',
+    steps:[['吸氣',4],['停住',4],['吐氣',4],['停住',4]],rounds:4,color:'moon'},
+  b478:{name:'4-7-8 助眠',emoji:'🌙',hint:'吸 4 停 7 吐 8 · 躺著做',why:'吐氣長度接近吸氣兩倍時，迷走神經張力上升，是最常被拿來對付入睡困難的節奏。',
+    steps:[['吸氣',4],['停住',7],['吐氣',8]],rounds:4,color:'jade'},
+  coherent:{name:'共振呼吸',emoji:'〰️',hint:'5-5 · 每分鐘 6 次',why:'每分鐘 6 次時心率變異度（HRV）達到最高，情緒調節與專注力都在這個頻率上最穩。',
+    steps:[['吸氣',5],['吐氣',5]],rounds:6,color:'jade'},
+  calm46:{name:'4-6 安撫',emoji:'🫧',hint:'吐氣比吸氣長 · 隨時能做',why:'最溫和的版本，捷運上、會議中都能做，沒有人看得出來。',
+    steps:[['吸氣',4],['吐氣',6]],rounds:6,color:'moon'},
+  energize:{name:'提振呼吸',emoji:'☀️',hint:'6-2 · 早晨開機',why:'吸氣長、吐氣短會提高交感活性，用來取代第二杯咖啡。',
+    steps:[['深深吸氣',6],['快速吐掉',2]],rounds:6,color:'rose'},
+};
+
+/* ---------- scenario library ---------- */
+const CATS = {rescue:{name:'急救',hint:'現在就不舒服'},before:{name:'出發前',hint:'進場之前的 60 秒'},daily:{name:'每天',hint:'固定時段的練習'},ritual:{name:'儀式',hint:'慢下來的時刻'}};
+const SCENES = {
+  anxiety:{name:'焦慮急救',emoji:'🌀',cat:'rescue',min:2,breath:'physio',rounds:3,tone:'gentle',hint:'心跳很快、腦袋停不下來',
+    metric:'焦慮',
+    open:['好，停一下。你現在是安全的。','把腳掌踩在地上，感覺地板在那裡。'],
+    steps:['說出五個你看得到的東西。不用出聲，心裡數就好。','四個你摸得到的。','三個你聽得到的聲音。','兩個你聞得到的。','一個你嚐得到的。'],
+    aff:['焦慮不是預言，它只是一個訊號。','我的身體很安全，我的呼吸帶我回來。','這個感覺會過去，就像之前每一次一樣。','我不需要現在就想通一切。','我可以只處理下一步。','我的念頭不是事實。'],
+    close:['好了。你回來了。','慢慢地，繼續今天。']},
+  meeting:{name:'開會前',emoji:'💼',cat:'before',min:1,breath:'box',rounds:3,tone:'firm',hint:'提案、簡報、面試前 60 秒',
+    metric:'緊張',
+    open:['進去之前，先給自己六十秒。','坐直，肩膀往後轉一圈，讓胸口打開。'],
+    aff:['我準備好了，我的準備就是我的底氣。','我知道我在說什麼。','我不需要證明什麼，我只是分享我看到的。','別人的表情不是評分，我可以慢慢說。','如果我不知道答案，我可以說我回去確認。','我的聲音穩，我的節奏由我決定。'],
+    close:['把肩膀放下來，下巴微微收。','好，去吧。']},
+  date:{name:'約會前',emoji:'💗',cat:'before',min:1,breath:'calm46',rounds:3,tone:'gentle',hint:'出門前回到自己身上',
+    metric:'緊張',
+    open:['出門前，先回到自己身上。','看著鏡子裡的那個人，不要急著挑毛病。'],
+    aff:['今天我不是去被挑選的，我也在挑選。','我不需要表演，我只要在場。','有趣的人會覺得我有趣，這就夠了。','如果不合拍，那不是我不夠好，只是頻率不同。','我可以緊張，緊張只是我在乎。','我允許自己享受今天晚上。'],
+    close:['好了。帶著這個頻率出門。']},
+  stage:{name:'上台前',emoji:'🎤',cat:'before',min:2,breath:'box',rounds:4,tone:'baddie',hint:'演出、直播、鏡頭前',
+    metric:'緊張',
+    open:['燈還沒亮，這一分鐘是你的。','腳掌踩實，膝蓋放鬆，重心往下沉。'],
+    steps:['想像第一個音、第一句話出口的樣子。順順的，就這樣。'],
+    aff:['腎上腺素不是害怕，是我的身體在準備。','舞台是我的家，我在上面自由呼吸。','我不需要完美，我需要真實。','他們是來看我的，不是來抓我的錯。','我的存在本身就有份量。','就算忘詞，我也能撐住這個空間。'],
+    close:['深吸一口氣，把胸口打開。','燈亮了。去吧。']},
+  post:{name:'發文前',emoji:'📱',cat:'before',min:1,breath:'calm46',rounds:3,tone:'baddie',hint:'按下發布之前的那口氣',
+    metric:'不安',
+    open:['手指停在那個按鈕上，先呼吸。'],
+    aff:['我的作品不需要所有人喜歡。','數字不是我的價值，數字只是數字。','會共鳴的人自然會留下。','我發布的是我，不是我的完美版本。','演算法不是老師，我不需要它的批准。','我今天做了創作者會做的事：把東西送出去。'],
+    close:['好，按下去。','然後去做別的事，不要一直重整。']},
+  anger:{name:'情緒降溫',emoji:'🔥',cat:'rescue',min:2,breath:'physio',rounds:4,tone:'firm',hint:'很生氣、想立刻回訊息',
+    metric:'火氣',
+    open:['先不要回覆。訊息可以等，你的神經系統不行。','如果可以，站起來走三步。'],
+    steps:['把感覺放在身體的某個位置：胸口？喉嚨？肚子？只是看著它。'],
+    aff:['我可以生氣，生氣是在告訴我界線被踩到了。','我不需要在最激動的時候做決定。','我可以晚一點再回應，這是力量不是逃避。','別人的情緒不是我的責任。','我要的是解決，不是贏。','十分鐘後的我會感謝現在的我。'],
+    close:['好，火降下來了。','現在，你可以選擇怎麼回應。']},
+  morning:{name:'早晨開機',emoji:'☀️',cat:'daily',min:3,breath:'energize',rounds:4,tone:'firm',hint:'起床後的第一件事',
+    metric:'能量',
+    open:['早安。還沒看手機吧？先給自己三分鐘。','坐起來，讓光進來。'],
+    aff:['今天由我決定要專注在哪裡。','我的能量清澈、穩定、明亮。','今天只有三件重要的事，其他都是雜訊。','我先照顧自己，再照顧別人。','我不趕，我有節奏。','今天會有一件好事發生，我會注意到它。'],
+    close:['好，睜開眼睛。','今天是你的。']},
+  focus:{name:'專注啟動',emoji:'🎯',cat:'daily',min:3,breath:'coherent',rounds:5,tone:'firm',hint:'開始工作前的清場',
+    metric:'分心',
+    open:['把手機翻過去。就一下下。','把要做的那件事，在心裡說一次。'],
+    steps:['想像九十分鐘後，那件事已經完成的樣子。'],
+    aff:['我一次只做一件事，這就夠了。','分心來的時候，我只是把注意力帶回來，不責備自己。','開始比完美重要。','我不需要有靈感才能開始，開始會帶來靈感。','九十分鐘之後我可以休息。','我把注意力放回我選擇的地方。'],
+    close:['好，計時開始。','去吧。']},
+  money:{name:'談錢前',emoji:'💰',cat:'before',min:2,breath:'box',rounds:3,tone:'firm',hint:'報價、談薪、寄出發票',
+    metric:'心虛',
+    open:['報價之前，先把身體坐直。','這不是在要錢，這是在說明價值。'],
+    aff:['我的時間和專業值這個數字。','沉默不代表我要降價。','我可以說出數字，然後閉嘴。','拒絕我的人不是我的客戶。','錢是能量的交換，不是人情。','我值得被準時、足額地付款。'],
+    close:['深呼吸。','把數字說出來。']},
+  period:{name:'經期照顧',emoji:'🌸',cat:'daily',min:5,breath:'calm46',rounds:5,tone:'gentle',hint:'身體需要慢下來的幾天',
+    metric:'不適',
+    open:['今天的身體在做很辛苦的事。','把手放在小腹上，讓手的溫度傳進去。'],
+    steps:['吸氣的時候，想像溫暖流向下腹；吐氣的時候，讓緊繃鬆開一點。'],
+    aff:['我的身體不是壞掉了，它只是在工作。','今天我可以少做一點，這不是懶。','痠痛會過去，我陪著它。','我允許自己休息，不需要理由。','我對自己溫柔，就像對最好的朋友。','我的能量是週期性的，不是壞掉的。'],
+    close:['謝謝身體today還在運作。','去躺一下吧。']},
+  tea:{name:'一杯茶的儀式',emoji:'🍵',cat:'ritual',min:5,breath:'coherent',rounds:6,tone:'gentle',hint:'泡一杯，什麼都不做',
+    metric:'雜亂',
+    open:['先去泡一杯。我等你。','杯子拿起來，先感覺溫度，不要急著喝。'],
+    steps:['聞一下。就聞，不要評論。','喝第一口，讓它在嘴裡停一下。','第二口，注意溫熱往下走到哪裡。'],
+    aff:['我可以什麼都不做，這也是有生產力的。','慢下來的時候，我才聽得見自己。','這一杯是我送給自己的。','我不需要一直有用。','此刻已經夠了。'],
+    close:['好，把杯子放下。','把這份安靜帶著走。']},
+  create:{name:'創作前',emoji:'🎨',cat:'before',min:3,breath:'coherent',rounds:4,tone:'baddie',hint:'寫歌、剪片、開新檔案',
+    metric:'卡住',
+    open:['打開檔案之前，先把評論家請出去。','他可以在門外等，等我做完再進來。'],
+    steps:['想像最爛的第一版已經完成了。看，天沒有塌下來。'],
+    aff:['我允許自己做出不完美的第一版。','靈感隨時找得到我，因為我隨時都在。','我的想法值得被做出來。','我不是在證明才華，我是在玩。','做完比做好重要，做好是下一輪的事。','我信任直覺，它從不遲到。'],
+    close:['好，打開它。','開始。']},
+  reset:{name:'轉場重設',emoji:'🔄',cat:'daily',min:2,breath:'physio',rounds:3,tone:'gentle',hint:'下班、通勤、換場景',
+    metric:'殘留',
+    open:['剛剛那一段結束了。','在進入下一段之前，先清空。'],
+    steps:['想像把剛剛的情緒裝進一個盒子，放在門口。它還在，只是不用帶進來。'],
+    aff:['上一場的我，可以留在上一場。','我不需要把所有情緒都帶著走。','現在這一刻是新的。','我可以重新選擇我的狀態。'],
+    close:['好，乾淨了。','進入下一段。']},
+};
+
+/* ---------- scenario script builder ---------- */
+function breathLines(patternKey, rounds){
+  const B=BREATHS[patternKey]; if(!B) return [];
+  const out=[]; const n=rounds||B.rounds;
+  out.push({t:`${B.name} · ${B.steps.map(s=>s[1]).join('-')} · ${n} 回合`,kind:'breath',pause:1200});
+  for(let r=0;r<n;r++) B.steps.forEach(([label,sec])=>out.push({t:`${label} ${sec}`,kind:'breath',pause:sec*1000,sec}));
+  return out;
+}
+function buildScene(key,{minutes,tone,name}={}){
+  const S=SCENES[key]; if(!S) return [];
+  const T=TONES[tone||S.tone||'gentle'];
+  const mins=minutes||S.min;
+  const lines=[]; const L=(t,kind,pause)=>lines.push({t,kind,pause});
+  S.open.forEach((t,i)=>L(t.replace('{name}',name||'你'),'open',i?1600:1800));
+  breathLines(S.breath,S.rounds).forEach(l=>lines.push(l));
+  (S.steps||[]).forEach(t=>L(t,'vision',5000));
+  const target=Math.max(4,Math.round(mins*2.5));
+  const r=rng(key+todayKey()); const affs=shuffle(S.aff,r);
+  let p=0;
+  for(let i=0;i<target;i++){
+    L(affs[i%affs.length],'aff',2000);
+    if((i+1)%4===0 && T.punch) L(T.punch[p++%T.punch.length],'punch',1400);
+  }
+  S.close.forEach(t=>L(t,'close',1400));
+  return lines;
+}
+function sceneStats(key){
+  const rs=(state.ratings||[]).filter(r=>r.scene===key && r.after!=null);
+  if(!rs.length) return null;
+  const d=rs.reduce((s,r)=>s+(r.before-r.after),0)/rs.length;
+  return {n:rs.length, drop:d};
+}
+function recommendScene(){
+  const h=new Date().getHours(), c=state.profile.concerns||[];
+  if(h<9) return 'morning';
+  if(h>=22||h<4) return 'reset';
+  if(c.includes('anxiety')) return 'anxiety';
+  if(c.includes('focus')&&h<18) return 'focus';
+  if(c.includes('creative')) return 'create';
+  if(c.includes('confidence')) return 'meeting';
+  if(h>=17) return 'tea';
+  return 'focus';
+}
+
 /* ---------- state ---------- */
 const KEY = 'melomood.v1';
 const state = load();
@@ -522,9 +722,11 @@ function seed(){
     demo:true,
     profile:{name:'Melody',concerns:['sleep','focus'],goals:['music','wealth','confidence'],tone:'baddie',voice:{recorded:true,seconds:42,at:daysAgo(3),voiceId:''},createdAt:daysAgo(11)},
     entries,
-    sessions:[{date:daysAgo(1),type:'sleep',min:12},{date:daysAgo(2),type:'manifest',min:7},{date:daysAgo(3),type:'manifest',min:3},{date:daysAgo(4),type:'sleep',min:12},{date:daysAgo(5),type:'manifest',min:7},{date:daysAgo(7),type:'manifest',min:7}],
-    settings:{elevenKey:'',claudeKey:'',theme:'',voiceId:'',voiceName:'',demoVoice:'melo'},
-    ui:{goal:'music',minutes:3},
+    sessions:[{date:daysAgo(7),type:'manifest',min:7,scene:'daily'},{date:daysAgo(5),type:'manifest',min:2,scene:'anxiety'},{date:daysAgo(4),type:'sleep',min:12},{date:daysAgo(3),type:'manifest',min:1,scene:'meeting'},{date:daysAgo(2),type:'manifest',min:2,scene:'anxiety'},{date:daysAgo(1),type:'sleep',min:12},{date:daysAgo(1),type:'manifest',min:3,scene:'focus'}],
+    settings:{elevenKey:'',claudeKey:'',theme:'',voiceId:'',voiceName:'',demoVoice:'melo',ambVol:.3,reminder:''},
+    ratings:[{scene:'anxiety',before:8,after:4,date:daysAgo(2)},{scene:'anxiety',before:7,after:3,date:daysAgo(5)},{scene:'meeting',before:6,after:3,date:daysAgo(3)}],
+    favs:['anxiety','meeting'], custom:{},
+    ui:{goal:'music',minutes:3,view:'lib',scene:null,breath:'physio',before:null},
   };
 }
 
@@ -588,13 +790,17 @@ function buildSleep({goals, name}){
 }
 
 /* ---------- optional: Claude deep personalisation ---------- */
-async function generateWithClaude({goal, minutes, tone, name}){
+async function generateWithClaude({goal, scene, minutes, tone, name}){
   const key = state.settings.claudeKey; if(!key) return null;
-  const G = GOALS[goal], T = TONES[tone];
+  const T = TONES[tone] || TONES.gentle;
   const recent = [...state.entries].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5)
     .map(e=>`${e.date} 心情${e.mood}/5 感謝：${(e.gratitude||[]).join('、')} 筆記：${e.note||''}`).join('\n');
-  const system = `你是 Melo Mood 的冥想引導作者。用繁體中文（台灣）、第一人稱現在式寫一段給使用者自己唸給自己聽的顯化腳本。語氣：${T.name}（${T.hint}）。長度約 ${minutes} 分鐘的朗讀量。每行一句，不要編號、不要標題、不要 markdown。結構：開場呼吸 → 肯定語（可重複、漸進）→ 一段具體的視覺化畫面 → 收尾。從使用者最近的日記裡挑一兩個具體細節放進腳本，讓它像只為她寫的。`;
-  const user = `使用者：${name}\n目標：${G.name}（${G.hint}）\n最近的日記：\n${recent||'（還沒有）'}`;
+  const brief = scene
+    ? `情境：${scene.name}（${scene.hint||''}）\n呼吸節奏：${BREATHS[scene.breath].name} ${BREATHS[scene.breath].steps.map(x=>x[0]+x[1]).join('-')}\n原本的句子：${scene.aff.join('；')}`
+    : `方向：${GOALS[goal].name}（${GOALS[goal].hint}）`;
+  const conc = (state.profile.concerns||[]).map(k=>CONCERNS[k]?.name).filter(Boolean).join('、');
+  const system = `你是 Melo Mood 的冥想引導作者。用繁體中文（台灣口語）、第一人稱現在式，寫一段給使用者自己唸給自己聽的引導詞。語氣：${T.name}（${T.hint}）。長度約 ${minutes} 分鐘的朗讀量。每行一句，不要編號、不要標題、不要 markdown、不要引號。結構：開場（叫她的名字、把她帶回身體）→ 呼吸指令 → 肯定語 → 一段具體畫面 → 收尾。從她的日記與狀態裡挑一兩個具體細節放進去，讓它像只為她寫的。不做醫療宣稱。`;
+  const user = `使用者：${name}\n${brief}\n她最近在改善：${conc||'（沒說）'}\n最近的日記：\n${recent||'（還沒有）'}`;
   // Raw fetch: this is a static page with no bundler, so the SDK is not available here.
   // In production, call this from the edge function in backend/edge-functions instead.
   const res = await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{
@@ -699,10 +905,10 @@ function stopPlayback(){
   if(player.audio){ player.audio.pause(); player.audio.src=''; player.audio=null; }
   player.onTick && player.onTick({idx:-1,pct:0,done:false,stopped:true});
 }
-async function playLines(lines, {rate=.9, onTick, onDone, mode='manifest', src}={}){
+async function playLines(lines, {rate=.9, onTick, onDone, mode='manifest', src, pack}={}){
   stopPlayback();
   player.lines=lines; player.idx=0; player.playing=true; player.onTick=onTick; player.total=estimateMs(lines,rate); player.startedAt=Date.now();
-  if(src?.mode==='pack'){ playPack(DEMO_PACK[mode], onTick, onDone); return; }
+  if(src?.mode==='pack'){ playPack(pack||DEMO_PACK[mode], onTick, onDone); return; }
   if(src?.mode==='eleven'){
     try{ await playEleven(lines, rate, onTick, onDone); return; }
     catch(e){ if(!player.playing) return; toast('ElevenLabs 連不上（'+(e.message||e)+'），改用系統聲音'); }
@@ -729,7 +935,7 @@ function simulate(lines,onTick,onDone){
 }
 /* pre-rendered pack: one audio file, line highlight from timestamps */
 function playPack(P, onTick, onDone){
-  const A=P.audio[demoVoice()]; const a=new Audio(A.src); player.audio=a;
+  const A=P.audio ? P.audio[demoVoice()] : P; const a=new Audio(A.src); player.audio=a;
   a.ontimeupdate=()=>{ const t=a.currentTime; let idx=0; for(let i=0;i<A.at.length;i++){ if(A.at[i]<=t+.05) idx=i; }
     onTick&&onTick({idx,pct:t/(a.duration||A.dur),done:false}); };
   a.onended=()=>{ player.playing=false; player.audio=null; onTick&&onTick({idx:-1,pct:1,done:true}); onDone&&onDone(); };
@@ -839,7 +1045,8 @@ $('#sheet-bg').onclick=closeSheet;
 
 /* ---------- navigation ---------- */
 function go(id){
-  stopPlayback(); closeSheet();
+  stopPlayback(); stopPacer(); closeSheet();
+  if(id!=='manifest') state.ui.view='lib';
   $$('.screen').forEach(s=>s.classList.toggle('active',s.id===id));
   $$('#nav button').forEach(b=>b.toggleAttribute('aria-current',b.dataset.go===id)&&b.setAttribute('aria-current','page'));
   $$('#nav button').forEach(b=>{ if(b.dataset.go!==id) b.removeAttribute('aria-current'); });
@@ -880,8 +1087,9 @@ function renderHome(){
       </div>
     </div>
     <div class="section">
-      <div class="section-h"><h2>立刻能做</h2></div>
-      <div class="quick">
+      <div class="section-h"><h2>立刻能做</h2><span class="more">60 秒就有感</span></div>
+      <div class="sosrow">${['anxiety','meeting','date','focus'].map(k=>`<button class="sos" data-scene="${k}"><span>${SCENES[k].emoji}</span><b>${esc(SCENES[k].name)}</b><i>${SCENES[k].min} 分</i></button>`).join('')}</div>
+      <div class="quick" style="margin-top:10px">
         <button class="qa" data-go="manifest"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M12 4a4 4 0 0 1 4 4v4a4 4 0 0 1-8 0V8a4 4 0 0 1 4-4z"/><path d="M6 11a6 6 0 0 0 12 0M12 17v3"/></svg></span><b>${state.ui.minutes} 分鐘冥想</b><span>${g.emoji} ${esc(g.name)} · ${esc(T.name)}</span></button>
         <button class="qa" data-go="sleep"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5z"/></svg></span><b>睡前導引</b><span>放鬆身體 · 帶著目標入睡</span></button>
         <button class="qa" data-go="journal"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 4h11a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2z"/><path d="M8 4v16"/></svg></span><b>寫三件感謝</b><span>90 秒 · 重塑注意力</span></button>
@@ -889,6 +1097,7 @@ function renderHome(){
       </div>
     </div>`;
   $$('#home [data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
+  $$('#home [data-scene]').forEach(b=>b.onclick=()=>{ go('manifest'); openScene(b.dataset.scene); });
   $('#home-play').onclick=()=>{ state.ui.goal=p.goals[0]; go('manifest'); setTimeout(()=>$('#mf-play')?.click(),250); };
   $('#home-voice').onclick=openRecorderSheet;
   $('#start-real')&&($('#start-real').onclick=startReal);
@@ -901,20 +1110,155 @@ function quickMood(v){
 }
 function startReal(){
   if(!confirm('清除範例資料，從你自己的目標開始？')) return;
-  Object.assign(state, seed()); state.demo=false; state.entries=[]; state.sessions=[]; state.profile={name:'',concerns:[],goals:[],tone:'',voice:{recorded:false},createdAt:todayKey()};
+  Object.assign(state, seed()); state.demo=false; state.entries=[]; state.sessions=[]; state.ratings=[]; state.favs=[]; state.custom={}; state.profile={name:'',concerns:[],goals:[],tone:'',voice:{recorded:false},createdAt:todayKey()};
   save(); startOnboarding();
 }
 
-/* ---------- MANIFEST ---------- */
+/* ---------- MEDITATE ---------- */
 let mfLines=[], mfSeed=todayKey();
+/* ---------- pre-rendered scenario audio (Melo's cloned voice) ---------- */
+const SCENE_AUDIO = {
+  anxiety:{src:'assets/sc-anxiety.mp3',dur:59,
+    lines:[['好，停一下。你現在是安全的。','open',0],['把腳掌踩在地上，感覺地板在那裡。','open',2.70],
+      ['跟著我：吸氣，一、二、三、四。','breath',5.87],['停住。','breath',9.59],['慢慢吐氣，一、二、三、四、五、六。','breath',11.50],
+      ['很好。再一次。吸氣。','breath',15.22],['停。','breath',19.08],['吐氣，長長地。','breath',20.81],
+      ['現在說出五個你看得到的東西。不用出聲，心裡數就好。','vision',23.68],['四個你摸得到的。','vision',28.68],['三個你聽得到的聲音。','vision',31.64],
+      ['焦慮不是預言，它只是一個訊號。','aff',34.94],['我的身體很安全，我的呼吸帶我回來。','aff',38.70],
+      ['這個感覺會過去，就像之前每一次一樣。','aff',42.38],['我不需要現在就想通一切。','aff',46.61],
+      ['再一次，吸氣。','breath',50.31],['吐氣。','breath',53.93],['好了。你回來了。慢慢地，繼續今天。','close',56.70]]},
+  meeting:{src:'assets/sc-meeting.mp3',dur:59,
+    lines:[['進去之前，先給自己六十秒。','open',0],['坐直，肩膀往後轉一圈，讓胸口打開。','open',4.10],
+      ['吸氣，把空氣吸到肚子裡。','breath',8.78],['吐氣，把緊張放掉。','breath',12.85],
+      ['我準備好了，我的準備就是我的底氣。','aff',16.40],['我知道我在說什麼。','aff',20.28],
+      ['我不需要證明什麼，我只是分享我看到的。','aff',23.64],['別人的表情不是評分，我可以慢慢說。','aff',28.40],
+      ['如果我不知道答案，我可以說我回去確認，這是專業，不是弱點。','aff',33.48],
+      ['再一次，吸氣。','breath',40.64],['吐氣。','breath',44.90],['把肩膀放下來。下巴微微收。','open',48.01],
+      ['我的聲音穩，我的節奏由我決定。','punch',53.20],['好，去吧。','close',57.95]]},
+  date:{src:'assets/sc-date.mp3',dur:53,
+    lines:[['出門前，先回到自己身上。','open',0],['看著鏡子裡的那個人，不要急著挑毛病。','open',3.47],
+      ['吸氣，四拍。','breath',8.31],['吐氣，六拍。','breath',11.54],
+      ['今天我不是去被挑選的，我也在挑選。','aff',14.82],['我不需要表演，我只要在場。','aff',18.88],
+      ['有趣的人會覺得我有趣，這就夠了。','aff',22.57],['如果不合拍，那不是我不夠好，只是頻率不同。','aff',26.36],
+      ['我可以緊張，緊張只是我在乎。','aff',31.23],['我允許自己享受今天晚上。','aff',34.93],
+      ['再一次，吸氣。','breath',39.41],['吐氣，把肩膀放下來。','breath',44.29],['好了。帶著這個頻率出門。','close',49.89]]},
+};
+Object.values(SCENE_AUDIO).forEach(P=>{ P.at=P.lines.map(l=>l[2]); P.lines=P.lines.map(([t,kind])=>({t,kind,pause:1500})); });
+
+/* ---------- MEDITATE: library ---------- */
 function renderManifest(){
+  const v=state.ui.view||'lib';
+  if(v==='scene') return renderScene();
+  if(v==='breath') return renderBreath();
+  return renderLibrary();
+}
+function sceneCard(k){
+  const S=SCENES[k], st=sceneStats(k), fav=(state.favs||[]).includes(k), audio=!!SCENE_AUDIO[k];
+  return `<button class="scard" data-scene="${k}">
+    <span class="em">${S.emoji}</span>
+    <span class="sc-b"><b>${esc(S.name)}</b>${fav?'<i class="fav">★</i>':''}${audio?'<i class="voiced">✦ 真人聲音</i>':''}</span>
+    <span class="sc-h">${esc(S.hint)}</span>
+    <span class="sc-f"><i>${S.min} 分</i><i>${BREATHS[S.breath].emoji} ${esc(BREATHS[S.breath].name)}</i>${st?`<i class="drop">${S.metric} −${st.drop.toFixed(1)}</i>`:''}</span>
+  </button>`;
+}
+function renderLibrary(){
+  const rec=recommendScene(), R=SCENES[rec];
+  const favs=(state.favs||[]).filter(k=>SCENES[k]);
+  const recent=(state.sessions||[]).filter(s=>s.scene&&SCENES[s.scene]).slice(-4).reverse().map(s=>s.scene).filter((v,i,a)=>a.indexOf(v)===i);
+  const custom=Object.entries(state.custom||{});
+  $('#manifest').innerHTML=`
+    <div class="topbar"><div><div class="eyebrow">Meditate · 冥想庫</div><h1 class="title">現在的你，<br>需要哪一種？</h1></div></div>
+
+    <button class="card hero reccard" id="rec-go">
+      <div class="eyebrow">為你推薦 · ${new Date().getHours()}:00 這個時間</div>
+      <p class="quote" style="font-size:20px">${R.emoji} ${esc(R.name)}</p>
+      <div class="meta"><span class="chip">${esc(R.hint)} · ${R.min} 分</span><span class="btn primary sm">開始 →</span></div>
+    </button>
+
+    <div class="section">
+      <div class="section-h"><h2>呼吸練習</h2><span class="more">不用聽引導，只跟著呼吸</span></div>
+      <div class="brow">${Object.entries(BREATHS).map(([k,b])=>`<button class="bchip" data-breath="${k}"><span class="be">${b.emoji}</span><b>${esc(b.name)}</b><span>${b.steps.map(s=>s[1]).join('-')}</span></button>`).join('')}</div>
+    </div>
+
+    ${favs.length?`<div class="section"><div class="section-h"><h2>★ 收藏</h2></div><div class="scards">${favs.map(sceneCard).join('')}</div></div>`:''}
+    ${recent.length?`<div class="section"><div class="section-h"><h2>最近聽過</h2></div><div class="scards">${recent.map(sceneCard).join('')}</div></div>`:''}
+
+    ${Object.entries(CATS).map(([ck,c])=>{
+      const ks=Object.keys(SCENES).filter(k=>SCENES[k].cat===ck);
+      return `<div class="section"><div class="section-h"><h2>${esc(c.name)}</h2><span class="more">${esc(c.hint)}</span></div><div class="scards">${ks.map(sceneCard).join('')}</div></div>`;
+    }).join('')}
+
+    <div class="section">
+      <div class="section-h"><h2>自訂情境</h2><span class="more">${custom.length?custom.length+' 個':'寫你自己的'}</span></div>
+      <div class="scards">${custom.map(([k,S])=>`<button class="scard" data-scene="${k}"><span class="em">${S.emoji||'✍️'}</span><span class="sc-b"><b>${esc(S.name)}</b></span><span class="sc-h">${esc(S.hint||'自訂')}</span><span class="sc-f"><i>${S.min} 分</i><i>${BREATHS[S.breath].emoji} ${esc(BREATHS[S.breath].name)}</i></span></button>`).join('')}
+      <button class="scard add" id="add-scene"><span class="em">＋</span><span class="sc-b"><b>做一個新的</b></span><span class="sc-h">說出情境，AI 幫你寫引導詞</span></button></div>
+    </div>
+
+    <div class="section">
+      <div class="section-h"><h2>每日冥想</h2><span class="more">跟著長期目標走</span></div>
+      <button class="scard wide" id="daily-go"><span class="em">🌙</span><span class="sc-b"><b>${state.ui.minutes} 分鐘每日練習</b></span><span class="sc-h">${state.profile.goals.map(k=>GOALS[k]?.emoji||'').join('')} 會引用你最近的日記與狀態</span><span class="sc-f"><i>可換語氣</i><i>✦ 真人聲音</i></span></button>
+    </div>`;
+  $('#rec-go').onclick=()=>openScene(rec);
+  $$('#manifest [data-scene]').forEach(b=>b.onclick=()=>openScene(b.dataset.scene));
+  $$('#manifest [data-breath]').forEach(b=>b.onclick=()=>openBreath(b.dataset.breath));
+  $('#add-scene').onclick=openCustomSheet;
+  $('#daily-go').onclick=()=>openScene('daily');
+}
+function openScene(k){ state.ui.scene=k; state.ui.view='scene'; state.ui.before=null; save(); renderManifest(); $('#manifest').scrollTop=0; }
+function openBreath(k){ state.ui.breath=k; state.ui.view='breath'; save(); renderManifest(); $('#manifest').scrollTop=0; }
+function backToLib(){ stopPlayback(); state.ui.view='lib'; save(); renderManifest(); }
+
+/* ---------- MEDITATE: scene player ---------- */
+function sceneOf(k){ return SCENES[k] || (state.custom||{})[k] || null; }
+function renderScene(){
+  const k=state.ui.scene, p=state.profile;
+  if(k==='daily') return renderDaily();
+  const S=sceneOf(k); if(!S) return backToLib();
+  const B=BREATHS[S.breath], useAudio=!!SCENE_AUDIO[k] && !(state.settings.elevenKey&&state.settings.voiceId);
+  const lines= useAudio ? SCENE_AUDIO[k].lines : buildScene(k,{tone:S.tone,name:p.name});
+  const st=sceneStats(k), fav=(state.favs||[]).includes(k);
+  const src= useAudio ? {mode:'pack',label:DEMO_VOICES[demoVoice()].name,sub:'真人聲音 · '+DEMO_VOICES[demoVoice()].sub}
+                      : voiceSource('manifest');
+  $('#manifest').innerHTML=`
+    <div class="row between" style="margin-bottom:14px"><button class="btn ghost sm" id="sc-back">← 冥想庫</button>
+      <button class="btn ghost sm" id="sc-fav" aria-pressed="${fav}">${fav?'★ 已收藏':'☆ 收藏'}</button></div>
+    <div class="topbar"><div><div class="eyebrow">${CATS[S.cat]?.name||'自訂'} · ${S.min} 分鐘</div><h1 class="title">${S.emoji} ${esc(S.name)}</h1></div></div>
+    <p class="note" style="max-width:36ch;margin-bottom:12px">${esc(S.hint||'')}</p>
+    <div class="whycard"><div class="eyebrow">${B.emoji} ${esc(B.name)} · ${B.steps.map(s=>s[0]+' '+s[1]).join(' → ')}</div><p>${esc(B.why)}</p></div>
+    ${S.metric?`<div class="section"><label class="label">開始前，你的「${esc(S.metric)}」有多強？<span class="note">選了才能看到效果</span></label>
+      <div class="dots" id="sc-before">${[...Array(11)].map((_,i)=>`<button data-v="${i}" aria-pressed="${state.ui.before===i}">${i}</button>`).join('')}</div>
+      ${st?`<p class="note" style="margin-top:8px">過去 ${st.n} 次，這段平均讓你的${esc(S.metric)}降了 <b style="color:var(--jade)">${st.drop.toFixed(1)} 分</b>。</p>`:''}</div>`:''}
+    <div class="orb-wrap"><div class="orb idle" id="mf-orb"><span class="phase" id="mf-phase">READY</span></div></div>
+    <div class="row between" style="margin:6px 0 12px"><div class="eyebrow">${lines.length} 句${useAudio?' · 預錄音檔':''}</div>
+      <div class="row"><button class="btn sm ghost" id="sc-amb">◌ 環境音</button>${state.settings.claudeKey?'<button class="btn sm ghost" id="sc-ai">✦ AI 重寫</button>':''}</div></div>
+    <div class="script" id="mf-script">${lines.map(l=>`<div class="line ${l.kind}">${esc(l.t)}</div>`).join('')}</div>
+    <div class="player">
+      <div class="bar"><i id="mf-bar"></i></div>
+      <div class="ctl">
+        <button class="play" id="mf-play" aria-label="播放"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button>
+        <div class="time" id="mf-time">00:00</div>
+        <button class="voice-src" id="mf-voice"><b>${src.mode==='pack'?'✦ ':''}${esc(src.label)}</b>${esc(src.sub)}</button>
+      </div>
+    </div>`;
+  $('#sc-back').onclick=backToLib;
+  $('#sc-fav').onclick=()=>{ state.favs=state.favs||[]; const i=state.favs.indexOf(k); i<0?state.favs.push(k):state.favs.splice(i,1); save(); renderScene(); };
+  $('#mf-voice').onclick=()=>openVoiceSheet(renderManifest);
+  $('#sc-amb').onclick=openAmbientSheet;
+  $('#sc-ai')&&($('#sc-ai').onclick=()=>aiRewrite(k,S));
+  $$('#sc-before button').forEach(b=>b.onclick=()=>{ state.ui.before=+b.dataset.v; $$('#sc-before button').forEach(x=>x.setAttribute('aria-pressed',x===b)); });
+  bindPlayer('mf', lines, TONES[S.tone||'gentle'].rate, 'manifest', src, {
+    packKey:useAudio?k:null, sceneKey:k, minutes:S.min,
+    onFinish:()=>{ if(S.metric && state.ui.before!=null) askAfter(k,S); }
+  });
+}
+function renderDaily(){
   const p=state.profile; if(!p.goals.includes(state.ui.goal)) state.ui.goal=p.goals[0]||'confidence';
   const g=GOALS[state.ui.goal], T=TONES[p.tone||'gentle'];
   const src=voiceSource('manifest');
-  mfLines= src.mode==='pack' ? DEMO_PACK.manifest.lines : buildScript({goal:state.ui.goal,minutes:state.ui.minutes,tone:p.tone||'gentle',name:p.name,seed:mfSeed+state.ui.goal+state.ui.minutes});
+  const lines= src.mode==='pack' ? DEMO_PACK.manifest.lines : buildScript({goal:state.ui.goal,minutes:state.ui.minutes,tone:p.tone||'gentle',name:p.name,seed:mfSeed+state.ui.goal+state.ui.minutes});
   $('#manifest').innerHTML=`
-    <div class="topbar"><div><div class="eyebrow">Meditate · 冥想引導</div><h1 class="title">今天，<br>對自己說什麼？</h1></div></div>
-    <label class="label">目標</label>
+    <div class="row between" style="margin-bottom:14px"><button class="btn ghost sm" id="sc-back">← 冥想庫</button></div>
+    <div class="topbar"><div><div class="eyebrow">每日練習</div><h1 class="title">今天，<br>對自己說什麼？</h1></div></div>
+    <label class="label">方向</label>
     <div class="row" style="flex-wrap:wrap;gap:8px;margin-bottom:16px" id="mf-goals">${p.goals.map(k=>`<button class="chip goal" data-k="${k}" style="${k===state.ui.goal?'border-color:var(--moon);color:var(--moon)':''}">${GOALS[k].emoji} ${esc(GOALS[k].name)}</button>`).join('')}<button class="chip" id="mf-addgoal">＋</button></div>
     <div class="row between" style="margin-bottom:16px">
       <div style="flex:1"><label class="label">長度</label><div class="seg" id="mf-min">${[3,7,12].map(m=>`<button data-m="${m}" aria-pressed="${m===state.ui.minutes}">${m} 分</button>`).join('')}</div></div>
@@ -923,30 +1267,232 @@ function renderManifest(){
     </div>
     <div class="orb-wrap"><div class="orb idle" id="mf-orb"><span class="phase" id="mf-phase">READY</span></div></div>
     <div class="row between" style="margin:8px 0 12px">
-      <div class="eyebrow">${mfLines.length} 句 · 約 ${state.ui.minutes} 分鐘${src.mode==='pack'?' · 示範音檔':' · 讀了你 '+state.entries.length+' 篇日記'}</div>
-      <div class="row">${src.mode==='pack'?'':'<button class="btn sm ghost" id="mf-regen">↻ 換一版</button>'}${state.settings.claudeKey?`<button class="btn sm ghost" id="mf-ai">✦ AI 深度</button>`:''}</div>
+      <div class="eyebrow">${lines.length} 句${src.mode==='pack'?' · 預錄音檔':' · 讀了你 '+state.entries.length+' 篇日記'}</div>
+      <div class="row">${src.mode==='pack'?'':'<button class="btn sm ghost" id="mf-regen">↻ 換一版</button>'}<button class="btn sm ghost" id="sc-amb">◌ 環境音</button></div>
     </div>
-    <div class="script" id="mf-script">${mfLines.map(l=>`<div class="line ${l.kind}">${esc(l.t)}</div>`).join('')}</div>
+    <div class="script" id="mf-script">${lines.map(l=>`<div class="line ${l.kind}">${esc(l.t)}</div>`).join('')}</div>
     <div class="player">
       <div class="bar"><i id="mf-bar"></i></div>
       <div class="ctl">
         <button class="play" id="mf-play" aria-label="播放"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button>
-        <div class="time" id="mf-time">00:00 / ${pad(state.ui.minutes)}:00</div>
-        <button class="voice-src" id="mf-voice" title="切換聲音"><b>${src.mode==='pack'?'✦ ':''}${esc(src.label)}</b>${esc(src.sub)}</button>
+        <div class="time" id="mf-time">00:00</div>
+        <button class="voice-src" id="mf-voice"><b>${src.mode==='pack'?'✦ ':''}${esc(src.label)}</b>${esc(src.sub)}</button>
       </div>
     </div>`;
-  $$('#mf-goals [data-k]').forEach(b=>b.onclick=()=>{state.ui.goal=b.dataset.k;save();renderManifest();});
+  $('#sc-back').onclick=backToLib;
+  $$('#mf-goals [data-k]').forEach(b=>b.onclick=()=>{state.ui.goal=b.dataset.k;save();renderDaily();});
   $('#mf-addgoal').onclick=()=>openGoalsSheet(renderManifest);
-  $$('#mf-min button').forEach(b=>b.onclick=()=>{state.ui.minutes=+b.dataset.m;save();renderManifest();});
-  $$('#mf-tone button').forEach(b=>b.onclick=()=>{state.profile.tone=b.dataset.t;save();renderManifest();});
+  $$('#mf-min button').forEach(b=>b.onclick=()=>{state.ui.minutes=+b.dataset.m;save();renderDaily();});
+  $$('#mf-tone button').forEach(b=>b.onclick=()=>{state.profile.tone=b.dataset.t;save();renderDaily();});
   $('#mf-voice').onclick=()=>openVoiceSheet(renderManifest);
-  $('#mf-regen')&&($('#mf-regen').onclick=()=>{ mfSeed=String(Math.random()); renderManifest(); toast('換了一版 ✦'); });
-  $('#mf-ai')&&($('#mf-ai').onclick=async()=>{ const b=$('#mf-ai'); b.textContent='生成中…'; b.disabled=true; try{ const l=await generateWithClaude({goal:state.ui.goal,minutes:state.ui.minutes,tone:p.tone,name:p.name}); if(l){ mfLines=l; $('#mf-script').innerHTML=l.map(x=>`<div class="line ${x.kind}">${esc(x.t)}</div>`).join(''); toast('AI 讀了你的日記，寫了新的一版'); } }catch(e){ toast(String(e.message||e)); } b.textContent='✦ AI 深度'; b.disabled=false; });
-  bindPlayer('mf', mfLines, TONES[p.tone||'gentle'].rate, 'manifest', src);
+  $('#sc-amb').onclick=openAmbientSheet;
+  $('#mf-regen')&&($('#mf-regen').onclick=()=>{ mfSeed=String(Math.random()); renderDaily(); toast('換了一版 ✦'); });
+  bindPlayer('mf', lines, TONES[p.tone||'gentle'].rate, 'manifest', src, {packKey:src.mode==='pack'?'manifest':null, sceneKey:'daily', minutes:state.ui.minutes});
 }
-function bindPlayer(prefix, lines, rate, type, src){
+function askAfter(k,S){
+  sheet(`<h2>現在呢？</h2><p class="sub">同一個「${esc(S.metric)}」，現在幾分？這是唯一能證明有效的方式。</p>
+    <div class="dots big" id="af">${[...Array(11)].map((_,i)=>`<button data-v="${i}">${i}</button>`).join('')}</div>
+    <button class="btn ghost block" id="af-skip" style="margin-top:18px">跳過</button>`, b=>{
+    $$('#af button',b).forEach(x=>x.onclick=()=>{
+      const after=+x.dataset.v, before=state.ui.before;
+      state.ratings=state.ratings||[]; state.ratings.push({scene:k,before,after,date:todayKey()});
+      state.ui.before=null; save(); closeSheet(); renderScene();
+      const d=before-after;
+      toast(d>0?`${S.metric}從 ${before} 降到 ${after} ✦ 有效`:d===0?'持平，明天再試一次':'記錄了，有時候會這樣');
+    });
+    $('#af-skip',b).onclick=()=>{ state.ui.before=null; closeSheet(); };
+  });
+}
+async function aiRewrite(k,S){
+  const b=$('#sc-ai'); b.textContent='生成中…'; b.disabled=true;
+  try{
+    const l=await generateWithClaude({scene:S, minutes:S.min, tone:S.tone, name:state.profile.name});
+    if(l){ $('#mf-script').innerHTML=l.map(x=>`<div class="line ${x.kind}">${esc(x.t)}</div>`).join('');
+      bindPlayer('mf', l, TONES[S.tone||'gentle'].rate, 'manifest', voiceSource('manifest'), {sceneKey:k, minutes:S.min});
+      toast('AI 讀了你的日記，重寫了這段'); }
+  }catch(e){ toast(String(e.message||e)); }
+  b.textContent='✦ AI 重寫'; b.disabled=false;
+}
+function openCustomSheet(){
+  sheet(`<h2>做一個新的情境</h2><p class="sub">說出你的場合，App 會排好呼吸節奏與肯定語。有 Claude 金鑰時會整段重寫。</p>
+    <div class="field"><label class="label" for="cu-name">情境名稱</label><input class="input" id="cu-name" placeholder="例如：回家見家人前"></div>
+    <div class="field"><label class="label" for="cu-hint">什麼時候用</label><input class="input" id="cu-hint" placeholder="例如：過年前的那個下午"></div>
+    <div class="field"><label class="label" for="cu-aff">你想聽到什麼？一行一句</label><textarea class="input" id="cu-aff" placeholder="我可以愛他們，也可以有界線。&#10;我不需要被理解才算數。"></textarea></div>
+    <label class="label">呼吸節奏</label>
+    <div class="opts" id="cu-b" style="margin-bottom:16px">${Object.entries(BREATHS).map(([k,b],i)=>`<button class="opt" data-k="${k}" aria-pressed="${i===0}"><span class="em">${b.emoji}</span><div><b>${esc(b.name)}</b><span>${esc(b.hint)}</span></div><span class="tick"></span></button>`).join('')}</div>
+    <button class="btn primary block" id="cu-ok">建立</button>`, b=>{
+    let br='physio';
+    $$('#cu-b .opt',b).forEach(o=>o.onclick=()=>{ br=o.dataset.k; $$('#cu-b .opt',b).forEach(x=>x.setAttribute('aria-pressed',x===o)); });
+    $('#cu-ok',b).onclick=()=>{
+      const name=$('#cu-name',b).value.trim(); if(!name) return toast('先取個名字');
+      const aff=$('#cu-aff',b).value.split('\n').map(s=>s.trim()).filter(Boolean);
+      const key='cu_'+Date.now();
+      state.custom=state.custom||{};
+      state.custom[key]={name,emoji:'✍️',cat:'before',min:2,breath:br,tone:state.profile.tone||'gentle',
+        hint:$('#cu-hint',b).value.trim()||'自訂情境',metric:'不安',
+        open:[`${name}之前，先給自己兩分鐘。`,'把腳踩實，肩膀放下來。'],
+        aff:aff.length?aff:['我可以用自己的節奏面對這件事。','我不需要完美，我只需要在場。','我信任自己會處理好。'],
+        close:['好了。','去吧。']};
+      save(); closeSheet(); openScene(key); toast('情境建好了 ✦');
+    };
+  });
+}
+
+/* ---------- MEDITATE: breath practice ---------- */
+let pacer=null;
+function renderBreath(){
+  const k=state.ui.breath, B=BREATHS[k];
+  const rounds=state.ui.rounds||B.rounds;
+  const cycle=B.steps.reduce((s,x)=>s+x[1],0);
+  $('#manifest').innerHTML=`
+    <div class="row between" style="margin-bottom:14px"><button class="btn ghost sm" id="sc-back">← 冥想庫</button>
+      <button class="btn ghost sm" id="br-edit">自訂秒數</button></div>
+    <div class="topbar"><div><div class="eyebrow">呼吸練習 · 無語音</div><h1 class="title">${B.emoji} ${esc(B.name)}</h1></div></div>
+    <p class="note" style="max-width:36ch;margin-bottom:14px">${esc(B.why)}</p>
+    <div class="pacerwrap">
+      <div class="pacer" id="pacer"><div class="pring"></div><div class="pcore" id="pcore"></div>
+        <div class="ptext"><b id="plabel">準備</b><span id="pcount">${cycle} 秒 / 回合</span></div></div>
+    </div>
+    <div class="brmeta"><div><b id="prounds">0</b><span>/ ${rounds} 回合</span></div><div><b id="ptime">00:00</b><span>已練習</span></div><div><b>${B.steps.map(s=>s[1]).join('-')}</b><span>節奏</span></div></div>
+    <div class="row" style="gap:10px;margin-top:22px">
+      <button class="btn primary block" id="br-play">開始</button>
+      <button class="btn ghost" id="br-amb">◌ 環境音</button>
+    </div>
+    <p class="note" style="margin-top:16px">吸氣時圓球放大，吐氣時縮小。跟著它就好，數字不用記。</p>`;
+  $('#sc-back').onclick=()=>{ stopPacer(); backToLib(); };
+  $('#br-amb').onclick=openAmbientSheet;
+  $('#br-edit').onclick=()=>openBreathEdit(k);
+  $('#br-play').onclick=()=>{ if(pacer){ stopPacer(); $('#br-play').textContent='開始'; } else { startPacer(k,rounds); $('#br-play').textContent='停止'; } };
+}
+function startPacer(k,rounds){
+  const B=BREATHS[k], core=$('#pcore'), label=$('#plabel'), count=$('#pcount'), rEl=$('#prounds'), tEl=$('#ptime');
+  let round=0, step=0, t0=Date.now(), left=0, tick=null;
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const run=()=>{
+    if(round>=rounds){ stopPacer(); $('#br-play').textContent='再一次';
+      state.sessions.push({date:todayKey(),type:'breath',min:Math.max(1,Math.round((Date.now()-t0)/60000)),scene:'breath_'+k}); save();
+      label.textContent='完成 ✦'; count.textContent='做得好'; toast('呼吸練習完成 ✦'); return; }
+    const [name,sec]=B.steps[step]; left=sec;
+    label.textContent=name; count.textContent=sec+' 秒';
+    const grow=/吸/.test(name), hold=/停/.test(name);
+    if(!reduce){ core.style.transition=`transform ${sec}s cubic-bezier(.4,0,.3,1)`; core.style.transform=`scale(${grow?1:hold?(core.style.transform.match(/[\d.]+/)?.[0]||1):.45})`; }
+    clearInterval(tick);
+    tick=setInterval(()=>{ left--; count.textContent=Math.max(0,left)+' 秒';
+      const el=Date.now()-t0; tEl.textContent=`${pad(Math.floor(el/60000))}:${pad(Math.floor(el/1000)%60)}`;
+      if(left<=0){ clearInterval(tick); step++; if(step>=B.steps.length){ step=0; round++; rEl.textContent=round; } run(); } },1000);
+    pacer={stop:()=>{clearInterval(tick);}};
+  };
+  core.style.transform='scale(.45)'; run();
+}
+function stopPacer(){ if(pacer){ pacer.stop(); pacer=null; } const c=$('#pcore'); if(c){ c.style.transition='transform .6s'; c.style.transform='scale(.45)'; } }
+function openBreathEdit(k){
+  const B=BREATHS[k];
+  sheet(`<h2>自訂 ${esc(B.name)}</h2><p class="sub">改秒數與回合。做起來舒服最重要，不用勉強。</p>
+    ${B.steps.map(([n,s],i)=>`<div class="field"><label class="label">${esc(n)}<b style="float:right;font-family:var(--mono)" id="v${i}">${s} 秒</b></label><input type="range" min="1" max="12" value="${s}" data-i="${i}" class="rng"></div>`).join('')}
+    <div class="field"><label class="label">回合<b style="float:right;font-family:var(--mono)" id="vr">${state.ui.rounds||B.rounds} 回</b></label><input type="range" min="2" max="15" value="${state.ui.rounds||B.rounds}" id="rr" class="rng"></div>
+    <button class="btn primary block" id="bs-ok">套用</button>`, b=>{
+    const vals=B.steps.map(s=>s[1]); let rounds=state.ui.rounds||B.rounds;
+    $$('.rng[data-i]',b).forEach(r=>r.oninput=()=>{ const i=+r.dataset.i; vals[i]=+r.value; $('#v'+i,b).textContent=r.value+' 秒'; });
+    $('#rr',b).oninput=e=>{ rounds=+e.target.value; $('#vr',b).textContent=rounds+' 回'; };
+    $('#bs-ok',b).onclick=()=>{ B.steps=B.steps.map(([n],i)=>[n,vals[i]]); state.ui.rounds=rounds; save(); closeSheet(); renderBreath(); toast('節奏更新了'); };
+  });
+}
+
+/* ---------- ambient mixer (6 layers, all synthesized live) ---------- */
+const AMB={
+  white:{name:'白噪音',emoji:'⚪',hint:'蓋掉人聲與鍵盤聲'},
+  brown:{name:'棕噪音',emoji:'🟤',hint:'低頻、比白噪音溫暖'},
+  rain:{name:'雨聲',emoji:'🌧',hint:'細雨打在窗上'},
+  ocean:{name:'海邊',emoji:'🌊',hint:'一來一回的浪，跟呼吸同頻'},
+  forest:{name:'山林裡',emoji:'🌲',hint:'風穿過樹葉，偶爾有鳥'},
+  bowl:{name:'頌缽',emoji:'🎐',hint:'每 20 秒一聲，收心用'},
+};
+let ambient=null;
+function ambCtx(){
+  if(!ambient){
+    const ctx=new (window.AudioContext||window.webkitAudioContext)();
+    const master=ctx.createGain(); master.gain.value=state.settings.ambVol??.3; master.connect(ctx.destination);
+    ambient={ctx,master,layers:{}};
+  }
+  return ambient;
+}
+function noiseBuffer(ctx,type){
+  const len=ctx.sampleRate*5, buf=ctx.createBuffer(1,len,ctx.sampleRate), d=buf.getChannelData(0);
+  if(type==='brown'){ let last=0; for(let i=0;i<len;i++){ const w=Math.random()*2-1; d[i]=(last+.02*w)/1.02; last=d[i]; d[i]*=3.5; } }
+  else for(let i=0;i<len;i++) d[i]=Math.random()*2-1;
+  return buf;
+}
+function ambOn(kind){
+  const {ctx,master,layers}=ambCtx(); if(layers[kind]) return;
+  const g=ctx.createGain(); g.gain.value=.0001; g.connect(master);
+  const nodes=[]; let timer=null;
+  const noise=(type,filter)=>{ const s=ctx.createBufferSource(); s.buffer=noiseBuffer(ctx,type); s.loop=true; s.connect(filter); s.start(); nodes.push(s); return s; };
+  if(kind==='white'){ const lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=7000; lp.connect(g); noise('white',lp); }
+  if(kind==='brown'){ const lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=420; lp.connect(g); noise('brown',lp); }
+  if(kind==='rain'){
+    const hp=ctx.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=700;
+    const lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=6000;
+    hp.connect(lp); lp.connect(g); noise('white',hp);
+    const drip=()=>{ if(!ambient?.layers[kind]) return; const t=ctx.currentTime;
+      const o=ctx.createOscillator(), og=ctx.createGain(); o.type='sine'; o.frequency.setValueAtTime(900+Math.random()*700,t); o.frequency.exponentialRampToValueAtTime(300,t+.12);
+      og.gain.setValueAtTime(.06,t); og.gain.exponentialRampToValueAtTime(.0001,t+.16); o.connect(og); og.connect(g); o.start(t); o.stop(t+.2);
+      timer=setTimeout(drip,400+Math.random()*1400); }; drip();
+  }
+  if(kind==='ocean'){
+    const lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=600; lp.connect(g); noise('brown',lp);
+    const lfo=ctx.createOscillator(); lfo.frequency.value=.085; const lg=ctx.createGain(); lg.gain.value=.75;
+    lfo.connect(lg); lg.connect(g.gain); lfo.start(); nodes.push(lfo);
+    const lfo2=ctx.createOscillator(); lfo2.frequency.value=.085; const lg2=ctx.createGain(); lg2.gain.value=900;
+    lfo2.connect(lg2); lg2.connect(lp.frequency); lfo2.start(); nodes.push(lfo2);
+  }
+  if(kind==='forest'){
+    const bp=ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=1100; bp.Q.value=.6; bp.connect(g); noise('white',bp);
+    const lfo=ctx.createOscillator(); lfo.frequency.value=.13; const lg=ctx.createGain(); lg.gain.value=600;
+    lfo.connect(lg); lg.connect(bp.frequency); lfo.start(); nodes.push(lfo);
+    const bird=()=>{ if(!ambient?.layers[kind]) return; const t=ctx.currentTime, n=1+Math.floor(Math.random()*3);
+      for(let i=0;i<n;i++){ const st=t+i*.13, o=ctx.createOscillator(), og=ctx.createGain(); o.type='sine';
+        const f=2200+Math.random()*1600; o.frequency.setValueAtTime(f,st); o.frequency.exponentialRampToValueAtTime(f*(Math.random()>.5?1.5:.7),st+.09);
+        og.gain.setValueAtTime(.0001,st); og.gain.linearRampToValueAtTime(.05,st+.02); og.gain.exponentialRampToValueAtTime(.0001,st+.13);
+        o.connect(og); og.connect(g); o.start(st); o.stop(st+.15); }
+      timer=setTimeout(bird,3000+Math.random()*9000); }; setTimeout(bird,1500);
+  }
+  if(kind==='bowl'){
+    const ring=()=>{ if(!ambient?.layers[kind]) return; const t=ctx.currentTime;
+      [174,349,523,698].forEach((f,i)=>{ const o=ctx.createOscillator(), og=ctx.createGain(); o.type='sine'; o.frequency.value=f;
+        og.gain.setValueAtTime(0,t); og.gain.linearRampToValueAtTime(.3/(i+1),t+.06); og.gain.exponentialRampToValueAtTime(.0001,t+8);
+        o.connect(og); og.connect(g); o.start(t); o.stop(t+8.5); });
+      timer=setTimeout(ring,20000); }; setTimeout(ring,300);
+  }
+  g.gain.exponentialRampToValueAtTime(kind==='bowl'?1:.55,ctx.currentTime+2.5);
+  layers[kind]={g,nodes,stop:()=>{ clearTimeout(timer); nodes.forEach(n=>{try{n.stop()}catch(e){}}); }};
+}
+function ambOff(kind){
+  if(!ambient?.layers[kind]) return;
+  const L=ambient.layers[kind]; delete ambient.layers[kind];
+  try{ L.g.gain.exponentialRampToValueAtTime(.0001, ambient.ctx.currentTime+.7); }catch(e){}
+  setTimeout(()=>L.stop(),800);
+  if(!Object.keys(ambient.layers).length) setTimeout(stopAmbient,900);
+}
+function stopAmbient(){ if(!ambient) return; const a=ambient; ambient=null; Object.values(a.layers).forEach(L=>L.stop()); try{ a.ctx.close(); }catch(e){} }
+function ambOnCount(){ return ambient?Object.keys(ambient.layers).length:0; }
+function openAmbientSheet(){
+  sheet(`<h2>環境音</h2><p class="sub">可以疊。全部即時合成，不用下載音檔，也能跟引導一起播。</p>
+    <div class="list" id="am">${Object.entries(AMB).map(([k,a])=>`<button class="opt" data-k="${k}" aria-pressed="${!!ambient?.layers[k]}"><span class="em">${a.emoji}</span><div><b>${esc(a.name)}</b><span>${esc(a.hint)}</span></div><span class="tick"></span></button>`).join('')}</div>
+    <div class="field" style="margin-top:16px"><label class="label">音量<b style="float:right;font-family:var(--mono)" id="amv">${Math.round((state.settings.ambVol??.3)*100)}%</b></label><input type="range" class="rng" id="amr" min="0" max="100" value="${Math.round((state.settings.ambVol??.3)*100)}"></div>
+    <button class="btn ghost block" id="am-off">全部關掉</button>`, b=>{
+    $$('#am .opt',b).forEach(o=>o.onclick=()=>{
+      const k=o.dataset.k, on=o.getAttribute('aria-pressed')==='true';
+      on?ambOff(k):ambOn(k); o.setAttribute('aria-pressed',!on);
+    });
+    $('#amr',b).oninput=e=>{ const v=e.target.value/100; state.settings.ambVol=v; $('#amv',b).textContent=e.target.value+'%'; if(ambient) ambient.master.gain.value=Math.max(.0001,v); save(); };
+    $('#am-off',b).onclick=()=>{ stopAmbient(); closeSheet(); toast('環境音關了'); };
+  });
+}
+
+function bindPlayer(prefix, lines, rate, type, src, opts={}){
   const play=$(`#${prefix}-play`), orb=$(`#${prefix}-orb`), phase=$(`#${prefix}-phase`), bar=$(`#${prefix}-bar`), time=$(`#${prefix}-time`), list=$(`#${prefix}-script`);
-  const total= src.mode==='pack' ? DEMO_PACK[type].audio[demoVoice()].dur*1000 : estimateMs(lines,rate); let phaseT=null;
+  const pack = src.mode==='pack' ? (SCENE_AUDIO[opts.packKey] || DEMO_PACK[type]) : null;
+  const total = pack ? (pack.audio ? pack.audio[demoVoice()].dur : pack.dur)*1000 : estimateMs(lines,rate); let phaseT=null;
   time.textContent=`00:00 / ${pad(Math.floor(total/60000))}:${pad(Math.floor(total/1000)%60)}`;
   const setPlaying=on=>{ play.innerHTML=on?'<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>':'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>'; orb.classList.toggle('idle',!on); if(!on){phase.textContent='READY';clearInterval(phaseT);} };
   const breathe=()=>{ const seq=[['吸氣',4000],['停',4000],['吐氣',6000]]; let i=0; const step=()=>{ phase.textContent=seq[i][0]; phaseT=setTimeout(()=>{i=(i+1)%3;step();},seq[i][1]); }; step(); };
@@ -954,12 +1500,13 @@ function bindPlayer(prefix, lines, rate, type, src){
     if(player.playing){ stopPlayback(); setPlaying(false); return; }
     setPlaying(true); breathe();
     const t0=Date.now();
-    playLines(lines,{rate,mode:type,src,onTick:({idx,pct,done,stopped})=>{
+    playLines(lines,{rate,mode:type,src,pack,onTick:({idx,pct,done,stopped})=>{
       if(stopped){ $$('.line',list).forEach(l=>l.classList.remove('now','done')); return; }
       $$('.line',list).forEach((l,i)=>{ l.classList.toggle('now',i===idx); l.classList.toggle('done',idx>=0&&i<idx); });
       if(idx>=0){ const el=$$('.line',list)[idx]; el&&el.scrollIntoView({block:'center',behavior:'smooth'}); }
       const el=(Date.now()-t0); bar.style.width=(pct*100)+'%'; time.textContent=`${pad(Math.floor(el/60000))}:${pad(Math.floor(el/1000)%60)} / ${pad(Math.floor(total/60000))}:${pad(Math.floor(total/1000)%60)}`;
-      if(done){ setPlaying(false); state.sessions.push({date:todayKey(),type,min:Math.max(1,Math.round(total/60000))}); save(); toast(type==='sleep'?'晚安 ✦':'完成 ✦ 帶著這個頻率走進今天'); }
+      if(done){ setPlaying(false); state.sessions.push({date:todayKey(),type,min:Math.max(1,Math.round(total/60000)),scene:opts.sceneKey}); save();
+        if(opts.onFinish) opts.onFinish(); else toast(type==='sleep'?'晚安 ✦':'完成 ✦ 帶著這個頻率走進今天'); }
     }});
   };
 }
@@ -986,22 +1533,8 @@ function renderSleep(){
     </div>`;
   bindPlayer('sl', slLines, .8, 'sleep', src);
   $('#sl-voice').onclick=()=>openVoiceSheet(renderSleep);
-  $('#sl-noise').onclick=e=>{ const on=toggleNoise(); e.currentTarget.setAttribute('aria-pressed',on); e.currentTarget.textContent=on?'◉ 環境音':'◌ 環境音'; };
+  $('#sl-noise').onclick=openAmbientSheet;
   $('#sl-dim').onclick=()=>{ $('#dim').classList.add('on'); tickClock(); };
-}
-let noise=null;
-function toggleNoise(){
-  if(noise){ noise.gain.gain.exponentialRampToValueAtTime(.0001,noise.ctx.currentTime+1); setTimeout(()=>{noise.ctx.close();},1200); noise=null; return false; }
-  const ctx=new (window.AudioContext||window.webkitAudioContext)();
-  const len=ctx.sampleRate*4, buf=ctx.createBuffer(1,len,ctx.sampleRate), d=buf.getChannelData(0); let last=0;
-  for(let i=0;i<len;i++){ const w=Math.random()*2-1; d[i]=(last+.02*w)/1.02; last=d[i]; d[i]*=3.5; }
-  const src=ctx.createBufferSource(); src.buffer=buf; src.loop=true;
-  const lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=420;
-  const drone=ctx.createOscillator(); drone.type='sine'; drone.frequency.value=108; const dg=ctx.createGain(); dg.gain.value=.05;
-  const lfo=ctx.createOscillator(); lfo.frequency.value=.07; const lg=ctx.createGain(); lg.gain.value=.03; lfo.connect(lg); lg.connect(dg.gain);
-  const gain=ctx.createGain(); gain.gain.value=.0001; gain.gain.exponentialRampToValueAtTime(.35,ctx.currentTime+3);
-  src.connect(lp); lp.connect(gain); drone.connect(dg); dg.connect(gain); gain.connect(ctx.destination); src.start(); drone.start(); lfo.start();
-  noise={ctx,gain}; return true;
 }
 function tickClock(){ const d=new Date(); $('#dim-clock').textContent=`${pad(d.getHours())}:${pad(d.getMinutes())}`; if($('#dim').classList.contains('on')) setTimeout(tickClock,15000); }
 $('#dim').onclick=()=>$('#dim').classList.remove('on');
@@ -1086,9 +1619,17 @@ function renderMe(){
       <div class="field"><label class="label" for="k-claude">Claude API key · AI 深度引導詞</label><input class="input" id="k-claude" type="password" placeholder="sk-ant-…" value="${esc(s.claudeKey)}"></div>
       <p class="note">金鑰只存在這個瀏覽器。正式版會走後端（見 backend/），金鑰不會進到手機。</p>
       <div class="row" style="margin-top:10px;gap:8px"><button class="btn soft sm" id="k-save">儲存</button><button class="btn ghost sm" id="k-voice">${s.voiceId?'聲音：'+esc(s.voiceName||s.voiceId.slice(0,8)):'選擇播放聲音'}</button></div></div></div>
+    <div class="section"><div class="section-h"><h2>哪一段對你有效</h2><span class="more">前後打分的平均差</span></div>
+      ${effRows()||'<p class="note">開始前先打一次分，結束後再打一次，這裡就會出現你自己的數據。</p>'}</div>
+    <div class="section"><div class="section-h"><h2>提醒</h2><span class="more">${s.reminder?'每天 '+esc(s.reminder):'關閉'}</span></div>
+      <div class="card"><div class="row" style="gap:10px"><input class="input" id="rm-time" type="time" value="${esc(s.reminder||'22:00')}" style="flex:1">
+        <button class="btn soft sm" id="rm-on">${s.reminder?'更新':'開啟'}</button>${s.reminder?'<button class="btn ghost sm" id="rm-off">關掉</button>':''}</div>
+        <p class="note" style="margin-top:10px">瀏覽器提醒只在這個分頁開著時有效。包成 App 之後會換成系統推播。</p></div></div>
+    <div class="section"><div class="section-h"><h2>分享卡</h2><span class="more">IG 限動尺寸</span></div>
+      <button class="btn ghost sm" id="me-share">做一張今日肯定語 →</button></div>
     <div class="section"><div class="section-h"><h2>資料</h2></div>
-      <div class="kv"><span>日記</span><b>${state.entries.length} 篇</b><span>自我對話</span><b>${state.sessions.reduce((a,x)=>a+x.min,0)} 分鐘</b><span>加入</span><b>${fmtDate(p.createdAt||todayKey())}</b></div>
-      <div class="row" style="margin-top:14px;gap:8px"><button class="btn ghost sm" id="me-export">匯出 JSON</button><button class="btn ghost sm" id="me-reset">${state.demo?'清除範例，重新開始':'重設'}</button></div></div>`;
+      <div class="kv"><span>日記</span><b>${state.entries.length} 篇</b><span>練習時間</span><b>${state.sessions.reduce((a,x)=>a+x.min,0)} 分鐘</b><span>前後評分</span><b>${(state.ratings||[]).length} 次</b><span>加入</span><b>${fmtDate(p.createdAt||todayKey())}</b></div>
+      <div class="row" style="margin-top:14px;gap:8px"><button class="btn ghost sm" id="me-export">匯出資料</button><button class="btn ghost sm" id="me-reset">${state.demo?'清除範例，重新開始':'重設'}</button></div></div>`;
   $('#me-rec').onclick=openRecorderSheet;
   $('#me-goals').onclick=()=>openGoalsSheet(renderMe);
   $('#me-con').onclick=()=>openConcernsSheet(renderMe);
@@ -1096,7 +1637,10 @@ function renderMe(){
   $('#me-glow').onclick=()=>toast('Demo：正式版會接 Stripe / TapPay 訂閱');
   $('#k-save').onclick=()=>{ state.settings.elevenKey=$('#k-eleven').value.trim(); state.settings.claudeKey=$('#k-claude').value.trim(); if(state.settings.elevenKey&&!state.settings.voiceId){ state.settings.voiceId=DEMO_VOICES.melo.id; state.settings.voiceName=DEMO_VOICES.melo.name; } save(); toast('已儲存'); renderMe(); };
   $('#k-voice').onclick=()=>openVoiceSheet(renderMe);
-  $('#me-export').onclick=()=>{ const a=document.createElement('a'); a.href='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(state,null,2)); a.download=`melomood-${todayKey()}.json`; a.click(); };
+  $('#me-export').onclick=()=>sheet(`<h2>你的資料</h2><p class="sub">全選複製，貼到任何地方存起來。</p><textarea class="input" style="min-height:220px;font-family:var(--mono);font-size:11px" readonly>${esc(JSON.stringify(state,null,2))}</textarea>`);
+  $('#me-share').onclick=openShareSheet;
+  $('#rm-on').onclick=()=>{ const t=$('#rm-time').value; if(!t) return; state.settings.reminder=t; save(); armReminder(); renderMe(); toast('提醒設在每天 '+t); };
+  $('#rm-off')&&($('#rm-off').onclick=()=>{ state.settings.reminder=''; save(); armReminder(); renderMe(); toast('提醒關掉了'); });
   $('#me-reset').onclick=startReal;
 }
 function openGoalsSheet(after){
@@ -1169,6 +1713,53 @@ function openConcernsSheet(after){
   });
 }
 
+
+/* ---------- effectiveness, share card, reminder ---------- */
+function effRows(){
+  const by={}; (state.ratings||[]).forEach(r=>{ if(r.after==null) return; (by[r.scene]=by[r.scene]||[]).push(r.before-r.after); });
+  const rows=Object.entries(by).map(([k,ds])=>{ const S=sceneOf(k); if(!S) return null;
+    const avg=ds.reduce((a,b)=>a+b,0)/ds.length; return {k,S,avg,n:ds.length}; }).filter(Boolean).sort((a,b)=>b.avg-a.avg);
+  if(!rows.length) return '';
+  const max=Math.max(...rows.map(r=>Math.abs(r.avg)),1);
+  return `<div class="effs">${rows.map(r=>`<div class="eff"><span class="en">${r.S.emoji} ${esc(r.S.name)}</span>
+    <span class="ebar"><i style="width:${Math.max(4,Math.abs(r.avg)/max*100)}%;background:${r.avg>=0?'var(--jade)':'var(--rose)'}"></i></span>
+    <b>${r.avg>=0?'−':'+'}${Math.abs(r.avg).toFixed(1)}</b><span class="ec">${r.n} 次</span></div>`).join('')}</div>`;
+}
+function openShareSheet(){
+  const p=state.profile, g=GOALS[p.goals[0]||'confidence'];
+  const r=rng(todayKey()+p.goals.join()); const quote=pick(g.aff,r);
+  sheet(`<h2>分享卡</h2><p class="sub">長按圖片存起來，或直接截圖發限動。</p><canvas id="sharec" style="width:100%;border-radius:var(--r-md);display:block"></canvas>`, b=>{
+    const c=$('#sharec',b), W=1080, H=1920; c.width=W; c.height=H; const x=c.getContext('2d');
+    const cs=getComputedStyle(document.documentElement);
+    const ink=cs.getPropertyValue('--ink').trim()||'#0B0A15', moon=cs.getPropertyValue('--moon').trim()||'#F3B08F', text=cs.getPropertyValue('--text').trim()||'#F6F0E9', muted=cs.getPropertyValue('--muted').trim()||'#A79EBB';
+    x.fillStyle=ink; x.fillRect(0,0,W,H);
+    const grd=x.createRadialGradient(W*.75,H*.2,20,W*.75,H*.2,900); grd.addColorStop(0,moon+'55'); grd.addColorStop(1,'transparent'); x.fillStyle=grd; x.fillRect(0,0,W,H);
+    x.fillStyle=text+'22'; for(let i=0;i<120;i++){ x.beginPath(); x.arc(Math.random()*W,Math.random()*H,Math.random()*2.4,0,7); x.fill(); }
+    x.fillStyle=moon; x.font='500 34px "DM Mono",monospace'; x.fillText('MELO MOOD', 90, 200);
+    x.fillStyle=muted; x.font='400 30px "Noto Sans TC",sans-serif'; x.fillText(`${g.emoji} ${g.name} · ${todayKey()}`, 90, 260);
+    x.fillStyle=text; x.font='700 78px "Noto Serif TC",serif';
+    const words=quote.split(''); let line='', y=H/2-160;
+    words.forEach(ch=>{ if(x.measureText(line+ch).width>W-200){ x.fillText(line,90,y); y+=118; line=ch; } else line+=ch; });
+    x.fillText(line,90,y);
+    x.strokeStyle=moon; x.lineWidth=5; x.beginPath(); x.moveTo(90,y+90); x.lineTo(260,y+90); x.stroke();
+    x.fillStyle=muted; x.font='400 30px "Noto Sans TC",sans-serif'; x.fillText('用自己的聲音，對潛意識說話。', 90, H-160);
+  });
+}
+let reminderTimer=null;
+function armReminder(){
+  clearTimeout(reminderTimer);
+  const t=state.settings.reminder; if(!t) return;
+  const [h,m]=t.split(':').map(Number); const now=new Date(); const at=new Date();
+  at.setHours(h,m,0,0); if(at<=now) at.setDate(at.getDate()+1);
+  reminderTimer=setTimeout(()=>{
+    const body='今天的練習還在等你 ✦';
+    if(window.Notification && Notification.permission==='granted') new Notification('Melo Mood',{body});
+    else toast(body);
+    armReminder();
+  }, at-now);
+  if(window.Notification && Notification.permission==='default') Notification.requestPermission().catch(()=>{});
+}
+
 /* ---------- theme ---------- */
 function applyTheme(t){ if(t) document.documentElement.setAttribute('data-theme',t); else document.documentElement.removeAttribute('data-theme'); $$('[data-theme-set]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.themeSet===t)); state.settings.theme=t; save(); }
 $$('[data-theme-set]').forEach(b=>b.onclick=()=>applyTheme(b.dataset.themeSet));
@@ -1188,6 +1779,7 @@ if(state.settings.theme) applyTheme(state.settings.theme);
 
 /* ---------- boot ---------- */
 if('speechSynthesis' in window){ speechSynthesis.getVoices(); speechSynthesis.onvoiceschanged=()=>speechSynthesis.getVoices(); }
+armReminder();
 if(!state.profile.name){ startOnboarding(); } else { go('home'); }
 </script>
 </body>
