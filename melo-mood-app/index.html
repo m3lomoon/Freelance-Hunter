@@ -8,47 +8,100 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@500;700;800&family=Noto+Serif+TC:wght@500;700&family=Noto+Sans+TC:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap">
 <style>
-/* ---------- tokens: dark-first (a bedtime app), light as the day mode ---------- */
+/* ---------- tokens: one committed look — near-black ground, mesh-gradient tiles ---------- */
 :root{
-  --ink:#0B0A15; --surface:#16142A; --raised:#211D3F; --hover:#2A2550;
-  --text:#F6F0E9; --muted:#A79EBB; --faint:#6F678A;
-  --line:rgba(246,240,233,.11); --line-strong:rgba(246,240,233,.22);
-  --moon:#F3B08F; --moon-deep:#E07A5F; --moon-ink:#2A1408;
-  --jade:#7FD1B9; --jade-ink:#0B2A21;
-  --rose:#F49AC1;
-  --glow:rgba(243,176,143,.28);
-  --shadow:0 30px 80px rgba(0,0,0,.55);
-  --r-lg:28px; --r-md:18px; --r-sm:12px; --r-pill:999px;
-  --display:"Syne","Noto Serif TC",serif;
-  --serif:"Noto Serif TC","Syne",serif;
+  --ink:#0D0D10; --surface:#131316; --raised:#1B1B20; --hover:#26262D;
+  --text:#F5F5F7; --muted:#9B9BA8; --faint:#6B6B7A;
+  --line:rgba(245,245,247,.10); --line-strong:rgba(245,245,247,.20);
+  --moon:#E4FF57; --moon-deep:#CFF01F; --moon-ink:#171B00;
+  --jade:#4FE0A2; --jade-ink:#06261A;
+  --rose:#F26AD8;
+  --glow:rgba(228,255,87,.20);
+  --shadow:0 40px 100px rgba(0,0,0,.7);
+  --onmesh:#FFFFFF; --onmesh-dim:rgba(255,255,255,.74); --onmesh-faint:rgba(255,255,255,.55);
+  --r-lg:26px; --r-md:20px; --r-sm:12px; --r-pill:999px;
+  --display:"Syne","Noto Sans TC",sans-serif;
+  --serif:"Noto Sans TC","Syne",sans-serif;
   --sans:"Noto Sans TC",system-ui,-apple-system,"PingFang TC","Microsoft JhengHei",sans-serif;
   --mono:"DM Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
   color-scheme:dark;
 }
-@media (prefers-color-scheme: light){
-  :root:not([data-theme="dark"]){
-    --ink:#F2EDF5; --surface:#FFFFFF; --raised:#EDE6F3; --hover:#E3DAEC;
-    --text:#1B1633; --muted:#6B6483; --faint:#9C95B0;
-    --line:rgba(27,22,51,.10); --line-strong:rgba(27,22,51,.22);
-    --moon:#D4694A; --moon-deep:#B94F33; --moon-ink:#FFF4EE;
-    --jade:#22957B; --jade-ink:#EAF8F3;
-    --rose:#D9538F;
-    --glow:rgba(212,105,74,.22);
-    --shadow:0 30px 80px rgba(60,40,90,.18);
-    color-scheme:light;
-  }
-}
-:root[data-theme="light"]{
-  --ink:#F2EDF5; --surface:#FFFFFF; --raised:#EDE6F3; --hover:#E3DAEC;
-  --text:#1B1633; --muted:#6B6483; --faint:#9C95B0;
-  --line:rgba(27,22,51,.10); --line-strong:rgba(27,22,51,.22);
-  --moon:#D4694A; --moon-deep:#B94F33; --moon-ink:#FFF4EE;
-  --jade:#22957B; --jade-ink:#EAF8F3;
-  --rose:#D9538F;
-  --glow:rgba(212,105,74,.22);
-  --shadow:0 30px 80px rgba(60,40,90,.18);
-  color-scheme:light;
-}
+
+/* ---------- mesh gradients: every category carries one ---------- */
+.mesh{position:relative;overflow:hidden;background-color:#141418}
+.mesh.g-ember{--wide-pos:40% 86%;background-image:
+  radial-gradient(60% 52% at 44% 16%,#3E0B00 0%,rgba(62,11,0,0) 66%),
+  radial-gradient(90% 82% at 82% 92%,#FF8A3D 0%,rgba(255,138,61,0) 62%),
+  radial-gradient(125% 115% at 14% 88%,#FF3D0F 0%,rgba(255,61,15,0) 72%),
+  linear-gradient(152deg,#FF5E22 0%,#D41C00 100%)}
+.mesh.g-lime{--wide-pos:22% 26%;background-image:
+  radial-gradient(62% 58% at 72% 78%,#7B3BF0 0%,rgba(123,59,240,0) 60%),
+  radial-gradient(80% 70% at 30% 26%,#E9FF5C 0%,rgba(233,255,92,0) 66%),
+  linear-gradient(148deg,#C8F03A 0%,#8FCE12 100%)}
+.mesh.g-jade{--wide-pos:50% 92%;background-image:
+  radial-gradient(62% 50% at 50% 8%,#02160C 0%,rgba(2,22,12,0) 70%),
+  radial-gradient(85% 78% at 52% 96%,#57F09A 0%,rgba(87,240,154,0) 64%),
+  linear-gradient(160deg,#1F8F52 0%,#0A5230 100%)}
+.mesh.g-aqua{--wide-pos:62% 58%;background-image:
+  radial-gradient(52% 46% at 26% 24%,#04241E 0%,rgba(4,36,30,0) 66%),
+  radial-gradient(60% 54% at 76% 30%,#F585CE 0%,rgba(245,133,206,0) 62%),
+  radial-gradient(64% 58% at 34% 82%,#F585CE 0%,rgba(245,133,206,0) 60%),
+  linear-gradient(150deg,#7BE6F2 0%,#49C4DC 100%)}
+.mesh.g-magenta{--wide-pos:16% 12%;background-image:
+  radial-gradient(52% 46% at 50% 56%,#1B0018 0%,rgba(27,0,24,0) 70%),
+  radial-gradient(95% 85% at 14% 8%,#F979E2 0%,rgba(249,121,226,0) 62%),
+  linear-gradient(146deg,#EE63CE 0%,#9B1FB4 100%)}
+.mesh.g-cobalt{--wide-pos:50% 50%;background-image:
+  radial-gradient(46% 26% at 52% 52%,#BFD8FF 0%,rgba(191,216,255,0) 68%),
+  radial-gradient(80% 70% at 18% 12%,#2A49E0 0%,rgba(42,73,224,0) 66%),
+  linear-gradient(158deg,#20308F 0%,#0A1046 100%)}
+.mesh.g-violet{--wide-pos:74% 84%;background-image:
+  radial-gradient(58% 50% at 30% 22%,#1A0330 0%,rgba(26,3,48,0) 68%),
+  radial-gradient(88% 78% at 84% 88%,#A66BFF 0%,rgba(166,107,255,0) 62%),
+  linear-gradient(150deg,#7A3BE8 0%,#3D0F96 100%)}
+.mesh.g-amber{--wide-pos:28% 84%;background-image:
+  radial-gradient(58% 48% at 66% 20%,#3A1A00 0%,rgba(58,26,0,0) 66%),
+  radial-gradient(88% 80% at 24% 88%,#FFD05C 0%,rgba(255,208,92,0) 62%),
+  linear-gradient(150deg,#FFAB1F 0%,#D06A00 100%)}
+.mesh.g-rose{--wide-pos:24% 20%;background-image:
+  radial-gradient(54% 48% at 68% 74%,#3A0016 0%,rgba(58,0,22,0) 66%),
+  radial-gradient(88% 78% at 22% 18%,#FF9CC0 0%,rgba(255,156,192,0) 62%),
+  linear-gradient(150deg,#F5628F 0%,#B0184E 100%)}
+.mesh.g-mint{--wide-pos:26% 24%;background-image:
+  radial-gradient(58% 50% at 74% 78%,#053026 0%,rgba(5,48,38,0) 66%),
+  radial-gradient(88% 78% at 24% 22%,#C4FFEA 0%,rgba(196,255,234,0) 64%),
+  linear-gradient(150deg,#6FE3C2 0%,#209B7E 100%)}
+.mesh.g-iris{--wide-pos:76% 18%;background-image:
+  radial-gradient(50% 42% at 50% 50%,#03062A 0%,rgba(3,6,42,0) 70%),
+  radial-gradient(90% 80% at 82% 14%,#8CA8FF 0%,rgba(140,168,255,0) 62%),
+  linear-gradient(150deg,#4A5CE0 0%,#1B1E7A 100%)}
+.mesh.g-slate{--wide-pos:62% 78%;background-image:
+  radial-gradient(58% 50% at 30% 26%,#3A3F52 0%,rgba(58,63,82,0) 68%),
+  radial-gradient(80% 72% at 78% 86%,#8E94AC 0%,rgba(142,148,172,0) 62%),
+  linear-gradient(150deg,#4B5064 0%,#23263A 100%)}
+
+/* wide format: same families, framed bright for hero-scale surfaces */
+.mesh.gw-ember{background-image:radial-gradient(72% 170% at 84% 84%,#FFB877 0%,rgba(0,0,0,0) 62%),radial-gradient(58% 150% at 10% 16%,#FF5E22 0%,rgba(0,0,0,0) 60%),linear-gradient(108deg,#E23200 0%,#FF6E2E 100%)}
+.mesh.gw-lime{background-image:radial-gradient(72% 170% at 84% 84%,#EEFF8C 0%,rgba(0,0,0,0) 62%),radial-gradient(58% 150% at 10% 16%,#8B45F0 0%,rgba(0,0,0,0) 60%),linear-gradient(108deg,#A7DB1E 0%,#CCF241 100%)}
+.mesh.gw-jade{background-image:radial-gradient(72% 170% at 84% 84%,#74F5AE 0%,rgba(0,0,0,0) 62%),radial-gradient(58% 150% at 10% 16%,#0E7A46 0%,rgba(0,0,0,0) 60%),linear-gradient(108deg,#147A47 0%,#26AE6C 100%)}
+.mesh.gw-aqua{background-image:radial-gradient(72% 170% at 84% 84%,#F9A6DC 0%,rgba(0,0,0,0) 62%),radial-gradient(58% 150% at 10% 16%,#7BE6F2 0%,rgba(0,0,0,0) 60%),linear-gradient(108deg,#3FB6CE 0%,#6FE0EE 100%)}
+.mesh.gw-magenta{background-image:radial-gradient(72% 170% at 84% 84%,#FFA3EB 0%,rgba(0,0,0,0) 62%),radial-gradient(58% 150% at 10% 16%,#9B1FB4 0%,rgba(0,0,0,0) 60%),linear-gradient(108deg,#B32BA8 0%,#EC64CE 100%)}
+.mesh.gw-cobalt{background-image:radial-gradient(72% 170% at 84% 84%,#B2CCFF 0%,rgba(0,0,0,0) 62%),radial-gradient(58% 150% at 10% 16%,#2A49E0 0%,rgba(0,0,0,0) 60%),linear-gradient(108deg,#182B8C 0%,#3350CE 100%)}
+.mesh.gw-violet{background-image:radial-gradient(72% 170% at 84% 84%,#CBA6FF 0%,rgba(0,0,0,0) 62%),radial-gradient(58% 150% at 10% 16%,#4A17A8 0%,rgba(0,0,0,0) 60%),linear-gradient(108deg,#5A22C4 0%,#8A50EC 100%)}
+.mesh.gw-amber{background-image:radial-gradient(72% 170% at 84% 84%,#FFDF97 0%,rgba(0,0,0,0) 62%),radial-gradient(58% 150% at 10% 16%,#D06A00 0%,rgba(0,0,0,0) 60%),linear-gradient(108deg,#C97300 0%,#F2A024 100%)}
+.mesh.gw-rose{background-image:radial-gradient(72% 170% at 84% 84%,#FFB0CC 0%,rgba(0,0,0,0) 62%),radial-gradient(58% 150% at 10% 16%,#B0184E 0%,rgba(0,0,0,0) 60%),linear-gradient(108deg,#C42A62 0%,#F26694 100%)}
+.mesh.gw-mint{background-image:radial-gradient(72% 170% at 84% 84%,#D6FFF1 0%,rgba(0,0,0,0) 62%),radial-gradient(58% 150% at 10% 16%,#209B7E 0%,rgba(0,0,0,0) 60%),linear-gradient(108deg,#229683 0%,#55D0B0 100%)}
+.mesh.gw-iris{background-image:radial-gradient(72% 170% at 84% 84%,#B2C4FF 0%,rgba(0,0,0,0) 62%),radial-gradient(58% 150% at 10% 16%,#1B1E7A 0%,rgba(0,0,0,0) 60%),linear-gradient(108deg,#2A3499 0%,#5A6BDE 100%)}
+.mesh.gw-slate{background-image:radial-gradient(72% 170% at 84% 84%,#AEB4CB 0%,rgba(0,0,0,0) 62%),radial-gradient(58% 150% at 10% 16%,#3A3F52 0%,rgba(0,0,0,0) 60%),linear-gradient(108deg,#3E4358 0%,#646A82 100%)}
+/* small swatch that replaces every pictograph */
+.sw{display:inline-block;width:20px;height:20px;border-radius:7px;flex:none;vertical-align:-4px;background-color:#141418}
+.sw.lg{width:30px;height:30px;border-radius:10px}
+.sw.xs{width:13px;height:13px;border-radius:5px;vertical-align:-2px}
+.pickrow{display:flex;flex-wrap:wrap;gap:7px}
+.pick{display:inline-flex;align-items:center;gap:7px;text-align:left;padding:9px 13px;border-radius:var(--r-pill);border:1px solid var(--line);background:var(--raised);font-size:13px;color:var(--muted);line-height:1.35;transition:border-color .15s,color .15s,background .15s}
+.pick[aria-pressed="true"]{border-color:var(--moon);color:var(--text);background:rgba(228,255,87,.07)}
+.pick.situ{font-size:13px}
+#cu-pool .pick{border-radius:14px}
 
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
@@ -66,42 +119,47 @@ p{margin:0}
 
 
 /* ---------- meditation library ---------- */
-.reccard{display:block;width:100%;text-align:left;border:1px solid var(--line);cursor:pointer;transition:transform .12s}
+.reccard{display:block;width:100%;text-align:left;cursor:pointer;transition:transform .12s}
 .reccard:active{transform:scale(.99)}
 .sosrow{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.sos{display:flex;flex-direction:column;align-items:center;gap:3px;padding:12px 4px;border-radius:var(--r-md);background:var(--raised);border:1px solid transparent;transition:border-color .15s,transform .12s}
-.sos:hover{border-color:var(--moon)}
+.sos{position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start;gap:1px;padding:10px 10px 9px;min-height:78px;border-radius:16px;color:var(--onmesh);transition:transform .12s}
+.sos::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 40%,rgba(0,0,0,.44));pointer-events:none}
+.sos>*{position:relative;z-index:1}
 .sos:active{transform:scale(.96)}
-.sos span{font-size:20px}
-.sos b{font-size:11px}
-.sos i{font-style:normal;font-family:var(--mono);font-size:9px;color:var(--faint)}
+.sos b{font-size:12px;line-height:1.2}
+.sos i{font-style:normal;font-family:var(--mono);font-size:9px;color:var(--onmesh-faint);letter-spacing:.06em}
 .brow{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
 .brow::-webkit-scrollbar{display:none}
-.bchip{flex:none;width:104px;padding:12px 10px;border-radius:var(--r-md);background:var(--raised);border:1px solid transparent;text-align:left;transition:border-color .15s}
-.bchip:hover{border-color:var(--line-strong)}
-.bchip .be{font-size:19px;display:block;margin-bottom:6px}
+.bchip{position:relative;overflow:hidden;flex:none;width:112px;min-height:100px;padding:11px;border-radius:18px;text-align:left;color:var(--onmesh);display:flex;flex-direction:column;justify-content:flex-end;transition:transform .12s}
+.bchip::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 42%,rgba(0,0,0,.44));pointer-events:none}
+.bchip>*{position:relative;z-index:1}
+.bchip:active{transform:scale(.97)}
 .bchip b{display:block;font-size:13px;line-height:1.3}
-.bchip span{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.bchip span{font-family:var(--mono);font-size:11px;color:var(--onmesh-dim);letter-spacing:.04em}
 .scards{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.scard{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:14px;border-radius:var(--r-md);background:var(--raised);border:1px solid transparent;text-align:left;transition:border-color .15s,transform .12s;position:relative}
-.scard:hover{border-color:var(--line-strong)}
+.scard{position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;gap:2px;min-height:146px;padding:14px;border-radius:var(--r-md);text-align:left;color:var(--onmesh);transition:transform .12s}
+.scard::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.12) 0%,rgba(0,0,0,0) 34%,rgba(0,0,0,.5) 100%);pointer-events:none}
+.scard>*{position:relative;z-index:1}
 .scard:active{transform:scale(.98)}
-.scard.wide{grid-column:1/-1}
-.scard.add{border:1px dashed var(--line-strong);background:transparent}
-.scard .em{font-size:22px;margin-bottom:6px}
+.scard.wide{grid-column:1/-1;min-height:120px}
+.scard.add{min-height:146px;background-image:none;background-color:transparent;border:1px dashed var(--line-strong);color:var(--text);justify-content:center;align-items:center;text-align:center}
+.scard.add::after{display:none}
+.scard.add .plus{font-family:var(--display);font-size:26px;font-weight:700;color:var(--muted);margin-bottom:6px}
 .scard .sc-b{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.scard .sc-b b{font-size:14px}
+.scard .sc-b b{font-size:15px;letter-spacing:-.01em}
 .scard .fav{font-style:normal;color:var(--moon);font-size:12px}
-.scard .voiced{font-style:normal;font-size:10px;color:var(--jade);background:var(--jade-ink);padding:1px 6px;border-radius:var(--r-pill)}
-.scard .sc-h{font-size:12px;color:var(--muted);line-height:1.45;margin-top:3px}
-.scard .sc-f{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
-.scard .sc-f i{font-style:normal;font-family:var(--mono);font-size:10px;letter-spacing:.03em;color:var(--faint);border:1px solid var(--line);padding:1px 6px;border-radius:var(--r-pill)}
-.scard .sc-f .drop{color:var(--jade);border-color:transparent;background:var(--jade-ink)}
+.scard .voiced{font-style:normal;font-size:9px;letter-spacing:.06em;font-family:var(--mono);color:var(--onmesh);background:rgba(0,0,0,.4);padding:2px 6px;border-radius:var(--r-pill)}
+.scard .sc-h{font-size:12px;color:var(--onmesh-dim);line-height:1.45;margin-top:4px}
+.scard .sc-f{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px}
+.scard .sc-f i{font-style:normal;font-family:var(--mono);font-size:10px;letter-spacing:.03em;color:var(--onmesh-dim);background:rgba(0,0,0,.3);padding:2px 7px;border-radius:var(--r-pill)}
+.scard .sc-f .drop{color:var(--moon);background:rgba(0,0,0,.45)}
+.scard.add .sc-b b{font-size:14px}
+.scard.add .sc-h{color:var(--muted)}
 .whycard{background:transparent;border-left:2px solid var(--jade);padding:2px 0 2px 14px;margin-bottom:18px}
 .whycard p{font-size:13px;color:var(--muted);line-height:1.6;margin-top:5px}
 .effs{display:grid;gap:10px}
 .eff{display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:10px}
-.eff .en{font-size:13px}
+.eff .en{font-size:13px;display:flex;align-items:center;gap:8px}
 .eff .ebar{height:6px;border-radius:3px;background:var(--raised);overflow:hidden}
 .eff .ebar i{display:block;height:100%;border-radius:3px}
 .eff b{font-family:var(--display);font-size:16px;font-variant-numeric:tabular-nums}
@@ -117,7 +175,7 @@ p{margin:0}
 .pacer{position:relative;width:220px;height:220px;display:grid;place-items:center}
 .pring{position:absolute;inset:0;border-radius:50%;border:1px solid var(--line-strong)}
 .pcore{position:absolute;width:200px;height:200px;border-radius:50%;transform:scale(.45);
-  background:radial-gradient(circle at 35% 30%,#fff3e8 0%,var(--moon) 30%,var(--moon-deep) 65%,transparent 78%);
+  background:radial-gradient(circle at 34% 28%,#F6FFC4 0%,#E4FF57 30%,#8FCE12 66%,transparent 78%);
   box-shadow:0 0 70px var(--glow)}
 .ptext{position:relative;z-index:2;text-align:center;color:var(--moon-ink);mix-blend-mode:normal}
 .ptext b{display:block;font-family:var(--serif);font-size:19px}
@@ -136,9 +194,8 @@ p{margin:0}
 .plate .sub{color:var(--muted);margin-top:14px;font-size:14px;max-width:34ch}
 .plate .pill{display:inline-flex;align-items:center;gap:8px;margin-top:22px;padding:6px 12px;border:1px solid var(--line-strong);border-radius:var(--r-pill);font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .plate .pill i{width:7px;height:7px;border-radius:50%;background:var(--jade);box-shadow:0 0 10px var(--jade)}
-.plate .theme{margin-top:26px;display:flex;gap:8px}
-.plate .theme button{padding:8px 12px;border:1px solid var(--line);border-radius:var(--r-sm);font-size:13px;color:var(--muted)}
-.plate .theme button[aria-pressed="true"]{border-color:var(--moon);color:var(--text)}
+.plate .swatches{margin-top:26px;display:grid;grid-template-columns:repeat(6,1fr);gap:8px;max-width:250px}
+.plate .swatches i{aspect-ratio:1;border-radius:12px;display:block}
 @media (min-width:820px){.plate{display:block}}
 
 .device{
@@ -171,13 +228,14 @@ p{margin:0}
 .section-h .more{font-size:12px;color:var(--muted)}
 
 .card{background:var(--raised);border-radius:var(--r-md);padding:18px}
-.card.hero{
-  background:radial-gradient(120% 90% at 100% 0%,var(--glow),transparent 55%),var(--raised);
-  border:1px solid var(--line);
-}
-.hero .quote{font-family:var(--serif);font-size:21px;line-height:1.5;font-weight:500;margin:6px 0 14px}
+.card.hero{position:relative;overflow:hidden;border:0;padding:20px;border-radius:var(--r-lg);color:var(--onmesh)}
+.card.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.2) 0%,rgba(0,0,0,.04) 44%,rgba(0,0,0,.46) 100%);pointer-events:none}
+.card.hero>*{position:relative;z-index:1}
+.card.hero .eyebrow{color:var(--onmesh-dim)}
+.hero .quote{font-family:var(--serif);font-size:21px;line-height:1.45;font-weight:700;margin:8px 0 16px;letter-spacing:-.01em}
 .hero .meta{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:var(--r-pill);font-size:12px;background:var(--surface);color:var(--muted);border:1px solid var(--line)}
+.chip{display:inline-flex;align-items:center;gap:7px;padding:5px 11px;border-radius:var(--r-pill);font-size:12px;background:var(--surface);color:var(--muted);border:1px solid var(--line)}
+.hero .chip{background:rgba(0,0,0,.3);border-color:rgba(255,255,255,.22);color:var(--onmesh)}
 .chip.goal{color:var(--text)}
 .chip.jade{background:var(--jade-ink);color:var(--jade);border-color:transparent}
 .chip.moon{background:var(--moon-ink);color:var(--moon);border-color:transparent}
@@ -194,12 +252,15 @@ p{margin:0}
 .btn[disabled]{opacity:.45;cursor:not-allowed}
 .btn svg{width:16px;height:16px}
 
-/* stat row */
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.stat{background:var(--raised);border-radius:var(--r-md);padding:14px 14px 12px}
-.stat .n{font-family:var(--display);font-size:26px;font-weight:800;letter-spacing:-.02em;line-height:1;font-variant-numeric:tabular-nums}
-.stat .n small{font-family:var(--mono);font-size:11px;color:var(--muted);font-weight:400;margin-left:3px;letter-spacing:.06em}
-.stat .l{font-size:12px;color:var(--muted);margin-top:6px}
+/* stat tiles */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{position:relative;overflow:hidden;border-radius:var(--r-md);padding:12px 13px 12px;min-height:104px;display:flex;flex-direction:column;justify-content:space-between;color:var(--onmesh)}
+.stat::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.26),rgba(0,0,0,0) 42%,rgba(0,0,0,.34));pointer-events:none}
+.stat>*{position:relative;z-index:1}
+.stat .l{font-size:11.5px;color:var(--onmesh-dim);line-height:1.3;order:-1}
+.stat .n{font-family:var(--display);font-size:29px;font-weight:700;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}
+.stat .n small{font-family:var(--mono);font-size:10px;color:var(--onmesh-faint);font-weight:400;margin-left:4px;letter-spacing:.08em}
+.tick-mark{position:absolute;z-index:1;right:12px;bottom:14px;width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:8px solid var(--moon)}
 
 /* mood row */
 .moods{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
@@ -212,10 +273,10 @@ p{margin:0}
 
 /* quick actions */
 .quick{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.qa{display:flex;flex-direction:column;gap:10px;padding:16px;border-radius:var(--r-md);background:var(--raised);text-align:left;border:1px solid transparent;transition:border-color .15s}
-.qa:hover{border-color:var(--line-strong)}
-.qa .ic{width:36px;height:36px;border-radius:12px;display:grid;place-items:center;background:var(--surface)}
-.qa .ic svg{width:18px;height:18px}
+.qa{display:flex;flex-direction:column;gap:10px;padding:15px;border-radius:var(--r-md);background:var(--raised);text-align:left;border:1px solid transparent;transition:border-color .15s,background .15s}
+.qa:hover{border-color:var(--line-strong);background:var(--hover)}
+.qa .ic{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;color:#0C0C0E}
+.qa .ic svg{width:17px;height:17px}
 .qa b{font-size:14px}
 .qa span{font-size:12px;color:var(--muted)}
 
@@ -223,7 +284,7 @@ p{margin:0}
 .opts{display:grid;gap:8px}
 .opt{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:var(--r-md);background:var(--raised);border:1px solid transparent;text-align:left;transition:border-color .15s,background .15s}
 .opt[aria-pressed="true"]{border-color:var(--moon);background:var(--moon-ink)}
-.opt .em{font-size:20px;width:28px;text-align:center}
+.opt .em{width:30px;height:30px;flex:none}
 .opt b{display:block;font-size:14px}
 .opt span{font-size:12px;color:var(--muted)}
 .opt .tick{margin-left:auto;width:18px;height:18px;border-radius:50%;border:1.5px solid var(--line-strong)}
@@ -232,13 +293,13 @@ p{margin:0}
 
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .con{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:12px 14px;border-radius:var(--r-md);background:var(--raised);border:1px solid transparent;text-align:left;transition:border-color .15s,background .15s}
-.con .em{font-size:20px;margin-bottom:4px}
+.con .em{margin-bottom:8px}
 .con b{font-size:14px}
 .con span:last-child{font-size:11px;color:var(--muted)}
 .con[aria-pressed="true"]{border-color:var(--moon);background:var(--moon-ink)}
 .seg{display:flex;background:var(--raised);border-radius:var(--r-pill);padding:4px;gap:4px}
 .seg button{flex:1;padding:8px 4px;border-radius:var(--r-pill);font-size:13px;color:var(--muted);white-space:nowrap}
-.seg button[aria-pressed="true"]{background:var(--surface);color:var(--text);font-weight:600}
+.seg button[aria-pressed="true"]{background:var(--moon);color:var(--moon-ink);font-weight:700}
 .row{display:flex;align-items:center;gap:10px}
 .row.between{justify-content:space-between}
 .label{font-size:12px;color:var(--muted);margin-bottom:8px;display:block}
@@ -268,16 +329,22 @@ p{margin:0}
 
 .orb-wrap{display:grid;place-items:center;padding:16px 0 6px}
 .orb{width:180px;height:180px;border-radius:50%;position:relative;display:grid;place-items:center;
-  background:radial-gradient(circle at 35% 30%,#fff3e8 0%,var(--moon) 28%,var(--moon-deep) 60%,transparent 72%);
-  filter:blur(.2px);box-shadow:0 0 80px var(--glow);
+  background:
+    radial-gradient(circle at 34% 28%,#FFC7F2 0%,rgba(255,199,242,0) 46%),
+    radial-gradient(circle at 68% 74%,#7A3BE8 0%,rgba(122,59,232,0) 58%),
+    radial-gradient(circle at 50% 50%,#EE63CE 0%,#9B1FB4 62%,transparent 74%);
+  box-shadow:0 0 90px rgba(238,99,206,.3);
   animation:breathe 14s ease-in-out infinite;}
 .orb::after{content:"";position:absolute;inset:-22px;border-radius:50%;border:1px solid var(--line-strong);opacity:.6;animation:ring 14s ease-in-out infinite}
-.orb.sleep{background:radial-gradient(circle at 35% 30%,#e9fff7 0%,var(--jade) 30%,#2A7A66 62%,transparent 74%);box-shadow:0 0 90px rgba(127,209,185,.28)}
+.orb.sleep{background:
+    radial-gradient(circle at 34% 28%,#C9E4FF 0%,rgba(201,228,255,0) 46%),
+    radial-gradient(circle at 62% 76%,#4FE0A2 0%,rgba(79,224,162,0) 56%),
+    radial-gradient(circle at 50% 50%,#2A49E0 0%,#0A1046 66%,transparent 76%);
+  box-shadow:0 0 90px rgba(42,73,224,.34)}
 .orb.idle{animation-play-state:paused}
 @keyframes breathe{0%{transform:scale(.72)}28%{transform:scale(1)}56%{transform:scale(1)}100%{transform:scale(.72)}}
 @keyframes ring{0%{transform:scale(.9);opacity:.2}28%{transform:scale(1.08);opacity:.7}56%{transform:scale(1.08);opacity:.7}100%{transform:scale(.9);opacity:.2}}
-.orb .phase{font-family:var(--mono);font-size:12px;letter-spacing:.2em;color:var(--moon-ink);text-transform:uppercase}
-.orb.sleep .phase{color:var(--jade-ink)}
+.orb .phase{font-family:var(--mono);font-size:12px;letter-spacing:.2em;color:#fff;text-transform:uppercase;text-shadow:0 1px 10px rgba(0,0,0,.5)}
 
 /* journal */
 .entry{background:var(--raised);border-radius:var(--r-md);padding:14px 16px;display:grid;grid-template-columns:44px 1fr;gap:12px}
@@ -392,10 +459,9 @@ textarea.input{min-height:90px;resize:vertical}
     <p class="tag">用你自己的聲音，<br>對潛意識說話。</p>
     <p class="sub">AI 讀你的目標與日記，動態寫出專屬冥想引導與睡前放鬆導引，再用你錄下的聲音唸給你聽。</p>
     <div class="pill"><i></i> Demo build · 資料只存在你的瀏覽器</div>
-    <div class="theme" role="group" aria-label="主題">
-      <button data-theme-set="" aria-pressed="true">跟隨系統</button>
-      <button data-theme-set="dark" aria-pressed="false">夜</button>
-      <button data-theme-set="light" aria-pressed="false">日</button>
+    <div class="swatches" aria-hidden="true">
+      <i class="mesh g-ember"></i><i class="mesh g-lime"></i><i class="mesh g-jade"></i>
+      <i class="mesh g-aqua"></i><i class="mesh g-magenta"></i><i class="mesh g-cobalt"></i>
     </div>
   </aside>
 
@@ -455,7 +521,7 @@ textarea.input{min-height:90px;resize:vertical}
 
     <nav class="nav" id="nav" aria-label="主選單">
       <button data-go="home" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><circle cx="19" cy="18" r="1.4"/><circle cx="5" cy="17" r="1"/></svg>今日</button>
-      <button data-go="manifest"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M12 4a4 4 0 0 1 4 4v4a4 4 0 0 1-8 0V8a4 4 0 0 1 4-4z"/><path d="M6 11a6 6 0 0 0 12 0M12 17v3M9 20h6"/></svg>冥想</button>
+      <button data-go="manifest"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="2.4"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="9.4" opacity=".45"/></svg>冥想</button>
       <button data-go="sleep"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5z"/></svg>睡眠</button>
       <button data-go="journal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M5 4h11a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2z"/><path d="M8 4v16M11 9h4M11 13h4"/></svg>日記</button>
       <button data-go="me"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="9" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>我</button>
@@ -485,41 +551,41 @@ const daysAgo = n => { const d=new Date(); d.setDate(d.getDate()-n); return toda
 
 /* ---------- content ---------- */
 const GOALS = {
-  wealth:{name:'財富自由',emoji:'💰',hint:'收入、版稅、被動現金流',
+  wealth:{name:'財富自由',g:'amber',hint:'收入、版稅、被動現金流',
     aff:['金錢自然地、持續地流向我。','我值得富足，也允許自己接收。','我的收入來自我的創造力與價值。','每一筆支出都帶著感謝，每一筆收入都帶著喜悅。','我和金錢的關係輕鬆、健康、充滿信任。','機會不斷出現，而我準備好了。','我用金錢創造自由，也創造愛。','富足是我的自然狀態。'],
     vision:'想像你打開手機，看見帳戶裡的數字安靜地成長。你不需要緊抓，只是微笑，因為你知道，這只是開始。',
     sleep:['在你睡著的時候，你的潛意識正在為你打開富足的門。','明天醒來，你會注意到更多機會，那都是為你準備的。']},
-  music:{name:'音樂與舞台',emoji:'🎤',hint:'作品、演出、被對的人聽見',
+  music:{name:'音樂與舞台',g:'magenta',hint:'作品、演出、被對的人聽見',
     aff:['我的聲音有力量，能觸動人心。','舞台是我的家，我在上面自由呼吸。','我的音樂正被對的人聽見。','每一次創作，我都更靠近真正的自己。','版稅、合作與邀約，正在向我走來。','我允許自己被看見、被聽見、被記住。','我的作品有自己的生命，走得比我更遠。','我是藝術家，也是自己的老闆。'],
     vision:'想像燈光暗下，第一個音落下，全場安靜地等你。你的聲音填滿整個空間，而你，只是在做自己。',
     sleep:['你的聲音在夢裡繼續練習，變得更自由、更有力量。','睡著時，宇宙正在安排對的人聽見你。']},
-  love:{name:'愛與關係',emoji:'💗',hint:'伴侶、家人、靈魂連結',
+  love:{name:'愛與關係',g:'rose',hint:'伴侶、家人、靈魂連結',
     aff:['我值得被溫柔、穩定、深刻地愛著。','我先把愛給自己，然後愛自然流動。','對的人正在向我靠近，我不必追趕。','我的關係滋養我、也讓我成長。','我可以柔軟，也可以有界線。','我釋放過去，為新的連結騰出空間。','愛在我身邊，愛就是我。','我的心是打開的，也是安全的。'],
     vision:'想像有一個人，在你什麼都沒做的時候，就已經選擇了你。你們並肩坐著，安靜而完整。',
     sleep:['你安全，你被愛，你可以完全放鬆。','在夢裡，你的心更打開了一點點。']},
-  health:{name:'身體與能量',emoji:'🌿',hint:'睡眠、運動、無糖飲食',
+  health:{name:'身體與能量',g:'jade',hint:'睡眠、運動、無糖飲食',
     aff:['我的身體是我最信任的夥伴。','每一次呼吸，我都更放鬆、更有能量。','我選擇讓身體感覺好的食物與動作。','我的睡眠深沉，醒來時充滿電。','我的身體知道如何自我修復。','運動是我送給自己的禮物。','我的能量清澈、穩定、明亮。','我照顧身體，身體也照顧我。'],
     vision:'想像早晨醒來，身體輕盈，呼吸很深。你伸展、你走動，每個細胞都在說：我準備好了。',
     sleep:['你的身體正在修復、更新，每一個細胞都在休息。','明天早上，你會比今天更有能量。']},
-  confidence:{name:'自信與魅力',emoji:'✨',hint:'被看見、說話有份量',
+  confidence:{name:'自信與魅力',g:'ember',hint:'被看見、說話有份量',
     aff:['我不需要任何人的許可才能發光。','我的存在本身就是價值。','我說話時，世界會停下來聽。','我走進房間，房間就換了頻率。','我不怕被看見，我就是為此而生。','我信任自己的決定。','我的獨特是我最大的資產。','自信不是我努力得到的，是我本來就有的。'],
     vision:'想像你推開門走進去，不用說話，整個房間的能量就轉向你。你放鬆、你微笑，因為你知道自己是誰。',
     sleep:['你已經足夠了，現在只是讓身體記住這件事。','醒來的時候，你會帶著一種安靜的確定感。']},
-  creative:{name:'創作靈感',emoji:'🎨',hint:'點子、專案、一人公司',
+  creative:{name:'創作靈感',g:'violet',hint:'點子、專案、一人公司',
     aff:['靈感隨時找得到我，因為我隨時都在。','我的創作不需要完美，只需要真實。','我允許自己玩，好點子就會來。','我的想法值得被做出來。','我用作品跟世界說話。','我信任直覺，它從不遲到。','每一天，我都在建造屬於我的宇宙。','創作讓我活著。'],
     vision:'想像你坐在工作桌前，靈感像水一樣流出來。你不追它，它自己來，因為這裡是它的家。',
     sleep:['你的潛意識整晚都在為你收集靈感。','明天，一個新的想法會自然地找到你。']},
 };
 const TONES = {
-  gentle:{name:'溫柔',emoji:'🌙',hint:'像深夜的朋友，慢慢說',rate:.88,
+  gentle:{name:'溫柔',g:'mint',hint:'像深夜的朋友，慢慢說',rate:.88,
     open:['嗨，{name}。慢慢來，這段時間是你的。','先深深吸一口氣……再慢慢吐出來。'],
     punch:['你可以慢慢來，一切都在對的時間。','你已經做得很好了。','沒有什麼需要證明。'],
     close:['謝謝你今天出現在這裡。','把這份感覺帶進今天，輕輕的，就夠了。']},
-  firm:{name:'堅定',emoji:'🔥',hint:'像教練，短、直接、有力',rate:.96,
+  firm:{name:'堅定',g:'ember',hint:'像教練，短、直接、有力',rate:.96,
     open:['{name}，聽好了。今天的你，正在成為那個版本的自己。','吸氣。吐氣。現在，我們開始。'],
     punch:['這是事實，不是希望。','我決定了，就是這樣。','沒有 B 計畫。'],
     close:['現在，睜開眼睛，去做。','你不是在等待，你是在行動。']},
-  baddie:{name:'Baddie 模式',emoji:'💅',hint:'高街潮流 × 5D 意識，帶點壞',rate:1,
+  baddie:{name:'Baddie 模式',g:'magenta',hint:'高街潮流 × 5D 意識，帶點壞',rate:1,
     open:['Okay {name}，鏡子裡那個人已經是頂級了，我們只是提醒她一下。','吸口氣，把肩膀放下來，皇冠戴正。'],
     punch:['而且，我值得。','說真的，這根本不是問題。','Period.'],
     close:['好了，去把今天拿下來。','記得：你不是在追什麼，你是在被追。']},
@@ -530,35 +596,35 @@ const MOODS = [
 const TAGS = ['工作','創作','家人','關係','身體','金錢','靈性','休息'];
 const READ_TEXT = '我是夏日的風，也是深夜的海。我允許自己慢下來，也允許自己被看見。今天，我把注意力放在我想要的地方，讓每一個字，都成為我的頻率。';
 const CONCERNS = {
-  sleep:{name:'睡不好',emoji:'😴',hint:'入睡難、半夜醒',goal:'health',tone:'gentle',
+  sleep:{name:'睡不好',g:'cobalt',hint:'入睡難、半夜醒',goal:'health',tone:'gentle',
     open:'我知道你最近睡得不太好。今天不趕，我們只讓身體先安靜下來。',
     aff:['我允許身體在夜裡完全放下。','休息不是偷懶，是我在為明天充電。'],
     sleep:'今晚，你不需要努力入睡。睡意會自己來找你。'},
-  anxiety:{name:'焦慮想太多',emoji:'🌀',hint:'停不下來的念頭',goal:'health',tone:'gentle',
+  anxiety:{name:'焦慮想太多',g:'aqua',hint:'停不下來的念頭',goal:'health',tone:'gentle',
     open:'我知道最近腦袋很吵。沒關係，念頭可以在，我們不用跟它走。',
     aff:['我不需要現在就想通一切。','我的呼吸比我的念頭更慢，也更有力。'],
     sleep:'每一個念頭飄過來，你都讓它飄過去。你只是看著。'},
-  confidence:{name:'缺乏自信',emoji:'🪞',hint:'覺得自己不夠',goal:'confidence',tone:'firm',
+  confidence:{name:'缺乏自信',g:'ember',hint:'覺得自己不夠',goal:'confidence',tone:'firm',
     open:'先說一件事：你已經夠了。今天只是讓身體記住這句話。',
     aff:['我不需要任何人的許可才能發光。','我信任自己的決定。'],
     sleep:'你已經足夠了，這件事在你睡著時也是真的。'},
-  low:{name:'情緒低落',emoji:'🌧',hint:'提不起勁',goal:'health',tone:'gentle',
+  low:{name:'情緒低落',g:'slate',hint:'提不起勁',goal:'health',tone:'gentle',
     open:'我知道最近有點重。今天的你，不需要很好，只需要在這裡。',
     aff:['今天的我，不需要很好，只需要在這裡。','雨會停，我也會再亮起來。'],
     sleep:'你今天已經撐過來了。這樣就夠了。'},
-  focus:{name:'難以專注',emoji:'🎯',hint:'分心、拖延',goal:'creative',tone:'firm',
+  focus:{name:'難以專注',g:'lime',hint:'分心、拖延',goal:'creative',tone:'firm',
     open:'今天只做一件事。就一件。',
     aff:['我一次只做一件事，這就夠了。','我把注意力放回我選擇的地方。'],
     sleep:'明天早上，你會清楚知道第一件要做的事。'},
-  relation:{name:'關係卡住',emoji:'💔',hint:'伴侶、家人、朋友',goal:'love',tone:'gentle',
+  relation:{name:'關係卡住',g:'rose',hint:'伴侶、家人、朋友',goal:'love',tone:'gentle',
     open:'關係裡的卡住，常常是因為我們先忘了自己。今天先回來。',
     aff:['我可以柔軟，也可以有界線。','我先把愛給自己，然後愛自然流動。'],
     sleep:'你被愛著，即使今天沒有人說出口。'},
-  money:{name:'金錢壓力',emoji:'💸',hint:'帳單、收入不穩',goal:'wealth',tone:'firm',
+  money:{name:'金錢壓力',g:'amber',hint:'帳單、收入不穩',goal:'wealth',tone:'firm',
     open:'金錢的緊，先從身體鬆開。深呼吸，錢不會因為你緊張就變多。',
     aff:['金錢是工具，我是主人。','我用創造力換來我值得的收入。'],
     sleep:'在你休息的時候，你已經種下的種子還在長。'},
-  creative:{name:'創作卡關',emoji:'🧱',hint:'沒靈感、怕不夠好',goal:'creative',tone:'firm',
+  creative:{name:'創作卡關',g:'violet',hint:'沒靈感、怕不夠好',goal:'creative',tone:'firm',
     open:'卡關不是沒有靈感，是太怕做壞。今天允許自己做壞。',
     aff:['我允許自己做出不完美的第一版。','我的想法值得被做出來。'],
     sleep:'你的潛意識整晚都在為你收集靈感。'},
@@ -566,91 +632,91 @@ const CONCERNS = {
 
 /* ---------- breath patterns (the science layer) ---------- */
 const BREATHS = {
-  physio:{name:'生理嘆息',emoji:'💨',hint:'兩段吸氣＋長吐 · 降壓最快的一招',why:'Stanford Huberman lab：兩段吸氣重新撐開肺泡，長吐氣拉高副交感活性，一分鐘內心率就會掉。',
+  physio:{name:'生理嘆息',g:'ember',hint:'兩段吸氣＋長吐 · 降壓最快的一招',why:'Stanford Huberman lab：兩段吸氣重新撐開肺泡，長吐氣拉高副交感活性，一分鐘內心率就會掉。',
     steps:[['吸氣',4],['再吸一小口',2],['長長地吐',8]],rounds:5,color:'rose'},
-  box:{name:'方箱呼吸',emoji:'⬜',hint:'4-4-4-4 · 上場前穩住手',why:'海豹部隊與運動員上場前的標準流程，等長的四拍讓注意力有地方放，手抖會停。',
+  box:{name:'方箱呼吸',g:'iris',hint:'4-4-4-4 · 上場前穩住手',why:'海豹部隊與運動員上場前的標準流程，等長的四拍讓注意力有地方放，手抖會停。',
     steps:[['吸氣',4],['停住',4],['吐氣',4],['停住',4]],rounds:4,color:'moon'},
-  b478:{name:'4-7-8 助眠',emoji:'🌙',hint:'吸 4 停 7 吐 8 · 躺著做',why:'吐氣長度接近吸氣兩倍時，迷走神經張力上升，是最常被拿來對付入睡困難的節奏。',
+  b478:{name:'4-7-8 助眠',g:'cobalt',hint:'吸 4 停 7 吐 8 · 躺著做',why:'吐氣長度接近吸氣兩倍時，迷走神經張力上升，是最常被拿來對付入睡困難的節奏。',
     steps:[['吸氣',4],['停住',7],['吐氣',8]],rounds:4,color:'jade'},
-  coherent:{name:'共振呼吸',emoji:'〰️',hint:'5-5 · 每分鐘 6 次',why:'每分鐘 6 次時心率變異度（HRV）達到最高，情緒調節與專注力都在這個頻率上最穩。',
+  coherent:{name:'共振呼吸',g:'aqua',hint:'5-5 · 每分鐘 6 次',why:'每分鐘 6 次時心率變異度（HRV）達到最高，情緒調節與專注力都在這個頻率上最穩。',
     steps:[['吸氣',5],['吐氣',5]],rounds:6,color:'jade'},
-  calm46:{name:'4-6 安撫',emoji:'🫧',hint:'吐氣比吸氣長 · 隨時能做',why:'最溫和的版本，捷運上、會議中都能做，沒有人看得出來。',
+  calm46:{name:'4-6 安撫',g:'mint',hint:'吐氣比吸氣長 · 隨時能做',why:'最溫和的版本，捷運上、會議中都能做，沒有人看得出來。',
     steps:[['吸氣',4],['吐氣',6]],rounds:6,color:'moon'},
-  energize:{name:'提振呼吸',emoji:'☀️',hint:'6-2 · 早晨開機',why:'吸氣長、吐氣短會提高交感活性，用來取代第二杯咖啡。',
+  energize:{name:'提振呼吸',g:'lime',hint:'6-2 · 早晨開機',why:'吸氣長、吐氣短會提高交感活性，用來取代第二杯咖啡。',
     steps:[['深深吸氣',6],['快速吐掉',2]],rounds:6,color:'rose'},
 };
 
 /* ---------- scenario library ---------- */
 const CATS = {rescue:{name:'急救',hint:'現在就不舒服'},before:{name:'出發前',hint:'進場之前的 60 秒'},daily:{name:'每天',hint:'固定時段的練習'},ritual:{name:'儀式',hint:'慢下來的時刻'}};
 const SCENES = {
-  anxiety:{name:'焦慮急救',emoji:'🌀',cat:'rescue',min:2,breath:'physio',rounds:3,tone:'gentle',hint:'心跳很快、腦袋停不下來',
+  anxiety:{name:'焦慮急救',g:'aqua',cat:'rescue',min:2,breath:'physio',rounds:3,tone:'gentle',hint:'心跳很快、腦袋停不下來',
     metric:'焦慮',
     open:['好，停一下。你現在是安全的。','把腳掌踩在地上，感覺地板在那裡。'],
     steps:['說出五個你看得到的東西。不用出聲，心裡數就好。','四個你摸得到的。','三個你聽得到的聲音。','兩個你聞得到的。','一個你嚐得到的。'],
     aff:['焦慮不是預言，它只是一個訊號。','我的身體很安全，我的呼吸帶我回來。','這個感覺會過去，就像之前每一次一樣。','我不需要現在就想通一切。','我可以只處理下一步。','我的念頭不是事實。'],
     close:['好了。你回來了。','慢慢地，繼續今天。']},
-  meeting:{name:'開會前',emoji:'💼',cat:'before',min:1,breath:'box',rounds:3,tone:'firm',hint:'提案、簡報、面試前 60 秒',
+  meeting:{name:'開會前',g:'iris',cat:'before',min:1,breath:'box',rounds:3,tone:'firm',hint:'提案、簡報、面試前 60 秒',
     metric:'緊張',
     open:['進去之前，先給自己六十秒。','坐直，肩膀往後轉一圈，讓胸口打開。'],
     aff:['我準備好了，我的準備就是我的底氣。','我知道我在說什麼。','我不需要證明什麼，我只是分享我看到的。','別人的表情不是評分，我可以慢慢說。','如果我不知道答案，我可以說我回去確認。','我的聲音穩，我的節奏由我決定。'],
     close:['把肩膀放下來，下巴微微收。','好，去吧。']},
-  date:{name:'約會前',emoji:'💗',cat:'before',min:1,breath:'calm46',rounds:3,tone:'gentle',hint:'出門前回到自己身上',
+  date:{name:'約會前',g:'rose',cat:'before',min:1,breath:'calm46',rounds:3,tone:'gentle',hint:'出門前回到自己身上',
     metric:'緊張',
     open:['出門前，先回到自己身上。','看著鏡子裡的那個人，不要急著挑毛病。'],
     aff:['今天我不是去被挑選的，我也在挑選。','我不需要表演，我只要在場。','有趣的人會覺得我有趣，這就夠了。','如果不合拍，那不是我不夠好，只是頻率不同。','我可以緊張，緊張只是我在乎。','我允許自己享受今天晚上。'],
     close:['好了。帶著這個頻率出門。']},
-  stage:{name:'上台前',emoji:'🎤',cat:'before',min:2,breath:'box',rounds:4,tone:'baddie',hint:'演出、直播、鏡頭前',
+  stage:{name:'上台前',g:'magenta',cat:'before',min:2,breath:'box',rounds:4,tone:'baddie',hint:'演出、直播、鏡頭前',
     metric:'緊張',
     open:['燈還沒亮，這一分鐘是你的。','腳掌踩實，膝蓋放鬆，重心往下沉。'],
     steps:['想像第一個音、第一句話出口的樣子。順順的，就這樣。'],
     aff:['腎上腺素不是害怕，是我的身體在準備。','舞台是我的家，我在上面自由呼吸。','我不需要完美，我需要真實。','他們是來看我的，不是來抓我的錯。','我的存在本身就有份量。','就算忘詞，我也能撐住這個空間。'],
     close:['深吸一口氣，把胸口打開。','燈亮了。去吧。']},
-  post:{name:'發文前',emoji:'📱',cat:'before',min:1,breath:'calm46',rounds:3,tone:'baddie',hint:'按下發布之前的那口氣',
+  post:{name:'發文前',g:'violet',cat:'before',min:1,breath:'calm46',rounds:3,tone:'baddie',hint:'按下發布之前的那口氣',
     metric:'不安',
     open:['手指停在那個按鈕上，先呼吸。'],
     aff:['我的作品不需要所有人喜歡。','數字不是我的價值，數字只是數字。','會共鳴的人自然會留下。','我發布的是我，不是我的完美版本。','演算法不是老師，我不需要它的批准。','我今天做了創作者會做的事：把東西送出去。'],
     close:['好，按下去。','然後去做別的事，不要一直重整。']},
-  anger:{name:'情緒降溫',emoji:'🔥',cat:'rescue',min:2,breath:'physio',rounds:4,tone:'firm',hint:'很生氣、想立刻回訊息',
+  anger:{name:'情緒降溫',g:'ember',cat:'rescue',min:2,breath:'physio',rounds:4,tone:'firm',hint:'很生氣、想立刻回訊息',
     metric:'火氣',
     open:['先不要回覆。訊息可以等，你的神經系統不行。','如果可以，站起來走三步。'],
     steps:['把感覺放在身體的某個位置：胸口？喉嚨？肚子？只是看著它。'],
     aff:['我可以生氣，生氣是在告訴我界線被踩到了。','我不需要在最激動的時候做決定。','我可以晚一點再回應，這是力量不是逃避。','別人的情緒不是我的責任。','我要的是解決，不是贏。','十分鐘後的我會感謝現在的我。'],
     close:['好，火降下來了。','現在，你可以選擇怎麼回應。']},
-  morning:{name:'早晨開機',emoji:'☀️',cat:'daily',min:3,breath:'energize',rounds:4,tone:'firm',hint:'起床後的第一件事',
+  morning:{name:'早晨開機',g:'lime',cat:'daily',min:3,breath:'energize',rounds:4,tone:'firm',hint:'起床後的第一件事',
     metric:'能量',
     open:['早安。還沒看手機吧？先給自己三分鐘。','坐起來，讓光進來。'],
     aff:['今天由我決定要專注在哪裡。','我的能量清澈、穩定、明亮。','今天只有三件重要的事，其他都是雜訊。','我先照顧自己，再照顧別人。','我不趕，我有節奏。','今天會有一件好事發生，我會注意到它。'],
     close:['好，睜開眼睛。','今天是你的。']},
-  focus:{name:'專注啟動',emoji:'🎯',cat:'daily',min:3,breath:'coherent',rounds:5,tone:'firm',hint:'開始工作前的清場',
+  focus:{name:'專注啟動',g:'jade',cat:'daily',min:3,breath:'coherent',rounds:5,tone:'firm',hint:'開始工作前的清場',
     metric:'分心',
     open:['把手機翻過去。就一下下。','把要做的那件事，在心裡說一次。'],
     steps:['想像九十分鐘後，那件事已經完成的樣子。'],
     aff:['我一次只做一件事，這就夠了。','分心來的時候，我只是把注意力帶回來，不責備自己。','開始比完美重要。','我不需要有靈感才能開始，開始會帶來靈感。','九十分鐘之後我可以休息。','我把注意力放回我選擇的地方。'],
     close:['好，計時開始。','去吧。']},
-  money:{name:'談錢前',emoji:'💰',cat:'before',min:2,breath:'box',rounds:3,tone:'firm',hint:'報價、談薪、寄出發票',
+  money:{name:'談錢前',g:'amber',cat:'before',min:2,breath:'box',rounds:3,tone:'firm',hint:'報價、談薪、寄出發票',
     metric:'心虛',
     open:['報價之前，先把身體坐直。','這不是在要錢，這是在說明價值。'],
     aff:['我的時間和專業值這個數字。','沉默不代表我要降價。','我可以說出數字，然後閉嘴。','拒絕我的人不是我的客戶。','錢是能量的交換，不是人情。','我值得被準時、足額地付款。'],
     close:['深呼吸。','把數字說出來。']},
-  period:{name:'經期照顧',emoji:'🌸',cat:'daily',min:5,breath:'calm46',rounds:5,tone:'gentle',hint:'身體需要慢下來的幾天',
+  period:{name:'經期照顧',g:'rose',cat:'daily',min:5,breath:'calm46',rounds:5,tone:'gentle',hint:'身體需要慢下來的幾天',
     metric:'不適',
     open:['今天的身體在做很辛苦的事。','把手放在小腹上，讓手的溫度傳進去。'],
     steps:['吸氣的時候，想像溫暖流向下腹；吐氣的時候，讓緊繃鬆開一點。'],
     aff:['我的身體不是壞掉了，它只是在工作。','今天我可以少做一點，這不是懶。','痠痛會過去，我陪著它。','我允許自己休息，不需要理由。','我對自己溫柔，就像對最好的朋友。','我的能量是週期性的，不是壞掉的。'],
     close:['謝謝身體today還在運作。','去躺一下吧。']},
-  tea:{name:'一杯茶的儀式',emoji:'🍵',cat:'ritual',min:5,breath:'coherent',rounds:6,tone:'gentle',hint:'泡一杯，什麼都不做',
+  tea:{name:'一杯茶的儀式',g:'mint',cat:'ritual',min:5,breath:'coherent',rounds:6,tone:'gentle',hint:'泡一杯，什麼都不做',
     metric:'雜亂',
     open:['先去泡一杯。我等你。','杯子拿起來，先感覺溫度，不要急著喝。'],
     steps:['聞一下。就聞，不要評論。','喝第一口，讓它在嘴裡停一下。','第二口，注意溫熱往下走到哪裡。'],
     aff:['我可以什麼都不做，這也是有生產力的。','慢下來的時候，我才聽得見自己。','這一杯是我送給自己的。','我不需要一直有用。','此刻已經夠了。'],
     close:['好，把杯子放下。','把這份安靜帶著走。']},
-  create:{name:'創作前',emoji:'🎨',cat:'before',min:3,breath:'coherent',rounds:4,tone:'baddie',hint:'寫歌、剪片、開新檔案',
+  create:{name:'創作前',g:'violet',cat:'before',min:3,breath:'coherent',rounds:4,tone:'baddie',hint:'寫歌、剪片、開新檔案',
     metric:'卡住',
     open:['打開檔案之前，先把評論家請出去。','他可以在門外等，等我做完再進來。'],
     steps:['想像最爛的第一版已經完成了。看，天沒有塌下來。'],
     aff:['我允許自己做出不完美的第一版。','靈感隨時找得到我，因為我隨時都在。','我的想法值得被做出來。','我不是在證明才華，我是在玩。','做完比做好重要，做好是下一輪的事。','我信任直覺，它從不遲到。'],
     close:['好，打開它。','開始。']},
-  reset:{name:'轉場重設',emoji:'🔄',cat:'daily',min:2,breath:'physio',rounds:3,tone:'gentle',hint:'下班、通勤、換場景',
+  reset:{name:'轉場重設',g:'slate',cat:'daily',min:2,breath:'physio',rounds:3,tone:'gentle',hint:'下班、通勤、換場景',
     metric:'殘留',
     open:['剛剛那一段結束了。','在進入下一段之前，先清空。'],
     steps:['想像把剛剛的情緒裝進一個盒子，放在門口。它還在，只是不用帶進來。'],
@@ -658,6 +724,25 @@ const SCENES = {
     close:['好，乾淨了。','進入下一段。']},
 };
 
+/* ---------- situation templates for the custom builder: tap, don't type ---------- */
+const SITU = {
+  home:{name:'回家見家人前',hint:'進門前的那幾分鐘',g:'amber',breath:'calm46',metric:'緊繃',
+    aff:['我可以愛他們，也可以有界線。','他們的情緒不是我的責任。','我不需要被理解才算數。','我可以隨時走出去透口氣。','我已經是大人了，我做得到。','今天我只要在場，不用表現。']},
+  conflict:{name:'面對衝突前',hint:'要把話說清楚之前',g:'ember',breath:'box',metric:'火氣',
+    aff:['我可以生氣，也可以好好說話。','我要的是被聽見，不是贏。','我先把身體放鬆，話才會準。','我說出我的需要，不攻擊對方。','就算沒共識，我也沒有做錯。','我值得被好好對待。']},
+  waiting:{name:'等一個結果',hint:'訊息、面試、報告都適用',g:'iris',breath:'coherent',metric:'焦慮',
+    aff:['我已經做完我能做的了。','結果不會改變我是誰。','我可以在不確定裡，還是好好呼吸。','等待也是一種進行式。','無論如何我都會有下一步。','我把它交出去，讓它自己走。']},
+  refuse:{name:'要拒絕別人',hint:'說不出口的那一次',g:'rose',breath:'box',metric:'愧疚',
+    aff:['拒絕一件事，不是拒絕一個人。','我的時間也是有限的。','我不欠任何人一個理由。','會因為我說不而離開的，本來就不穩。','照顧自己不是自私。','我可以溫柔，而且堅定。']},
+  decide:{name:'做重要決定',hint:'選項太多、腦袋很吵',g:'violet',breath:'coherent',metric:'混亂',
+    aff:['我不需要一次看清全部的路。','我的直覺知道，我只是還沒安靜。','沒有完美的選項，只有我選了之後怎麼走。','我可以改變主意。','我信任現在這個版本的我。','決定完，我就不再回頭問。']},
+  alone:{name:'一個人待著',hint:'安靜下來反而有點空',g:'cobalt',breath:'b478',metric:'孤單',
+    aff:['一個人，不等於沒有人愛我。','我可以陪自己，像陪一個好朋友。','安靜是我在充電。','我不需要被填滿。','這種感覺會流過去。','我和自己在一起，是安全的。']},
+  compare:{name:'忍不住比較',hint:'滑完手機之後',g:'aqua',breath:'physio',metric:'不安',
+    aff:['我看到的是他們的第 100 步。','我的時間軸只有我在走。','別人發光，不會讓我變暗。','我把注意力拿回我的作品上。','我今天做了什麼，比誰更前面重要。','我為他們開心，也為自己留位置。']},
+  restart:{name:'重新開始',hint:'停很久了，想再動起來',g:'lime',breath:'energize',metric:'卡住',
+    aff:['我可以從很小的一步開始。','停下來不是失敗，是休息。','我不用補回錯過的，只要接著走。','今天做五分鐘就算數。','我還在這裡，這就是證據。','重新開始，我已經做過很多次了。']},
+};
 /* ---------- scenario script builder ---------- */
 function breathLines(patternKey, rounds){
   const B=BREATHS[patternKey]; if(!B) return [];
@@ -815,8 +900,9 @@ async function generateWithClaude({goal, scene, minutes, tone, name}){
 
 /* ---------- demo voice pack: two scripts pre-rendered in Melo's own cloned voice ---------- */
 const DEMO_VOICES = {
-  melo:{id:'cVpaMfwbISlOywwtDanV', name:'Melo 的聲音', sub:'MELO MOON 中文 平靜 · 複製聲', emoji:'✦'},
-  deep:{id:'brChkoggsUHF1stW6omH', name:'低沉男聲', sub:'Ethan Zhang · 深沉、磁性', emoji:'🌑'},
+  brand:{id:'ZGNKRFGTTnfytxotHN56', name:'Melo 品牌聲', sub:'Melo Moon Brand Voice · 需 fine-tune', g:'lime'},
+  melo:{id:'cVpaMfwbISlOywwtDanV', name:'Melo 的聲音', sub:'MELO MOON 中文 平靜 · 複製聲', g:'magenta'},
+  deep:{id:'brChkoggsUHF1stW6omH', name:'低沉男聲', sub:'Ethan Zhang · 深沉、磁性', g:'cobalt'},
 };
 const DEMO_PACK = {
   manifest:{goal:'music',tone:'baddie',minutes:3,
@@ -880,7 +966,7 @@ const DEMO_PACK = {
       deep:{src:'assets/demo-sleep-deep.mp3',dur:128,at:[0,5.87,10.48,17.13,25.39,30.58,36.49,41.27,45.83,48.85,52.34,55.42,58.59,61.06,64.08,67.62,69.55,72.36,75.23,81.26,87.36,94.26,100.76,106.52,111.97,118.25,124.86]},
     }},
 };
-const demoVoice = ()=> DEMO_VOICES[state.settings.demoVoice] ? state.settings.demoVoice : 'melo';
+const demoVoice = ()=> ['melo','deep'].includes(state.settings.demoVoice) ? state.settings.demoVoice : 'melo';
 /* which voice will actually speak right now */
 function voiceSource(kind){
   const s=state.settings;
@@ -888,7 +974,7 @@ function voiceSource(kind){
   const P=DEMO_PACK[kind];
   const fits = kind==='sleep' || (state.ui.goal===P.goal && state.profile.tone===P.tone && state.ui.minutes===P.minutes);
   if(fits){ const v=DEMO_VOICES[demoVoice()]; return {mode:'pack', label:v.name, sub:'示範音檔 · '+v.sub}; }
-  return {mode:'browser', label:'系統聲音', sub:`真人聲音示範只有 ${GOALS[P.goal].emoji}×${TONES[P.tone].emoji}×${P.minutes} 分 · 加金鑰可全部用你的聲音`};
+  return {mode:'browser', label:'系統聲音', sub:`真人聲音示範只有 ${GOALS[P.goal].name}×${TONES[P.tone].name}×${P.minutes} 分 · 加金鑰可全部用你的聲音`};
 }
 
 /* ---------- playback ---------- */
@@ -943,15 +1029,28 @@ function playPack(P, onTick, onDone){
   a.play().catch(()=>{});
 }
 /* live ElevenLabs: one request per line (cached), highlight is exact */
+let voiceFallback=null;   // set once if the chosen voice cannot be synthesised yet
+function liveVoice(){ return voiceFallback || state.settings.voiceId; }
 async function ttsLine(text, rate){
-  const s=state.settings, key=`${s.voiceId}|${rate}|${text}`;
+  const s=state.settings, vid=liveVoice(), key=`${vid}|${rate}|${text}`;
   if(ttsCache.has(key)) return ttsCache.get(key);
-  const p=(async()=>{
-    const res=await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${s.voiceId}?output_format=mp3_44100_64`,{
+  const call=async id=>{
+    const res=await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${id}?output_format=mp3_44100_64`,{
       method:'POST',headers:{'xi-api-key':s.elevenKey,'content-type':'application/json'},
       body:JSON.stringify({text,model_id:'eleven_multilingual_v2',voice_settings:{stability:.6,similarity_boost:.8,style:.15,speed:rate}})});
-    if(!res.ok) throw new Error('HTTP '+res.status);
+    if(!res.ok){ const t=await res.text().catch(()=>''); const e=new Error('HTTP '+res.status); e.body=t; throw e; }
     return URL.createObjectURL(await res.blob());
+  };
+  const p=(async()=>{
+    try{ return await call(vid); }
+    catch(e){
+      // the brand voice only works once its fine-tune finishes — drop to the cloned voice meanwhile
+      if(vid!==DEMO_VOICES.melo.id && /fine.?tun|400/i.test((e.body||'')+e.message)){
+        voiceFallback=DEMO_VOICES.melo.id; toast('品牌聲還在 fine-tune，先用 Melo 的複製聲');
+        return await call(voiceFallback);
+      }
+      throw e;
+    }
   })();
   ttsCache.set(key,p); p.catch(()=>ttsCache.delete(key)); return p;
 }
@@ -1034,7 +1133,7 @@ function streak(){
 }
 function faceSVG(v, size=30){
   const m=MOODS[v-1]; const mouth={1:'M9 17q3-2.5 6 0',2:'M9 16.5q3-1 6 0',3:'M9 16h6',4:'M9 15q3 2.5 6 0',5:'M8.5 14.5q3.5 4 7 0'}[v];
-  return `<svg class="face" viewBox="0 0 24 24" width="${size}" height="${size}" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="${m.c}" opacity=".95"/><circle cx="9" cy="10" r="1.1" fill="#1B1633"/><circle cx="15" cy="10" r="1.1" fill="#1B1633"/><path d="${mouth}" stroke="#1B1633" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg>`;
+  return `<svg class="face" viewBox="0 0 24 24" width="${size}" height="${size}" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="${m.c}" opacity=".95"/><circle cx="9" cy="10" r="1.1" fill="#101014"/><circle cx="15" cy="10" r="1.1" fill="#101014"/><path d="${mouth}" stroke="#101014" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg>`;
 }
 function greeting(){ const h=new Date().getHours(); return h<5?'還醒著呢':h<11?'早安':h<14?'午安':h<18?'下午好':h<22?'晚上好':'夜深了'; }
 function fmtDate(k){ const [y,m,d]=k.split('-'); return `${m}/${d}`; }
@@ -1065,35 +1164,35 @@ function renderHome(){
   $('#home').innerHTML=`
     ${state.demo?`<div class="banner">✦ 你正在看範例資料<button id="start-real">開始我的旅程 →</button></div>`:''}
     <div class="topbar">
-      <div><div class="eyebrow">${greeting()} · ${T.emoji} ${esc(T.name)}</div><h1 class="title">${esc(p.name||'你')}，<br>今天想練習什麼？</h1></div>
+      <div><div class="eyebrow">${greeting()} · ${esc(T.name)}</div><h1 class="title">${esc(p.name||'你')}，<br>今天想練習什麼？</h1></div>
       <div class="date">週${weekday()}<b>${new Date().getDate()}</b></div>
     </div>
-    <div class="card hero">
-      <div class="eyebrow">今日肯定語 · ${g.emoji} ${esc(g.name)}</div>
+    <div class="card hero mesh gw-${g.g}">
+      <div class="eyebrow">今日肯定語 · ${esc(g.name)}</div>
       <p class="quote">${esc(quote)}</p>
       <div class="meta"><span class="chip ${p.voice?.voiceId?'jade':''}">${p.voice?.voiceId?'✦ 你的聲音':p.voice?.recorded?'◐ 樣本已錄 · 待複製':'○ 尚未錄音'}</span>
       <button class="btn primary sm" id="home-play">▶ 唸給我聽</button></div>
     </div>
-    ${(p.concerns||[]).length?`<div class="row" style="flex-wrap:wrap;gap:6px;margin-top:14px"><span class="eyebrow" style="margin-right:4px">正在改善</span>${p.concerns.map(k=>CONCERNS[k]?`<span class="chip">${CONCERNS[k].emoji} ${esc(CONCERNS[k].name)}</span>`:'').join('')}${p.concerns.includes('sleep')?'<span class="chip jade">今晚試試睡前導引 →</span>':''}</div>`:''}
+    ${(p.concerns||[]).length?`<div class="row" style="flex-wrap:wrap;gap:6px;margin-top:14px"><span class="eyebrow" style="margin-right:4px">正在改善</span>${p.concerns.map(k=>CONCERNS[k]?`<span class="chip"><i class="sw xs mesh g-${CONCERNS[k].g}"></i>${esc(CONCERNS[k].name)}</span>`:'').join('')}${p.concerns.includes('sleep')?'<span class="chip jade">今晚試試睡前導引 →</span>':''}</div>`:''}
     <div class="section">
       <div class="section-h"><h2>現在的心情</h2><span class="more">${today?'今天記錄過了 · 可更新':'點一下就記錄'}</span></div>
       <div class="moods" id="home-moods">${MOODS.map(m=>`<button class="mood" data-v="${m.v}" aria-pressed="${today&&today.mood===m.v}">${faceSVG(m.v)}<span class="lbl">${m.l}</span></button>`).join('')}</div>
     </div>
     <div class="section">
       <div class="stats">
-        <div class="stat"><div class="n">${streak()}<small>DAYS</small></div><div class="l">連續出現</div></div>
-        <div class="stat"><div class="n">${mins}<small>MIN</small></div><div class="l">自我對話</div></div>
-        <div class="stat"><div class="n">${state.entries.length}<small>×</small></div><div class="l">感恩日記</div></div>
+        <div class="stat mesh g-lime"><div class="n">${streak()}<small>DAYS</small></div><div class="l">連續出現</div><i class="tick-mark"></i></div>
+        <div class="stat mesh g-magenta"><div class="n">${mins}<small>MIN</small></div><div class="l">自我對話</div><i class="tick-mark"></i></div>
+        <div class="stat mesh g-cobalt"><div class="n">${state.entries.length}<small>×</small></div><div class="l">感恩日記</div><i class="tick-mark"></i></div>
       </div>
     </div>
     <div class="section">
       <div class="section-h"><h2>立刻能做</h2><span class="more">60 秒就有感</span></div>
-      <div class="sosrow">${['anxiety','meeting','date','focus'].map(k=>`<button class="sos" data-scene="${k}"><span>${SCENES[k].emoji}</span><b>${esc(SCENES[k].name)}</b><i>${SCENES[k].min} 分</i></button>`).join('')}</div>
+      <div class="sosrow">${['anxiety','meeting','date','focus'].map(k=>`<button class="sos mesh g-${SCENES[k].g}" data-scene="${k}"><b>${esc(SCENES[k].name)}</b><i>${SCENES[k].min} MIN</i></button>`).join('')}</div>
       <div class="quick" style="margin-top:10px">
-        <button class="qa" data-go="manifest"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M12 4a4 4 0 0 1 4 4v4a4 4 0 0 1-8 0V8a4 4 0 0 1 4-4z"/><path d="M6 11a6 6 0 0 0 12 0M12 17v3"/></svg></span><b>${state.ui.minutes} 分鐘冥想</b><span>${g.emoji} ${esc(g.name)} · ${esc(T.name)}</span></button>
-        <button class="qa" data-go="sleep"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5z"/></svg></span><b>睡前導引</b><span>放鬆身體 · 帶著目標入睡</span></button>
-        <button class="qa" data-go="journal"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 4h11a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2z"/><path d="M8 4v16"/></svg></span><b>寫三件感謝</b><span>90 秒 · 重塑注意力</span></button>
-        <button class="qa" id="home-voice"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 12h2M8 8v8M12 5v14M16 9v6M20 11v2"/></svg></span><b>${p.voice?.recorded?'重錄聲音':'錄下聲音'}</b><span>${p.voice?.recorded?`${p.voice.seconds} 秒樣本 · ${fmtDate(p.voice.at)}`:'30 到 60 秒'}</span></button>
+        <button class="qa" data-go="manifest"><span class="ic mesh g-violet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M12 4a4 4 0 0 1 4 4v4a4 4 0 0 1-8 0V8a4 4 0 0 1 4-4z"/><path d="M6 11a6 6 0 0 0 12 0M12 17v3"/></svg></span><b>${state.ui.minutes} 分鐘冥想</b><span>${esc(g.name)} · ${esc(T.name)}</span></button>
+        <button class="qa" data-go="sleep"><span class="ic mesh g-cobalt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5z"/></svg></span><b>睡前導引</b><span>放鬆身體 · 帶著目標入睡</span></button>
+        <button class="qa" data-go="journal"><span class="ic mesh g-jade"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 4h11a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2z"/><path d="M8 4v16"/></svg></span><b>寫三件感謝</b><span>90 秒 · 重塑注意力</span></button>
+        <button class="qa" id="home-voice"><span class="ic mesh g-ember"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 12h2M8 8v8M12 5v14M16 9v6M20 11v2"/></svg></span><b>${p.voice?.recorded?'重錄聲音':'錄下聲音'}</b><span>${p.voice?.recorded?`${p.voice.seconds} 秒樣本 · ${fmtDate(p.voice.at)}`:'30 到 60 秒'}</span></button>
       </div>
     </div>`;
   $$('#home [data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
@@ -1153,11 +1252,10 @@ function renderManifest(){
 }
 function sceneCard(k){
   const S=SCENES[k], st=sceneStats(k), fav=(state.favs||[]).includes(k), audio=!!SCENE_AUDIO[k];
-  return `<button class="scard" data-scene="${k}">
-    <span class="em">${S.emoji}</span>
-    <span class="sc-b"><b>${esc(S.name)}</b>${fav?'<i class="fav">★</i>':''}${audio?'<i class="voiced">✦ 真人聲音</i>':''}</span>
+  return `<button class="scard mesh g-${S.g||'slate'}" data-scene="${k}">
+    <span class="sc-b"><b>${esc(S.name)}</b>${fav?'<i class="fav">★</i>':''}${audio?'<i class="voiced">真人聲音</i>':''}</span>
     <span class="sc-h">${esc(S.hint)}</span>
-    <span class="sc-f"><i>${S.min} 分</i><i>${BREATHS[S.breath].emoji} ${esc(BREATHS[S.breath].name)}</i>${st?`<i class="drop">${S.metric} −${st.drop.toFixed(1)}</i>`:''}</span>
+    <span class="sc-f"><i>${S.min} 分</i><i>${esc(BREATHS[S.breath].name)}</i>${st?`<i class="drop">${S.metric} −${st.drop.toFixed(1)}</i>`:''}</span>
   </button>`;
 }
 function renderLibrary(){
@@ -1168,15 +1266,15 @@ function renderLibrary(){
   $('#manifest').innerHTML=`
     <div class="topbar"><div><div class="eyebrow">Meditate · 冥想庫</div><h1 class="title">現在的你，<br>需要哪一種？</h1></div></div>
 
-    <button class="card hero reccard" id="rec-go">
+    <button class="card hero reccard mesh gw-${R.g}" id="rec-go">
       <div class="eyebrow">為你推薦 · ${new Date().getHours()}:00 這個時間</div>
-      <p class="quote" style="font-size:20px">${R.emoji} ${esc(R.name)}</p>
+      <p class="quote" style="font-size:22px">${esc(R.name)}</p>
       <div class="meta"><span class="chip">${esc(R.hint)} · ${R.min} 分</span><span class="btn primary sm">開始 →</span></div>
     </button>
 
     <div class="section">
       <div class="section-h"><h2>呼吸練習</h2><span class="more">不用聽引導，只跟著呼吸</span></div>
-      <div class="brow">${Object.entries(BREATHS).map(([k,b])=>`<button class="bchip" data-breath="${k}"><span class="be">${b.emoji}</span><b>${esc(b.name)}</b><span>${b.steps.map(s=>s[1]).join('-')}</span></button>`).join('')}</div>
+      <div class="brow">${Object.entries(BREATHS).map(([k,b])=>`<button class="bchip mesh g-${b.g}" data-breath="${k}"><b>${esc(b.name)}</b><span>${b.steps.map(s=>s[1]).join('-')}</span></button>`).join('')}</div>
     </div>
 
     ${favs.length?`<div class="section"><div class="section-h"><h2>★ 收藏</h2></div><div class="scards">${favs.map(sceneCard).join('')}</div></div>`:''}
@@ -1189,13 +1287,13 @@ function renderLibrary(){
 
     <div class="section">
       <div class="section-h"><h2>自訂情境</h2><span class="more">${custom.length?custom.length+' 個':'寫你自己的'}</span></div>
-      <div class="scards">${custom.map(([k,S])=>`<button class="scard" data-scene="${k}"><span class="em">${S.emoji||'✍️'}</span><span class="sc-b"><b>${esc(S.name)}</b></span><span class="sc-h">${esc(S.hint||'自訂')}</span><span class="sc-f"><i>${S.min} 分</i><i>${BREATHS[S.breath].emoji} ${esc(BREATHS[S.breath].name)}</i></span></button>`).join('')}
-      <button class="scard add" id="add-scene"><span class="em">＋</span><span class="sc-b"><b>做一個新的</b></span><span class="sc-h">說出情境，AI 幫你寫引導詞</span></button></div>
+      <div class="scards">${custom.map(([k,S])=>`<button class="scard mesh g-${S.g||'slate'}" data-scene="${k}"><span class="sc-b"><b>${esc(S.name)}</b></span><span class="sc-h">${esc(S.hint||'自訂')}</span><span class="sc-f"><i>${S.min} 分</i><i>${esc(BREATHS[S.breath].name)}</i></span></button>`).join('')}
+      <button class="scard add" id="add-scene"><span class="plus">＋</span><span class="sc-b"><b>做一個新的</b></span><span class="sc-h">選情境就好，不用打字</span></button></div>
     </div>
 
     <div class="section">
       <div class="section-h"><h2>每日冥想</h2><span class="more">跟著長期目標走</span></div>
-      <button class="scard wide" id="daily-go"><span class="em">🌙</span><span class="sc-b"><b>${state.ui.minutes} 分鐘每日練習</b></span><span class="sc-h">${state.profile.goals.map(k=>GOALS[k]?.emoji||'').join('')} 會引用你最近的日記與狀態</span><span class="sc-f"><i>可換語氣</i><i>✦ 真人聲音</i></span></button>
+      <button class="scard wide mesh gw-${GOALS[state.profile.goals[0]]?.g||'violet'}" id="daily-go"><span class="sc-b"><b>${state.ui.minutes} 分鐘每日練習</b></span><span class="sc-h">${state.profile.goals.map(k=>GOALS[k]?.name).filter(Boolean).join(' · ')} · 會引用你最近的日記</span><span class="sc-f"><i>可換語氣</i><i>真人聲音</i></span></button>
     </div>`;
   $('#rec-go').onclick=()=>openScene(rec);
   $$('#manifest [data-scene]').forEach(b=>b.onclick=()=>openScene(b.dataset.scene));
@@ -1221,9 +1319,9 @@ function renderScene(){
   $('#manifest').innerHTML=`
     <div class="row between" style="margin-bottom:14px"><button class="btn ghost sm" id="sc-back">← 冥想庫</button>
       <button class="btn ghost sm" id="sc-fav" aria-pressed="${fav}">${fav?'★ 已收藏':'☆ 收藏'}</button></div>
-    <div class="topbar"><div><div class="eyebrow">${CATS[S.cat]?.name||'自訂'} · ${S.min} 分鐘</div><h1 class="title">${S.emoji} ${esc(S.name)}</h1></div></div>
+    <div class="topbar"><div><div class="eyebrow">${CATS[S.cat]?.name||'自訂'} · ${S.min} 分鐘</div><h1 class="title">${esc(S.name)}</h1></div></div>
     <p class="note" style="max-width:36ch;margin-bottom:12px">${esc(S.hint||'')}</p>
-    <div class="whycard"><div class="eyebrow">${B.emoji} ${esc(B.name)} · ${B.steps.map(s=>s[0]+' '+s[1]).join(' → ')}</div><p>${esc(B.why)}</p></div>
+    <div class="whycard"><div class="eyebrow">${esc(B.name)} · ${B.steps.map(s=>s[0]+' '+s[1]).join(' → ')}</div><p>${esc(B.why)}</p></div>
     ${S.metric?`<div class="section"><label class="label">開始前，你的「${esc(S.metric)}」有多強？<span class="note">選了才能看到效果</span></label>
       <div class="dots" id="sc-before">${[...Array(11)].map((_,i)=>`<button data-v="${i}" aria-pressed="${state.ui.before===i}">${i}</button>`).join('')}</div>
       ${st?`<p class="note" style="margin-top:8px">過去 ${st.n} 次，這段平均讓你的${esc(S.metric)}降了 <b style="color:var(--jade)">${st.drop.toFixed(1)} 分</b>。</p>`:''}</div>`:''}
@@ -1259,11 +1357,11 @@ function renderDaily(){
     <div class="row between" style="margin-bottom:14px"><button class="btn ghost sm" id="sc-back">← 冥想庫</button></div>
     <div class="topbar"><div><div class="eyebrow">每日練習</div><h1 class="title">今天，<br>對自己說什麼？</h1></div></div>
     <label class="label">方向</label>
-    <div class="row" style="flex-wrap:wrap;gap:8px;margin-bottom:16px" id="mf-goals">${p.goals.map(k=>`<button class="chip goal" data-k="${k}" style="${k===state.ui.goal?'border-color:var(--moon);color:var(--moon)':''}">${GOALS[k].emoji} ${esc(GOALS[k].name)}</button>`).join('')}<button class="chip" id="mf-addgoal">＋</button></div>
+    <div class="row" style="flex-wrap:wrap;gap:8px;margin-bottom:16px" id="mf-goals">${p.goals.map(k=>`<button class="chip goal" data-k="${k}" style="${k===state.ui.goal?'border-color:var(--moon);color:var(--moon)':''}"><i class="sw xs mesh g-${GOALS[k].g}"></i>${esc(GOALS[k].name)}</button>`).join('')}<button class="chip" id="mf-addgoal">＋</button></div>
     <div class="row between" style="margin-bottom:16px">
       <div style="flex:1"><label class="label">長度</label><div class="seg" id="mf-min">${[3,7,12].map(m=>`<button data-m="${m}" aria-pressed="${m===state.ui.minutes}">${m} 分</button>`).join('')}</div></div>
       <div style="width:12px"></div>
-      <div style="flex:1"><label class="label">語氣</label><div class="seg" id="mf-tone">${Object.entries(TONES).map(([k,t])=>`<button data-t="${k}" aria-pressed="${k===p.tone}" title="${t.name}">${t.emoji}</button>`).join('')}</div></div>
+      <div style="flex:1"><label class="label">語氣</label><div class="seg" id="mf-tone">${Object.entries(TONES).map(([k,t])=>`<button data-t="${k}" aria-pressed="${k===p.tone}">${esc(t.name)}</button>`).join('')}</div></div>
     </div>
     <div class="orb-wrap"><div class="orb idle" id="mf-orb"><span class="phase" id="mf-phase">READY</span></div></div>
     <div class="row between" style="margin:8px 0 12px">
@@ -1314,28 +1412,72 @@ async function aiRewrite(k,S){
   b.textContent='✦ AI 重寫'; b.disabled=false;
 }
 function openCustomSheet(){
-  sheet(`<h2>做一個新的情境</h2><p class="sub">說出你的場合，App 會排好呼吸節奏與肯定語。有 Claude 金鑰時會整段重寫。</p>
-    <div class="field"><label class="label" for="cu-name">情境名稱</label><input class="input" id="cu-name" placeholder="例如：回家見家人前"></div>
-    <div class="field"><label class="label" for="cu-hint">什麼時候用</label><input class="input" id="cu-hint" placeholder="例如：過年前的那個下午"></div>
-    <div class="field"><label class="label" for="cu-aff">你想聽到什麼？一行一句</label><textarea class="input" id="cu-aff" placeholder="我可以愛他們，也可以有界線。&#10;我不需要被理解才算數。"></textarea></div>
-    <label class="label">呼吸節奏</label>
-    <div class="opts" id="cu-b" style="margin-bottom:16px">${Object.entries(BREATHS).map(([k,b],i)=>`<button class="opt" data-k="${k}" aria-pressed="${i===0}"><span class="em">${b.emoji}</span><div><b>${esc(b.name)}</b><span>${esc(b.hint)}</span></div><span class="tick"></span></button>`).join('')}</div>
-    <button class="btn primary block" id="cu-ok">建立</button>`, b=>{
-    let br='physio';
+  let situ=null, custom=false, picked=new Set(), pool=[];
+  const render=b=>{
+    const S=situ?SITU[situ]:null;
+    $('#cu-body',b).innerHTML = !situ ? '' : `
+      <div class="field"><label class="label" for="cu-name">情境名稱</label><input class="input" id="cu-name" value="${esc(custom?'':S.name)}" placeholder="例如：回家見家人前"></div>
+      <div class="field"><label class="label" for="cu-hint">什麼時候用</label><input class="input" id="cu-hint" value="${esc(custom?'':S.hint)}" placeholder="例如：過年前的那個下午"></div>
+      <div class="row between" style="margin-bottom:8px"><label class="label" style="margin:0">想聽到的句子</label>
+        <div class="row" style="gap:6px"><button class="btn sm ghost" id="cu-more">↻ 換一批</button><button class="btn sm ghost" id="cu-ai">✦ AI 生成</button></div></div>
+      <p class="note" style="margin-bottom:10px">點掉不要的，剩下的就是你的引導詞。選 ${picked.size} 句。</p>
+      <div class="pickrow" id="cu-pool">${pool.map((t,i)=>`<button class="pick" data-i="${i}" aria-pressed="${picked.has(i)}">${esc(t)}</button>`).join('')}</div>
+      <button class="btn ghost sm block" id="cu-own" style="margin:12px 0 6px">＋ 自己加一句</button>
+      <div id="cu-ownwrap" hidden><textarea class="input" id="cu-aff" placeholder="一行一句，可留空"></textarea></div>
+      <label class="label" style="margin-top:14px">呼吸節奏</label>
+      <div class="opts" id="cu-b" style="margin-bottom:16px">${Object.entries(BREATHS).map(([k,bb])=>`<button class="opt" data-k="${k}" aria-pressed="${k===(S?S.breath:'physio')}"><i class="em sw lg mesh g-${bb.g}"></i><div><b>${esc(bb.name)}</b><span>${esc(bb.hint)}</span></div><span class="tick"></span></button>`).join('')}</div>
+      <button class="btn primary block" id="cu-ok">建立情境</button>`;
+    if(!situ) return;
+    $$('#cu-pool .pick',b).forEach(o=>o.onclick=()=>{ const i=+o.dataset.i; picked.has(i)?picked.delete(i):picked.add(i); o.setAttribute('aria-pressed',picked.has(i)); $('#cu-body .note',b).textContent=`點掉不要的，剩下的就是你的引導詞。選 ${picked.size} 句。`; });
+    $('#cu-own',b).onclick=()=>{ const w=$('#cu-ownwrap',b); w.hidden=!w.hidden; if(!w.hidden) $('#cu-aff',b).focus(); };
+    $('#cu-more',b).onclick=()=>{ pool=shuffle(SITU[situ].aff,rng(String(Math.random()))); picked=new Set([0,1,2]); render(b); };
+    $('#cu-ai',b).onclick=async()=>{
+      const btn=$('#cu-ai',b), name=$('#cu-name',b).value.trim()||SITU[situ].name;
+      btn.textContent='生成中…'; btn.disabled=true;
+      const extra=await aiLines(name,$('#cu-hint',b).value.trim());
+      if(extra.length){ pool=extra.concat(pool).slice(0,8); picked=new Set([0,1,2]); render(b); toast('AI 寫了新的句子'); }
+      else { btn.textContent='✦ AI 生成'; btn.disabled=false; }
+    };
+    let br=SITU[situ].breath;
     $$('#cu-b .opt',b).forEach(o=>o.onclick=()=>{ br=o.dataset.k; $$('#cu-b .opt',b).forEach(x=>x.setAttribute('aria-pressed',x===o)); });
     $('#cu-ok',b).onclick=()=>{
       const name=$('#cu-name',b).value.trim(); if(!name) return toast('先取個名字');
-      const aff=$('#cu-aff',b).value.split('\n').map(s=>s.trim()).filter(Boolean);
+      const own=($('#cu-aff',b).value||'').split('\n').map(x=>x.trim()).filter(Boolean);
+      const aff=[...[...picked].sort((x,y)=>x-y).map(i=>pool[i]),...own];
       const key='cu_'+Date.now();
       state.custom=state.custom||{};
-      state.custom[key]={name,emoji:'✍️',cat:'before',min:2,breath:br,tone:state.profile.tone||'gentle',
-        hint:$('#cu-hint',b).value.trim()||'自訂情境',metric:'不安',
+      state.custom[key]={name,g:SITU[situ].g,cat:'before',min:2,breath:br,tone:state.profile.tone||'gentle',
+        hint:$('#cu-hint',b).value.trim()||'自訂情境',metric:SITU[situ].metric,
         open:[`${name}之前，先給自己兩分鐘。`,'把腳踩實，肩膀放下來。'],
         aff:aff.length?aff:['我可以用自己的節奏面對這件事。','我不需要完美，我只需要在場。','我信任自己會處理好。'],
         close:['好了。','去吧。']};
       save(); closeSheet(); openScene(key); toast('情境建好了 ✦');
     };
+  };
+  sheet(`<h2>做一個新的情境</h2><p class="sub">先選一個最接近的場合，句子和呼吸節奏都會幫你排好。不想打字也可以完成。</p>
+    <div class="pickrow" id="cu-situ">${Object.entries(SITU).map(([k,v])=>`<button class="pick situ" data-k="${k}"><i class="sw xs mesh g-${v.g}"></i>${esc(v.name)}</button>`).join('')}<button class="pick situ" data-k="_own"><i class="sw xs mesh g-slate"></i>其他場合</button></div>
+    <div id="cu-body" style="margin-top:18px"></div>`, b=>{
+    $$('#cu-situ .pick',b).forEach(o=>o.onclick=()=>{
+      custom = o.dataset.k==='_own';
+      situ = custom ? 'restart' : o.dataset.k;
+      $$('#cu-situ .pick',b).forEach(x=>x.setAttribute('aria-pressed',x===o));
+      pool=[...SITU[situ].aff]; picked=new Set([0,1,2]); render(b);
+    });
   });
+}
+async function aiLines(name,when){
+  if(!state.settings.claudeKey){ toast('要 AI 生成，先在「我」貼上 Claude 金鑰'); return []; }
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{
+      'content-type':'application/json','x-api-key':state.settings.claudeKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-opus-5',max_tokens:600,
+        system:'用繁體中文（台灣口語）寫 5 句第一人稱現在式的自我肯定語，給使用者在指定情境前唸給自己聽。每行一句，不要編號、不要標題、不要引號。句子短、具體、不做醫療宣稱。',
+        messages:[{role:'user',content:`情境：${name}\n什麼時候用：${when||'（沒說）'}`}]})});
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const d=await res.json();
+    if(d.stop_reason==='refusal') throw new Error('請求被拒絕');
+    return d.content.filter(x=>x.type==='text').map(x=>x.text).join('\n').split(/\n+/).map(x=>x.trim().replace(/^[-•\d.、]+\s*/,'')).filter(Boolean).slice(0,5);
+  }catch(e){ toast('AI 生成失敗：'+(e.message||e)); return []; }
 }
 
 /* ---------- MEDITATE: breath practice ---------- */
@@ -1347,7 +1489,7 @@ function renderBreath(){
   $('#manifest').innerHTML=`
     <div class="row between" style="margin-bottom:14px"><button class="btn ghost sm" id="sc-back">← 冥想庫</button>
       <button class="btn ghost sm" id="br-edit">自訂秒數</button></div>
-    <div class="topbar"><div><div class="eyebrow">呼吸練習 · 無語音</div><h1 class="title">${B.emoji} ${esc(B.name)}</h1></div></div>
+    <div class="topbar"><div><div class="eyebrow">呼吸練習 · 無語音</div><h1 class="title">${esc(B.name)}</h1></div></div>
     <p class="note" style="max-width:36ch;margin-bottom:14px">${esc(B.why)}</p>
     <div class="pacerwrap">
       <div class="pacer" id="pacer"><div class="pring"></div><div class="pcore" id="pcore"></div>
@@ -1400,12 +1542,12 @@ function openBreathEdit(k){
 
 /* ---------- ambient mixer (6 layers, all synthesized live) ---------- */
 const AMB={
-  white:{name:'白噪音',emoji:'⚪',hint:'蓋掉人聲與鍵盤聲'},
-  brown:{name:'棕噪音',emoji:'🟤',hint:'低頻、比白噪音溫暖'},
-  rain:{name:'雨聲',emoji:'🌧',hint:'細雨打在窗上'},
-  ocean:{name:'海邊',emoji:'🌊',hint:'一來一回的浪，跟呼吸同頻'},
-  forest:{name:'山林裡',emoji:'🌲',hint:'風穿過樹葉，偶爾有鳥'},
-  bowl:{name:'頌缽',emoji:'🎐',hint:'每 20 秒一聲，收心用'},
+  white:{name:'白噪音',g:'slate',hint:'蓋掉人聲與鍵盤聲'},
+  brown:{name:'棕噪音',g:'amber',hint:'低頻、比白噪音溫暖'},
+  rain:{name:'雨聲',g:'cobalt',hint:'細雨打在窗上'},
+  ocean:{name:'海邊',g:'aqua',hint:'一來一回的浪，跟呼吸同頻'},
+  forest:{name:'山林裡',g:'jade',hint:'風穿過樹葉，偶爾有鳥'},
+  bowl:{name:'頌缽',g:'mint',hint:'每 20 秒一聲，收心用'},
 };
 let ambient=null;
 function ambCtx(){
@@ -1477,7 +1619,7 @@ function stopAmbient(){ if(!ambient) return; const a=ambient; ambient=null; Obje
 function ambOnCount(){ return ambient?Object.keys(ambient.layers).length:0; }
 function openAmbientSheet(){
   sheet(`<h2>環境音</h2><p class="sub">可以疊。全部即時合成，不用下載音檔，也能跟引導一起播。</p>
-    <div class="list" id="am">${Object.entries(AMB).map(([k,a])=>`<button class="opt" data-k="${k}" aria-pressed="${!!ambient?.layers[k]}"><span class="em">${a.emoji}</span><div><b>${esc(a.name)}</b><span>${esc(a.hint)}</span></div><span class="tick"></span></button>`).join('')}</div>
+    <div class="list" id="am">${Object.entries(AMB).map(([k,a])=>`<button class="opt" data-k="${k}" aria-pressed="${!!ambient?.layers[k]}"><i class="em sw lg mesh g-${a.g}"></i><div><b>${esc(a.name)}</b><span>${esc(a.hint)}</span></div><span class="tick"></span></button>`).join('')}</div>
     <div class="field" style="margin-top:16px"><label class="label">音量<b style="float:right;font-family:var(--mono)" id="amv">${Math.round((state.settings.ambVol??.3)*100)}%</b></label><input type="range" class="rng" id="amr" min="0" max="100" value="${Math.round((state.settings.ambVol??.3)*100)}"></div>
     <button class="btn ghost block" id="am-off">全部關掉</button>`, b=>{
     $$('#am .opt',b).forEach(o=>o.onclick=()=>{
@@ -1605,9 +1747,9 @@ function renderMe(){
       <div style="flex:1"><b>${v.voiceId?'你的聲音已就緒':v.recorded?'樣本已錄製，等待複製':'還沒有聲音樣本'}</b><span>${v.voiceId?`Voice ID ${esc(v.voiceId.slice(0,8))}… · ${v.seconds} 秒樣本`:v.recorded?`${v.seconds} 秒 · ${fmtDate(v.at)} · 加入 ElevenLabs 金鑰後重錄即可複製`:'30 到 60 秒，安靜的房間'}</span></div>
       <button class="btn sm soft" id="me-rec">${v.recorded?'重錄':'錄音'}</button></div>
     <div class="section"><div class="section-h"><h2>最近的狀態</h2><button class="more" id="me-con">調整 →</button></div>
-      <div class="row" style="flex-wrap:wrap;gap:8px">${(p.concerns||[]).map(k=>CONCERNS[k]?`<span class="chip">${CONCERNS[k].emoji} ${esc(CONCERNS[k].name)}</span>`:'').join('')||'<span class="note">還沒選</span>'}</div></div>
+      <div class="row" style="flex-wrap:wrap;gap:8px">${(p.concerns||[]).map(k=>CONCERNS[k]?`<span class="chip"><i class="sw xs mesh g-${CONCERNS[k].g}"></i>${esc(CONCERNS[k].name)}</span>`:'').join('')||'<span class="note">還沒選</span>'}</div></div>
     <div class="section"><div class="section-h"><h2>我的方向</h2><button class="more" id="me-goals">調整 →</button></div>
-      <div class="row" style="flex-wrap:wrap;gap:8px">${p.goals.map(k=>`<span class="chip goal">${GOALS[k].emoji} ${esc(GOALS[k].name)}</span>`).join('')||'<span class="note">還沒選目標</span>'}<span class="chip">${TONES[p.tone]?.emoji||''} ${esc(TONES[p.tone]?.name||'未選語氣')}</span></div></div>
+      <div class="row" style="flex-wrap:wrap;gap:8px">${p.goals.map(k=>`<span class="chip goal"><i class="sw xs mesh g-${GOALS[k].g}"></i>${esc(GOALS[k].name)}</span>`).join('')||'<span class="note">還沒選目標</span>'}<span class="chip"><i class="sw xs mesh g-${TONES[p.tone]?.g||'slate'}"></i>${esc(TONES[p.tone]?.name||'未選語氣')}</span></div></div>
     <div class="section"><div class="section-h"><h2>方案</h2><span class="more">NT$ · 月繳</span></div>
       <div class="plans">
         <div class="plan"><div class="pn">Free</div><div class="pp"><b>0</b> /月</div><ul><li>1 個目標 · 每日一段 3 分鐘冥想</li><li>系統聲音</li><li>心情與感恩日記</li></ul></div>
@@ -1635,7 +1777,7 @@ function renderMe(){
   $('#me-con').onclick=()=>openConcernsSheet(renderMe);
   $('#me-edit').onclick=()=>sheet(`<h2>怎麼稱呼你？</h2><p class="sub">引導詞裡會用這個名字叫你。</p><input class="input" id="sh-name" value="${esc(p.name)}" style="margin-bottom:16px"><button class="btn primary block" id="sh-ok">儲存</button>`,b=>{ $('#sh-ok',b).onclick=()=>{ state.profile.name=$('#sh-name',b).value.trim(); save(); closeSheet(); renderMe(); }; });
   $('#me-glow').onclick=()=>toast('Demo：正式版會接 Stripe / TapPay 訂閱');
-  $('#k-save').onclick=()=>{ state.settings.elevenKey=$('#k-eleven').value.trim(); state.settings.claudeKey=$('#k-claude').value.trim(); if(state.settings.elevenKey&&!state.settings.voiceId){ state.settings.voiceId=DEMO_VOICES.melo.id; state.settings.voiceName=DEMO_VOICES.melo.name; } save(); toast('已儲存'); renderMe(); };
+  $('#k-save').onclick=()=>{ state.settings.elevenKey=$('#k-eleven').value.trim(); state.settings.claudeKey=$('#k-claude').value.trim(); if(state.settings.elevenKey&&!state.settings.voiceId){ state.settings.voiceId=DEMO_VOICES.brand.id; state.settings.voiceName=DEMO_VOICES.brand.name; } save(); toast('已儲存'); renderMe(); };
   $('#k-voice').onclick=()=>openVoiceSheet(renderMe);
   $('#me-export').onclick=()=>sheet(`<h2>你的資料</h2><p class="sub">全選複製，貼到任何地方存起來。</p><textarea class="input" style="min-height:220px;font-family:var(--mono);font-size:11px" readonly>${esc(JSON.stringify(state,null,2))}</textarea>`);
   $('#me-share').onclick=openShareSheet;
@@ -1649,13 +1791,13 @@ function openGoalsSheet(after){
     $('#sh-ok',b).onclick=()=>{ if(!sel.size) return toast('至少選一個'); state.profile.goals=[...sel]; save(); closeSheet(); after&&after(); };
   });
 }
-function goalOptions(selected){ return Object.entries(GOALS).map(([k,g])=>`<button class="opt" data-k="${k}" aria-pressed="${selected.includes(k)}"><span class="em">${g.emoji}</span><div><b>${esc(g.name)}</b><span>${esc(g.hint)}</span></div><span class="tick"></span></button>`).join(''); }
+function goalOptions(selected){ return Object.entries(GOALS).map(([k,g])=>`<button class="opt" data-k="${k}" aria-pressed="${selected.includes(k)}"><i class="em sw lg mesh g-${g.g}"></i><div><b>${esc(g.name)}</b><span>${esc(g.hint)}</span></div><span class="tick"></span></button>`).join(''); }
 function bindGoalOptions(root,sel){ $$('.opt',root).forEach(b=>b.onclick=()=>{ const k=b.dataset.k; if(sel.has(k)) sel.delete(k); else { if(sel.size>=3) return toast('最多 3 個，先放下一個'); sel.add(k); } b.setAttribute('aria-pressed',sel.has(k)); }); }
 function openVoiceSheet(after){
   const s=state.settings;
   if(!s.elevenKey){
     sheet(`<h2>播放聲音</h2><p class="sub">兩段示範音檔（🎤 音樂 × 💅 Baddie × 3 分，以及睡前導引）可以選聲音。其他組合暫時用系統聲音。</p>
-      <div class="list" id="sh-demo">${Object.entries(DEMO_VOICES).map(([k,v])=>`<button class="opt" data-k="${k}" aria-pressed="${k===demoVoice()}"><span class="em">${v.emoji}</span><div><b>${esc(v.name)}</b><span>${esc(v.sub)}</span></div><span class="tick"></span></button>`).join('')}
+      <div class="list" id="sh-demo">${Object.entries(DEMO_VOICES).map(([k,v])=>`<button class="opt" data-k="${k}" aria-pressed="${k===demoVoice()}"><i class="em sw lg mesh g-${v.g}"></i><div><b>${esc(v.name)}</b><span>${esc(v.sub)}</span></div><span class="tick"></span></button>`).join('')}
         <div class="opt" style="opacity:.7"><span class="em">🔊</span><div><b>系統聲音</b><span>其他所有組合 · 瀏覽器內建 zh-TW 語音</span></div></div>
       </div>
       <p class="note" style="margin:14px 0">想要每一段都是真人聲音？到「我 → 連接」貼上 ElevenLabs API key，就能用這兩個聲音唸任何引導，或錄音複製你自己的。</p>
@@ -1669,8 +1811,8 @@ function openVoiceSheet(after){
       const acct=await loadVoices(); const box=$('#sh-voices',b);
       const curated=Object.values(DEMO_VOICES).map(v=>({id:v.id,name:v.name,cat:'curated',lang:v.sub}));
       const vs=[...curated, ...acct.filter(v=>!curated.some(c=>c.id===v.id))];
-      box.innerHTML=vs.map(v=>`<button class="opt" data-id="${esc(v.id)}" data-name="${esc(v.name)}" aria-pressed="${v.id===s.voiceId}"><span class="em">${v.cat==='curated'?(v.id===DEMO_VOICES.melo.id?'✦':'🌑'):v.cat==='cloned'?'✦':v.lang==='zh'?'中':'🔊'}</span><div><b>${esc(v.name)}</b><span>${v.cat==='curated'?esc(v.lang):(v.cat==='cloned'?'複製聲':v.cat||'')+(v.lang?' · '+esc(v.lang):'')}</span></div><span class="tick"></span></button>`).join('')||'<p class="note">帳號裡沒有聲音。先在「我」錄一段來複製。</p>';
-      $$('.opt',box).forEach(o=>o.onclick=()=>{ s.voiceId=o.dataset.id; s.voiceName=o.dataset.name; ttsCache.clear(); save(); closeSheet(); toast('聲音：'+s.voiceName); after&&after(); });
+      box.innerHTML=vs.map(v=>`<button class="opt" data-id="${esc(v.id)}" data-name="${esc(v.name)}" aria-pressed="${v.id===s.voiceId}"><i class="em sw lg mesh g-${v.cat==='curated'?(v.id===DEMO_VOICES.melo.id?'magenta':'cobalt'):v.cat==='cloned'?'magenta':v.lang==='zh'?'jade':'slate'}"></i><div><b>${esc(v.name)}</b><span>${v.cat==='curated'?esc(v.lang):(v.cat==='cloned'?'複製聲':v.cat||'')+(v.lang?' · '+esc(v.lang):'')}</span></div><span class="tick"></span></button>`).join('')||'<p class="note">帳號裡沒有聲音。先在「我」錄一段來複製。</p>';
+      $$('.opt',box).forEach(o=>o.onclick=()=>{ s.voiceId=o.dataset.id; s.voiceName=o.dataset.name; ttsCache.clear(); voiceFallback=null; save(); closeSheet(); toast('聲音：'+s.voiceName); after&&after(); });
     }catch(e){ $('#sh-voices',b).innerHTML=`<p class="note">載入失敗（${esc(e.message||e)}）。檢查金鑰，或這個頁面是否允許連外。</p>`; }
   });
 }
@@ -1689,7 +1831,7 @@ function renderOb(){
   if(obStep===1){ $('#ob-name').value=state.profile.name||''; $('#ob-concerns').innerHTML=concernOptions([...obCon]); bindConcernOptions($('#ob-concerns'),obCon); }
   if(obStep===2){ $('#ob-goals').innerHTML=goalOptions([...obSel]); bindGoalOptions($('#ob-goals'),obSel);
     $$('#ob-min button').forEach(b=>{ b.setAttribute('aria-pressed',+b.dataset.m===obMin); b.onclick=()=>{ obMin=+b.dataset.m; $$('#ob-min button').forEach(x=>x.setAttribute('aria-pressed',x===b)); }; }); }
-  if(obStep===3){ $('#ob-tones').innerHTML=Object.entries(TONES).map(([k,t])=>`<button class="opt tone" data-t="${k}" aria-pressed="${obTone===k}"><span class="em">${t.emoji}</span><div><b>${esc(t.name)}</b><span>${esc(t.hint)}</span></div><span class="tick"></span></button>`).join('');
+  if(obStep===3){ $('#ob-tones').innerHTML=Object.entries(TONES).map(([k,t])=>`<button class="opt tone" data-t="${k}" aria-pressed="${obTone===k}"><i class="em sw lg mesh g-${t.g}"></i><div><b>${esc(t.name)}</b><span>${esc(t.hint)}</span></div><span class="tick"></span></button>`).join('');
     $$('#ob-tones .opt').forEach(b=>b.onclick=()=>{ obTone=b.dataset.t; $$('#ob-tones .opt').forEach(x=>x.setAttribute('aria-pressed',x===b)); }); }
   if(obStep===4){ obRecCleanup=mountRecorder($('#ob-rec'),{onDone:()=>{ toast('聲音樣本已存 ✦'); finishOb(); }}); }
 }
@@ -1704,7 +1846,7 @@ $('#ob-next').onclick=()=>{
 };
 $('#ob-back').onclick=()=>{ if(obStep>1){ obRecCleanup&&obRecCleanup(); obStep--; renderOb(); } };
 function finishOb(){ obRecCleanup&&obRecCleanup(); state.demo=false; state.ui.goal=state.profile.goals[0]; save(); go('home'); toast(`歡迎，${state.profile.name} ✦`); }
-function concernOptions(selected){ return Object.entries(CONCERNS).map(([k,c])=>`<button class="con" data-k="${k}" aria-pressed="${selected.includes(k)}"><span class="em">${c.emoji}</span><b>${esc(c.name)}</b><span>${esc(c.hint)}</span></button>`).join(''); }
+function concernOptions(selected){ return Object.entries(CONCERNS).map(([k,c])=>`<button class="con" data-k="${k}" aria-pressed="${selected.includes(k)}"><i class="em sw lg mesh g-${c.g}"></i><b>${esc(c.name)}</b><span>${esc(c.hint)}</span></button>`).join(''); }
 function bindConcernOptions(root,sel){ $$('.con',root).forEach(b=>b.onclick=()=>{ const k=b.dataset.k; if(sel.has(k)) sel.delete(k); else { if(sel.size>=3) return toast('最多 3 個'); sel.add(k); } b.setAttribute('aria-pressed',sel.has(k)); }); }
 function openConcernsSheet(after){
   sheet(`<h2>最近的狀態</h2><p class="sub">最多 3 個。引導詞的開頭會先回應這些。</p><div class="grid2" id="sh-con">${concernOptions(state.profile.concerns||[])}</div><button class="btn primary block" id="sh-ok" style="margin-top:18px">完成</button>`,b=>{
@@ -1721,7 +1863,7 @@ function effRows(){
     const avg=ds.reduce((a,b)=>a+b,0)/ds.length; return {k,S,avg,n:ds.length}; }).filter(Boolean).sort((a,b)=>b.avg-a.avg);
   if(!rows.length) return '';
   const max=Math.max(...rows.map(r=>Math.abs(r.avg)),1);
-  return `<div class="effs">${rows.map(r=>`<div class="eff"><span class="en">${r.S.emoji} ${esc(r.S.name)}</span>
+  return `<div class="effs">${rows.map(r=>`<div class="eff"><span class="en"><i class="sw xs mesh g-${r.S.g||'slate'}"></i>${esc(r.S.name)}</span>
     <span class="ebar"><i style="width:${Math.max(4,Math.abs(r.avg)/max*100)}%;background:${r.avg>=0?'var(--jade)':'var(--rose)'}"></i></span>
     <b>${r.avg>=0?'−':'+'}${Math.abs(r.avg).toFixed(1)}</b><span class="ec">${r.n} 次</span></div>`).join('')}</div>`;
 }
@@ -1736,7 +1878,7 @@ function openShareSheet(){
     const grd=x.createRadialGradient(W*.75,H*.2,20,W*.75,H*.2,900); grd.addColorStop(0,moon+'55'); grd.addColorStop(1,'transparent'); x.fillStyle=grd; x.fillRect(0,0,W,H);
     x.fillStyle=text+'22'; for(let i=0;i<120;i++){ x.beginPath(); x.arc(Math.random()*W,Math.random()*H,Math.random()*2.4,0,7); x.fill(); }
     x.fillStyle=moon; x.font='500 34px "DM Mono",monospace'; x.fillText('MELO MOOD', 90, 200);
-    x.fillStyle=muted; x.font='400 30px "Noto Sans TC",sans-serif'; x.fillText(`${g.emoji} ${g.name} · ${todayKey()}`, 90, 260);
+    x.fillStyle=muted; x.font='400 30px "Noto Sans TC",sans-serif'; x.fillText(`${g.name} · ${todayKey()}`, 90, 260);
     x.fillStyle=text; x.font='700 78px "Noto Serif TC",serif';
     const words=quote.split(''); let line='', y=H/2-160;
     words.forEach(ch=>{ if(x.measureText(line+ch).width>W-200){ x.fillText(line,90,y); y+=118; line=ch; } else line+=ch; });
@@ -1760,19 +1902,14 @@ function armReminder(){
   if(window.Notification && Notification.permission==='default') Notification.requestPermission().catch(()=>{});
 }
 
-/* ---------- theme ---------- */
-function applyTheme(t){ if(t) document.documentElement.setAttribute('data-theme',t); else document.documentElement.removeAttribute('data-theme'); $$('[data-theme-set]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.themeSet===t)); state.settings.theme=t; save(); }
-$$('[data-theme-set]').forEach(b=>b.onclick=()=>applyTheme(b.dataset.themeSet));
-if(state.settings.theme) applyTheme(state.settings.theme);
 
 /* ---------- night sky ---------- */
 (function sky(){
   const c=$('#sky'), ctx=c.getContext('2d'); let stars=[], w=0,h=0; const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
   const resize=()=>{ w=c.width=innerWidth*devicePixelRatio; h=c.height=innerHeight*devicePixelRatio; stars=Array.from({length:Math.floor(w*h/22000)},()=>({x:Math.random()*w,y:Math.random()*h,r:Math.random()*1.4+.3,p:Math.random()*Math.PI*2,s:Math.random()*.4+.1})); };
   resize(); addEventListener('resize',resize);
-  const light=()=>getComputedStyle(document.documentElement).colorScheme==='light';
-  const draw=t=>{ ctx.clearRect(0,0,w,h); const L=light(); ctx.fillStyle=L?'rgba(27,22,51,.35)':'rgba(246,240,233,.9)';
-    for(const s of stars){ const a=reduce?.6:.35+.35*Math.sin(t/1400*s.s+s.p); ctx.globalAlpha=a*(L?.6:1); ctx.beginPath(); ctx.arc(s.x,s.y,s.r*devicePixelRatio,0,7); ctx.fill(); if(!reduce){ s.y+=s.s*.08; if(s.y>h) s.y=0; } }
+  const draw=t=>{ ctx.clearRect(0,0,w,h); ctx.fillStyle='rgba(245,245,247,.85)';
+    for(const s of stars){ const a=reduce?.5:.28+.3*Math.sin(t/1400*s.s+s.p); ctx.globalAlpha=a; ctx.beginPath(); ctx.arc(s.x,s.y,s.r*devicePixelRatio,0,7); ctx.fill(); if(!reduce){ s.y+=s.s*.08; if(s.y>h) s.y=0; } }
     ctx.globalAlpha=1; if(!reduce) requestAnimationFrame(draw); };
   requestAnimationFrame(draw);
 })();
