@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Melo Mood</title>
-<meta name="description" content="用你自己的聲音，對潛意識說話。AI 顯化腳本、睡前催眠導引與心情日記。">
+<meta name="description" content="用你自己的聲音，對潛意識說話。AI 個人化冥想引導、睡前放鬆導引與心情日記。">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@500;700;800&family=Noto+Serif+TC:wght@500;700&family=Noto+Sans+TC:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap">
 <style>
@@ -168,6 +168,12 @@ p{margin:0}
 .opt[aria-pressed="true"] .tick{background:var(--moon);border-color:var(--moon)}
 .opt.tone{padding:14px}
 
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.con{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:12px 14px;border-radius:var(--r-md);background:var(--raised);border:1px solid transparent;text-align:left;transition:border-color .15s,background .15s}
+.con .em{font-size:20px;margin-bottom:4px}
+.con b{font-size:14px}
+.con span:last-child{font-size:11px;color:var(--muted)}
+.con[aria-pressed="true"]{border-color:var(--moon);background:var(--moon-ink)}
 .seg{display:flex;background:var(--raised);border-radius:var(--r-pill);padding:4px;gap:4px}
 .seg button{flex:1;padding:8px 4px;border-radius:var(--r-pill);font-size:13px;color:var(--muted);white-space:nowrap}
 .seg button[aria-pressed="true"]{background:var(--surface);color:var(--text);font-weight:600}
@@ -194,7 +200,8 @@ p{margin:0}
 .player .time{font-family:var(--mono);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;min-width:74px}
 .play{width:54px;height:54px;border-radius:50%;background:var(--moon);color:var(--moon-ink);display:grid;place-items:center;box-shadow:0 8px 30px var(--glow);flex:none}
 .play svg{width:22px;height:22px}
-.voice-src{font-size:12px;color:var(--muted);text-align:right;flex:1;line-height:1.4}
+.voice-src{font-size:12px;color:var(--muted);text-align:right;flex:1;line-height:1.4;border-radius:10px;padding:4px 6px;margin:-4px -6px}
+.voice-src:hover{background:var(--hover);color:var(--text)}
 .voice-src b{display:block;color:var(--text)}
 
 .orb-wrap{display:grid;place-items:center;padding:16px 0 6px}
@@ -258,7 +265,7 @@ textarea.input{min-height:90px;resize:vertical}
 .device.sheet-open .sheet.open{transform:none}
 
 /* onboarding */
-#onboard{padding-top:34px}
+#onboard{padding-top:34px;padding-bottom:20px}
 .ob-step{display:none}
 .ob-step.active{display:block;animation:fade .3s ease}
 .ob-progress{display:flex;gap:6px;margin-bottom:26px}
@@ -267,7 +274,7 @@ textarea.input{min-height:90px;resize:vertical}
 .ob-h{font-family:var(--serif);font-size:30px;line-height:1.25;margin-bottom:8px}
 .ob-h .lat{font-family:var(--display);color:var(--moon);letter-spacing:-.02em}
 .ob-p{color:var(--muted);margin-bottom:22px;max-width:36ch}
-.ob-foot{position:absolute;left:22px;right:22px;bottom:calc(26px + env(safe-area-inset-bottom));display:flex;gap:10px}
+.ob-foot{position:sticky;bottom:0;display:flex;gap:10px;margin-top:28px;padding:14px 0 calc(10px + env(safe-area-inset-bottom));background:linear-gradient(180deg,transparent,var(--surface) 35%)}
 
 /* recorder */
 .rec{background:var(--raised);border-radius:var(--r-lg);padding:18px}
@@ -321,7 +328,7 @@ textarea.input{min-height:90px;resize:vertical}
   <aside class="plate">
     <div class="wordmark">Melo<em>·</em>Mood</div>
     <p class="tag">用你自己的聲音，<br>對潛意識說話。</p>
-    <p class="sub">AI 讀你的目標與日記，動態寫出專屬顯化腳本與睡前催眠導引，再用你錄下的聲音唸給你聽。</p>
+    <p class="sub">AI 讀你的目標與日記，動態寫出專屬冥想引導與睡前放鬆導引，再用你錄下的聲音唸給你聽。</p>
     <div class="pill"><i></i> Demo build · 資料只存在你的瀏覽器</div>
     <div class="theme" role="group" aria-label="主題">
       <button data-theme-set="" aria-pressed="true">跟隨系統</button>
@@ -335,25 +342,34 @@ textarea.input{min-height:90px;resize:vertical}
 
       <!-- ============ ONBOARDING ============ -->
       <section class="screen" id="onboard" aria-label="開始設定">
-        <div class="ob-progress"><i class="on"></i><i></i><i></i></div>
+        <div class="ob-progress"><i class="on"></i><i></i><i></i><i></i></div>
 
         <div class="ob-step active" data-step="1">
-          <h1 class="ob-h">嗨。<br>你想顯化<span class="lat">什麼</span>？</h1>
-          <p class="ob-p">先告訴我怎麼稱呼你，再選 1 到 3 個目標。腳本會圍著它們寫。</p>
+          <h1 class="ob-h">嗨。<br>最近想改善<span class="lat">什麼</span>？</h1>
+          <p class="ob-p">先告訴我怎麼稱呼你，再點最有感的 1 到 3 個。引導詞會從這裡開始寫。</p>
           <div class="field"><label class="label" for="ob-name">你的名字</label><input class="input" id="ob-name" placeholder="例如：Melody" autocomplete="nickname"></div>
-          <label class="label">目標（最多 3 個）</label>
-          <div class="opts" id="ob-goals"></div>
+          <label class="label">最近的狀態（最多 3 個）</label>
+          <div class="grid2" id="ob-concerns"></div>
         </div>
 
         <div class="ob-step" data-step="2">
-          <h1 class="ob-h">你想聽到<br>哪一種<span class="lat">語氣</span>？</h1>
-          <p class="ob-p">同一句肯定語，用不同語氣寫出來的感覺完全不同。之後隨時可以換。</p>
-          <div class="opts" id="ob-tones"></div>
+          <h1 class="ob-h">你想往<br><span class="lat">哪裡</span>去？</h1>
+          <p class="ob-p">選 1 到 3 個方向。每天的練習會輪流圍著它們。</p>
+          <label class="label">方向（最多 3 個）</label>
+          <div class="opts" id="ob-goals"></div>
+          <label class="label" style="margin-top:16px">每天想花多久</label>
+          <div class="seg" id="ob-min"><button data-m="3" aria-pressed="true">3 分</button><button data-m="7" aria-pressed="false">7 分</button><button data-m="12" aria-pressed="false">12 分</button></div>
         </div>
 
         <div class="ob-step" data-step="3">
+          <h1 class="ob-h">你想聽到<br>哪一種<span class="lat">語氣</span>？</h1>
+          <p class="ob-p">同一句話，用不同語氣說出來的感覺完全不同。之後隨時可以換。</p>
+          <div class="opts" id="ob-tones"></div>
+        </div>
+
+        <div class="ob-step" data-step="4">
           <h1 class="ob-h">錄下<br>你的<span class="lat">聲音</span></h1>
-          <p class="ob-p">唸下面這段話，約 30 到 60 秒。這段樣本會用來複製你的聲音，讓腳本由「你」唸給你聽。可以先跳過。</p>
+          <p class="ob-p">唸下面這段話，約 30 到 60 秒。這段樣本會用來複製你的聲音，讓引導由「你」唸給你聽。可以先跳過。</p>
           <div id="ob-rec"></div>
         </div>
 
@@ -366,7 +382,7 @@ textarea.input{min-height:90px;resize:vertical}
       <!-- ============ HOME ============ -->
       <section class="screen" id="home" aria-label="今日"></section>
       <!-- ============ MANIFEST ============ -->
-      <section class="screen" id="manifest" aria-label="顯化腳本"></section>
+      <section class="screen" id="manifest" aria-label="冥想引導"></section>
       <!-- ============ SLEEP ============ -->
       <section class="screen" id="sleep" aria-label="睡前導引"></section>
       <!-- ============ JOURNAL ============ -->
@@ -377,7 +393,7 @@ textarea.input{min-height:90px;resize:vertical}
 
     <nav class="nav" id="nav" aria-label="主選單">
       <button data-go="home" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><circle cx="19" cy="18" r="1.4"/><circle cx="5" cy="17" r="1"/></svg>今日</button>
-      <button data-go="manifest"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M12 4a4 4 0 0 1 4 4v4a4 4 0 0 1-8 0V8a4 4 0 0 1 4-4z"/><path d="M6 11a6 6 0 0 0 12 0M12 17v3M9 20h6"/></svg>顯化</button>
+      <button data-go="manifest"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M12 4a4 4 0 0 1 4 4v4a4 4 0 0 1-8 0V8a4 4 0 0 1 4-4z"/><path d="M6 11a6 6 0 0 0 12 0M12 17v3M9 20h6"/></svg>冥想</button>
       <button data-go="sleep"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5z"/></svg>睡眠</button>
       <button data-go="journal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M5 4h11a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2z"/><path d="M8 4v16M11 9h4M11 13h4"/></svg>日記</button>
       <button data-go="me"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="9" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>我</button>
@@ -451,6 +467,40 @@ const MOODS = [
 ];
 const TAGS = ['工作','創作','家人','關係','身體','金錢','靈性','休息'];
 const READ_TEXT = '我是夏日的風，也是深夜的海。我允許自己慢下來，也允許自己被看見。今天，我把注意力放在我想要的地方，讓每一個字，都成為我的頻率。';
+const CONCERNS = {
+  sleep:{name:'睡不好',emoji:'😴',hint:'入睡難、半夜醒',goal:'health',tone:'gentle',
+    open:'我知道你最近睡得不太好。今天不趕，我們只讓身體先安靜下來。',
+    aff:['我允許身體在夜裡完全放下。','休息不是偷懶，是我在為明天充電。'],
+    sleep:'今晚，你不需要努力入睡。睡意會自己來找你。'},
+  anxiety:{name:'焦慮想太多',emoji:'🌀',hint:'停不下來的念頭',goal:'health',tone:'gentle',
+    open:'我知道最近腦袋很吵。沒關係，念頭可以在，我們不用跟它走。',
+    aff:['我不需要現在就想通一切。','我的呼吸比我的念頭更慢，也更有力。'],
+    sleep:'每一個念頭飄過來，你都讓它飄過去。你只是看著。'},
+  confidence:{name:'缺乏自信',emoji:'🪞',hint:'覺得自己不夠',goal:'confidence',tone:'firm',
+    open:'先說一件事：你已經夠了。今天只是讓身體記住這句話。',
+    aff:['我不需要任何人的許可才能發光。','我信任自己的決定。'],
+    sleep:'你已經足夠了，這件事在你睡著時也是真的。'},
+  low:{name:'情緒低落',emoji:'🌧',hint:'提不起勁',goal:'health',tone:'gentle',
+    open:'我知道最近有點重。今天的你，不需要很好，只需要在這裡。',
+    aff:['今天的我，不需要很好，只需要在這裡。','雨會停，我也會再亮起來。'],
+    sleep:'你今天已經撐過來了。這樣就夠了。'},
+  focus:{name:'難以專注',emoji:'🎯',hint:'分心、拖延',goal:'creative',tone:'firm',
+    open:'今天只做一件事。就一件。',
+    aff:['我一次只做一件事，這就夠了。','我把注意力放回我選擇的地方。'],
+    sleep:'明天早上，你會清楚知道第一件要做的事。'},
+  relation:{name:'關係卡住',emoji:'💔',hint:'伴侶、家人、朋友',goal:'love',tone:'gentle',
+    open:'關係裡的卡住，常常是因為我們先忘了自己。今天先回來。',
+    aff:['我可以柔軟，也可以有界線。','我先把愛給自己，然後愛自然流動。'],
+    sleep:'你被愛著，即使今天沒有人說出口。'},
+  money:{name:'金錢壓力',emoji:'💸',hint:'帳單、收入不穩',goal:'wealth',tone:'firm',
+    open:'金錢的緊，先從身體鬆開。深呼吸，錢不會因為你緊張就變多。',
+    aff:['金錢是工具，我是主人。','我用創造力換來我值得的收入。'],
+    sleep:'在你休息的時候，你已經種下的種子還在長。'},
+  creative:{name:'創作卡關',emoji:'🧱',hint:'沒靈感、怕不夠好',goal:'creative',tone:'firm',
+    open:'卡關不是沒有靈感，是太怕做壞。今天允許自己做壞。',
+    aff:['我允許自己做出不完美的第一版。','我的想法值得被做出來。'],
+    sleep:'你的潛意識整晚都在為你收集靈感。'},
+};
 
 /* ---------- state ---------- */
 const KEY = 'melomood.v1';
@@ -470,11 +520,11 @@ function seed(){
   const entries = moods.map((m,i)=>({id:'demo'+i,date:daysAgo(11-i),mood:m,gratitude:grats[i],note:notes[i],tags:g[i],demo:true}));
   return {
     demo:true,
-    profile:{name:'Melody',goals:['music','wealth','confidence'],tone:'baddie',voice:{recorded:true,seconds:42,at:daysAgo(3),voiceId:''},createdAt:daysAgo(11)},
+    profile:{name:'Melody',concerns:['sleep','focus'],goals:['music','wealth','confidence'],tone:'baddie',voice:{recorded:true,seconds:42,at:daysAgo(3),voiceId:''},createdAt:daysAgo(11)},
     entries,
     sessions:[{date:daysAgo(1),type:'sleep',min:12},{date:daysAgo(2),type:'manifest',min:7},{date:daysAgo(3),type:'manifest',min:3},{date:daysAgo(4),type:'sleep',min:12},{date:daysAgo(5),type:'manifest',min:7},{date:daysAgo(7),type:'manifest',min:7}],
-    settings:{elevenKey:'',claudeKey:'',theme:''},
-    ui:{goal:'music',minutes:7},
+    settings:{elevenKey:'',claudeKey:'',theme:'',voiceId:'',voiceName:'',demoVoice:'melo'},
+    ui:{goal:'music',minutes:3},
   };
 }
 
@@ -500,9 +550,11 @@ function buildScript({goal, minutes, tone, name, seed}){
   L(T.open[0].replace('{name}',name||'你'),'open',1200);
   L('吸氣 4 · 停 4 · 吐氣 6','breath',6000);
   L(T.open[1],'open',1400);
+  const cons=(state.profile.concerns||[]).map(k=>CONCERNS[k]).filter(Boolean);
+  if(cons[0]) L(cons[0].open,'open',1600);
   if(ctx?.grat) L(`昨天你寫下感謝：「${ctx.grat}」。這份感謝，今天也在。`,'open',1500);
-  if(ctx && ctx.avg<2.6) L('我知道最近有點累。沒關係，我們今天只做一件事：相信。','open',1500);
-  const affs = shuffle(G.aff, r);
+  if(ctx && ctx.avg<2.6 && !cons.some(c=>c.aff.some(x=>/在這裡/.test(x)))) L('我知道最近有點累。沒關係，我們今天只做一件事：相信。','open',1500);
+  const affs = shuffle([...G.aff, ...cons.flatMap(c=>c.aff)], r);
   let punchIdx = 0;
   for(let i=0;i<count;i++){
     if(i===8) L('再說一次，慢一點，讓身體聽見。','breath',2500);
@@ -527,6 +579,7 @@ function buildSleep({goals, name}){
   L('大腿、小腿、腳掌……全部都放下了。','aff',3200);
   L('我會從 10 數到 1。每一個數字，你都更深、更放鬆。','open',1800);
   for(let n=10;n>=1;n--) L(n===1?'1……完全放鬆。':`${n}……更深一點。`,'breath',n>5?2200:3000);
+  (state.profile.concerns||[]).slice(0,3).forEach(k=>CONCERNS[k]&&L(CONCERNS[k].sleep,'aff',3400));
   goals.slice(0,3).forEach(g=>GOALS[g].sleep.forEach(s=>L(s,'aff',3400)));
   L('你不需要努力，一切都已經在路上。','punch',2600);
   L('你安全。你被愛。你已經足夠。','aff',3400);
@@ -540,7 +593,7 @@ async function generateWithClaude({goal, minutes, tone, name}){
   const G = GOALS[goal], T = TONES[tone];
   const recent = [...state.entries].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5)
     .map(e=>`${e.date} 心情${e.mood}/5 感謝：${(e.gratitude||[]).join('、')} 筆記：${e.note||''}`).join('\n');
-  const system = `你是 Melo Mood 的顯化腳本作者。用繁體中文（台灣）、第一人稱現在式寫一段給使用者自己唸給自己聽的顯化腳本。語氣：${T.name}（${T.hint}）。長度約 ${minutes} 分鐘的朗讀量。每行一句，不要編號、不要標題、不要 markdown。結構：開場呼吸 → 肯定語（可重複、漸進）→ 一段具體的視覺化畫面 → 收尾。從使用者最近的日記裡挑一兩個具體細節放進腳本，讓它像只為她寫的。`;
+  const system = `你是 Melo Mood 的冥想引導作者。用繁體中文（台灣）、第一人稱現在式寫一段給使用者自己唸給自己聽的顯化腳本。語氣：${T.name}（${T.hint}）。長度約 ${minutes} 分鐘的朗讀量。每行一句，不要編號、不要標題、不要 markdown。結構：開場呼吸 → 肯定語（可重複、漸進）→ 一段具體的視覺化畫面 → 收尾。從使用者最近的日記裡挑一兩個具體細節放進腳本，讓它像只為她寫的。`;
   const user = `使用者：${name}\n目標：${G.name}（${G.hint}）\n最近的日記：\n${recent||'（還沒有）'}`;
   // Raw fetch: this is a static page with no bundler, so the SDK is not available here.
   // In production, call this from the edge function in backend/edge-functions instead.
@@ -554,8 +607,87 @@ async function generateWithClaude({goal, minutes, tone, name}){
   return text.split(/\n+/).map(s=>s.trim()).filter(Boolean).map((t,i,a)=>({t,kind:i===0||i===a.length-1?'open':/想像/.test(t)?'vision':'aff',pause:1300}));
 }
 
-/* ---------- playback (browser voices or your cloned voice) ---------- */
-const player = {timer:null,idx:0,lines:[],onTick:null,playing:false,audio:null,startedAt:0,elapsed:0,total:0};
+/* ---------- demo voice pack: two scripts pre-rendered in Melo's own cloned voice ---------- */
+const DEMO_VOICES = {
+  melo:{id:'cVpaMfwbISlOywwtDanV', name:'Melo 的聲音', sub:'MELO MOON 中文 平靜 · 複製聲', emoji:'✦'},
+  deep:{id:'brChkoggsUHF1stW6omH', name:'低沉男聲', sub:'Ethan Zhang · 深沉、磁性', emoji:'🌑'},
+};
+const DEMO_PACK = {
+  manifest:{goal:'music',tone:'baddie',minutes:3,
+    lines:[
+      ['Okay Melody，鏡子裡那個人已經是頂級了，我們只是提醒她一下。','open'],
+      ['吸氣……','breath'],
+      ['停……','breath'],
+      ['慢慢吐氣。','breath'],
+      ['吸口氣，把肩膀放下來，皇冠戴正。','open'],
+      ['我的聲音有力量，能觸動人心。','aff'],
+      ['舞台是我的家，我在上面自由呼吸。','aff'],
+      ['我的音樂正被對的人聽見。','aff'],
+      ['每一次創作，我都更靠近真正的自己。','aff'],
+      ['而且，我值得。','punch'],
+      ['版稅、合作與邀約，正在向我走來。','aff'],
+      ['我允許自己被看見、被聽見、被記住。','aff'],
+      ['我的作品有自己的生命，走得比我更遠。','aff'],
+      ['我是藝術家，也是自己的老闆。','aff'],
+      ['說真的，這根本不是問題。','punch'],
+      ['想像燈光暗下，第一個音落下，全場安靜地等你。你的聲音填滿整個空間，而你，只是在做自己。','vision'],
+      ['停在這個畫面裡，三次呼吸。','breath'],
+      ['好了，去把今天拿下來。','close'],
+      ['記得：你不是在追什麼，你是在被追。','close'],
+    ].map(([t,kind])=>({t,kind,pause:1200})),
+    audio:{
+      melo:{src:'assets/demo-manifest.mp3',dur:84,at:[0,5.83,8.29,10.39,13.39,17.96,21.72,25.98,29.62,33.83,36.89,41.78,46.72,51.39,55.06,58.92,67.71,76.80,80.60]},
+      deep:{src:'assets/demo-manifest-deep.mp3',dur:84,at:[0,5.88,8.42,10.61,13.53,18.10,21.81,25.86,29.11,33.51,36.96,41.88,46.31,50.90,54.89,58.91,67.51,76.66,80.40]},
+    }},
+  sleep:{
+    lines:[
+      ['Melody，今天結束了。你什麼都不用做了。','open'],
+      ['讓身體沉進床裡，讓床接住你。','open'],
+      ['吸氣……慢慢吐氣……讓吐氣比吸氣長一點。','open'],
+      ['現在，注意你的額頭，讓它放鬆。眼睛周圍，放鬆。下巴，鬆開。','aff'],
+      ['肩膀落下來。手臂變重。手掌打開。','aff'],
+      ['胸口很輕，肚子很軟，每一次呼吸都更深一點。','aff'],
+      ['大腿、小腿、腳掌……全部都放下了。','aff'],
+      ['我會從 10 數到 1。每一個數字，你都更深、更放鬆。','open'],
+      ['10……更深一點。','breath'],
+      ['9……更深一點。','breath'],
+      ['8……更深一點。','breath'],
+      ['7……更深一點。','breath'],
+      ['6……更深一點。','breath'],
+      ['5……更深一點。','breath'],
+      ['4……更深一點。','breath'],
+      ['3……更深一點。','breath'],
+      ['2……更深一點。','breath'],
+      ['1……完全放鬆。','breath'],
+      ['你的聲音在夢裡繼續練習，變得更自由、更有力量。','aff'],
+      ['睡著時，宇宙正在安排對的人聽見你。','aff'],
+      ['在你睡著的時候，你的潛意識正在為你打開富足的門。','aff'],
+      ['明天醒來，你會注意到更多機會，那都是為你準備的。','aff'],
+      ['你已經足夠了，現在只是讓身體記住這件事。','aff'],
+      ['醒來的時候，你會帶著一種安靜的確定感。','aff'],
+      ['你不需要努力，一切都已經在路上。','punch'],
+      ['你安全。你被愛。你已經足夠。','aff'],
+      ['現在，你可以睡了。晚安。','close'],
+    ].map(([t,kind])=>({t,kind,pause:3000})),
+    audio:{
+      melo:{src:'assets/demo-sleep.mp3',dur:129,at:[0,5.49,10.41,17.29,25.38,30.60,36.68,41.40,46.36,49.49,52.76,55.93,58.92,61.61,64.21,66.92,69.78,72.43,75.28,81.40,87.29,94.44,100.73,106.74,112.34,118.41,125.54]},
+      deep:{src:'assets/demo-sleep-deep.mp3',dur:128,at:[0,5.87,10.48,17.13,25.39,30.58,36.49,41.27,45.83,48.85,52.34,55.42,58.59,61.06,64.08,67.62,69.55,72.36,75.23,81.26,87.36,94.26,100.76,106.52,111.97,118.25,124.86]},
+    }},
+};
+const demoVoice = ()=> DEMO_VOICES[state.settings.demoVoice] ? state.settings.demoVoice : 'melo';
+/* which voice will actually speak right now */
+function voiceSource(kind){
+  const s=state.settings;
+  if(s.elevenKey && s.voiceId) return {mode:'eleven', label:s.voiceName||'ElevenLabs', sub:s.voiceId===state.profile.voice?.voiceId?'你的聲音 · 即時合成':'ElevenLabs · 即時合成'};
+  const P=DEMO_PACK[kind];
+  const fits = kind==='sleep' || (state.ui.goal===P.goal && state.profile.tone===P.tone && state.ui.minutes===P.minutes);
+  if(fits){ const v=DEMO_VOICES[demoVoice()]; return {mode:'pack', label:v.name, sub:'示範音檔 · '+v.sub}; }
+  return {mode:'browser', label:'系統聲音', sub:`真人聲音示範只有 ${GOALS[P.goal].emoji}×${TONES[P.tone].emoji}×${P.minutes} 分 · 加金鑰可全部用你的聲音`};
+}
+
+/* ---------- playback ---------- */
+const player = {timer:null,idx:0,lines:[],onTick:null,playing:false,audio:null,startedAt:0,total:0};
+const ttsCache = new Map();
 function estimateMs(lines, rate){ return lines.reduce((s,l)=>s+Math.max(600,l.t.length*230/rate)+l.pause,0); }
 function zhVoice(){
   const vs = speechSynthesis.getVoices();
@@ -564,16 +696,16 @@ function zhVoice(){
 function stopPlayback(){
   player.playing=false; clearTimeout(player.timer);
   try{ speechSynthesis.cancel(); }catch(e){}
-  if(player.audio){ player.audio.pause(); player.audio=null; }
+  if(player.audio){ player.audio.pause(); player.audio.src=''; player.audio=null; }
   player.onTick && player.onTick({idx:-1,pct:0,done:false,stopped:true});
 }
-async function playLines(lines, {rate=.9, onTick, onDone, mode='manifest'}={}){
+async function playLines(lines, {rate=.9, onTick, onDone, mode='manifest', src}={}){
   stopPlayback();
   player.lines=lines; player.idx=0; player.playing=true; player.onTick=onTick; player.total=estimateMs(lines,rate); player.startedAt=Date.now();
-  const clone = state.profile.voice?.voiceId && state.settings.elevenKey;
-  if(clone){
-    try{ await playCloned(lines, rate, onTick, onDone); return; }
-    catch(e){ toast('聲音複製服務暫時無法連線，改用系統聲音'); }
+  if(src?.mode==='pack'){ playPack(DEMO_PACK[mode], onTick, onDone); return; }
+  if(src?.mode==='eleven'){
+    try{ await playEleven(lines, rate, onTick, onDone); return; }
+    catch(e){ if(!player.playing) return; toast('ElevenLabs 連不上（'+(e.message||e)+'），改用系統聲音'); }
   }
   if(!('speechSynthesis' in window)){ toast('這個瀏覽器不支援語音播放'); simulate(lines,onTick,onDone); return; }
   const voice = zhVoice();
@@ -595,16 +727,50 @@ function simulate(lines,onTick,onDone){
     onTick&&onTick({idx:player.idx,pct:player.idx/lines.length,done:false}); const l=lines[player.idx++]; player.timer=setTimeout(step, l.t.length*220+l.pause); };
   step();
 }
-async function playCloned(lines, rate, onTick, onDone){
-  const text = lines.map(l=>l.t + (l.pause>2500?' <break time="2s"/>' : ' ')).join('\n');
-  const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${state.profile.voice.voiceId}?output_format=mp3_44100_128`,{
-    method:'POST',headers:{'xi-api-key':state.settings.elevenKey,'content-type':'application/json'},
-    body:JSON.stringify({text,model_id:'eleven_multilingual_v2',voice_settings:{stability:.55,similarity_boost:.8,style:.2,speed:rate}})});
-  if(!res.ok) throw new Error('ElevenLabs '+res.status);
-  const blob = await res.blob(); const a = new Audio(URL.createObjectURL(blob)); player.audio=a;
-  a.ontimeupdate=()=>{ if(!a.duration) return; const pct=a.currentTime/a.duration; const idx=Math.min(lines.length-1,Math.floor(pct*lines.length)); onTick&&onTick({idx,pct,done:false}); };
-  a.onended=()=>{ player.playing=false; onTick&&onTick({idx:-1,pct:1,done:true}); onDone&&onDone(); };
-  await a.play();
+/* pre-rendered pack: one audio file, line highlight from timestamps */
+function playPack(P, onTick, onDone){
+  const A=P.audio[demoVoice()]; const a=new Audio(A.src); player.audio=a;
+  a.ontimeupdate=()=>{ const t=a.currentTime; let idx=0; for(let i=0;i<A.at.length;i++){ if(A.at[i]<=t+.05) idx=i; }
+    onTick&&onTick({idx,pct:t/(a.duration||A.dur),done:false}); };
+  a.onended=()=>{ player.playing=false; player.audio=null; onTick&&onTick({idx:-1,pct:1,done:true}); onDone&&onDone(); };
+  a.onerror=()=>{ if(!player.playing) return; toast('示範音檔載入失敗，改用系統聲音'); player.audio=null; playLines(P.lines,{onTick,onDone,src:{mode:'browser'}}); };
+  a.play().catch(()=>{});
+}
+/* live ElevenLabs: one request per line (cached), highlight is exact */
+async function ttsLine(text, rate){
+  const s=state.settings, key=`${s.voiceId}|${rate}|${text}`;
+  if(ttsCache.has(key)) return ttsCache.get(key);
+  const p=(async()=>{
+    const res=await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${s.voiceId}?output_format=mp3_44100_64`,{
+      method:'POST',headers:{'xi-api-key':s.elevenKey,'content-type':'application/json'},
+      body:JSON.stringify({text,model_id:'eleven_multilingual_v2',voice_settings:{stability:.6,similarity_boost:.8,style:.15,speed:rate}})});
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    return URL.createObjectURL(await res.blob());
+  })();
+  ttsCache.set(key,p); p.catch(()=>ttsCache.delete(key)); return p;
+}
+async function playEleven(lines, rate, onTick, onDone){
+  const speakable = l=>l.kind!=='breath' || /[一-鿿]{3,}/.test(l.t);
+  const t0=Date.now();
+  for(let i=0;i<lines.length;i++){
+    if(!player.playing) return;
+    const l=lines[i]; onTick&&onTick({idx:i,pct:Math.min(1,(Date.now()-t0)/player.total),done:false});
+    if(speakable(l)){
+      const url=await ttsLine(l.t.replace(/·/g,'，'), rate);
+      if(lines[i+1]&&speakable(lines[i+1])) ttsLine(lines[i+1].t.replace(/·/g,'，'), rate).catch(()=>{});
+      if(!player.playing) return;
+      await new Promise((res,rej)=>{ const a=new Audio(url); player.audio=a; a.onended=res; a.onerror=()=>rej(new Error('audio')); a.play().catch(rej); });
+    }
+    await new Promise(r=>{ player.timer=setTimeout(r, l.pause||800); });
+  }
+  player.playing=false; player.audio=null; onTick&&onTick({idx:-1,pct:1,done:true}); onDone&&onDone();
+}
+async function loadVoices(){
+  const res=await fetch('https://api.elevenlabs.io/v1/voices',{headers:{'xi-api-key':state.settings.elevenKey}});
+  if(!res.ok) throw new Error('HTTP '+res.status);
+  const j=await res.json();
+  return j.voices.map(v=>({id:v.voice_id,name:v.name,lang:v.labels?.language||'',cat:v.category}))
+    .sort((a,b)=>(b.cat==='cloned')-(a.cat==='cloned')||(b.lang==='zh')-(a.lang==='zh'));
 }
 
 /* ---------- voice recorder ---------- */
@@ -646,7 +812,7 @@ function mountRecorder(host, {onDone}){
       try{
         const fd=new FormData(); fd.append('name',`MeloMood · ${state.profile.name||'me'}`); fd.append('files',blob,'sample.webm'); fd.append('remove_background_noise','true');
         const r=await fetch('https://api.elevenlabs.io/v1/voices/add',{method:'POST',headers:{'xi-api-key':state.settings.elevenKey},body:fd});
-        if(!r.ok) throw new Error(r.status); const j=await r.json(); state.profile.voice.voiceId=j.voice_id; toast('聲音複製完成 ✦');
+        if(!r.ok) throw new Error(r.status); const j=await r.json(); state.profile.voice.voiceId=j.voice_id; state.settings.voiceId=j.voice_id; state.settings.voiceName='你的聲音'; toast('聲音複製完成 ✦');
       }catch(e){ toast('上傳失敗，先用系統聲音'); }
     }
     save(); cancelAnimationFrame(raf); onDone&&onDone();
@@ -692,7 +858,7 @@ function renderHome(){
   $('#home').innerHTML=`
     ${state.demo?`<div class="banner">✦ 你正在看範例資料<button id="start-real">開始我的旅程 →</button></div>`:''}
     <div class="topbar">
-      <div><div class="eyebrow">${greeting()} · ${T.emoji} ${esc(T.name)}</div><h1 class="title">${esc(p.name||'你')}，<br>今天想顯化什麼？</h1></div>
+      <div><div class="eyebrow">${greeting()} · ${T.emoji} ${esc(T.name)}</div><h1 class="title">${esc(p.name||'你')}，<br>今天想練習什麼？</h1></div>
       <div class="date">週${weekday()}<b>${new Date().getDate()}</b></div>
     </div>
     <div class="card hero">
@@ -701,6 +867,7 @@ function renderHome(){
       <div class="meta"><span class="chip ${p.voice?.voiceId?'jade':''}">${p.voice?.voiceId?'✦ 你的聲音':p.voice?.recorded?'◐ 樣本已錄 · 待複製':'○ 尚未錄音'}</span>
       <button class="btn primary sm" id="home-play">▶ 唸給我聽</button></div>
     </div>
+    ${(p.concerns||[]).length?`<div class="row" style="flex-wrap:wrap;gap:6px;margin-top:14px"><span class="eyebrow" style="margin-right:4px">正在改善</span>${p.concerns.map(k=>CONCERNS[k]?`<span class="chip">${CONCERNS[k].emoji} ${esc(CONCERNS[k].name)}</span>`:'').join('')}${p.concerns.includes('sleep')?'<span class="chip jade">今晚試試睡前導引 →</span>':''}</div>`:''}
     <div class="section">
       <div class="section-h"><h2>現在的心情</h2><span class="more">${today?'今天記錄過了 · 可更新':'點一下就記錄'}</span></div>
       <div class="moods" id="home-moods">${MOODS.map(m=>`<button class="mood" data-v="${m.v}" aria-pressed="${today&&today.mood===m.v}">${faceSVG(m.v)}<span class="lbl">${m.l}</span></button>`).join('')}</div>
@@ -715,8 +882,8 @@ function renderHome(){
     <div class="section">
       <div class="section-h"><h2>立刻能做</h2></div>
       <div class="quick">
-        <button class="qa" data-go="manifest"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M12 4a4 4 0 0 1 4 4v4a4 4 0 0 1-8 0V8a4 4 0 0 1 4-4z"/><path d="M6 11a6 6 0 0 0 12 0M12 17v3"/></svg></span><b>${state.ui.minutes} 分鐘顯化</b><span>${g.emoji} ${esc(g.name)} · ${esc(T.name)}</span></button>
-        <button class="qa" data-go="sleep"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5z"/></svg></span><b>睡前催眠</b><span>12 分鐘 · 帶著目標入睡</span></button>
+        <button class="qa" data-go="manifest"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M12 4a4 4 0 0 1 4 4v4a4 4 0 0 1-8 0V8a4 4 0 0 1 4-4z"/><path d="M6 11a6 6 0 0 0 12 0M12 17v3"/></svg></span><b>${state.ui.minutes} 分鐘冥想</b><span>${g.emoji} ${esc(g.name)} · ${esc(T.name)}</span></button>
+        <button class="qa" data-go="sleep"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5z"/></svg></span><b>睡前導引</b><span>放鬆身體 · 帶著目標入睡</span></button>
         <button class="qa" data-go="journal"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 4h11a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2z"/><path d="M8 4v16"/></svg></span><b>寫三件感謝</b><span>90 秒 · 重塑注意力</span></button>
         <button class="qa" id="home-voice"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 12h2M8 8v8M12 5v14M16 9v6M20 11v2"/></svg></span><b>${p.voice?.recorded?'重錄聲音':'錄下聲音'}</b><span>${p.voice?.recorded?`${p.voice.seconds} 秒樣本 · ${fmtDate(p.voice.at)}`:'30 到 60 秒'}</span></button>
       </div>
@@ -734,7 +901,7 @@ function quickMood(v){
 }
 function startReal(){
   if(!confirm('清除範例資料，從你自己的目標開始？')) return;
-  Object.assign(state, seed()); state.demo=false; state.entries=[]; state.sessions=[]; state.profile={name:'',goals:[],tone:'',voice:{recorded:false},createdAt:todayKey()};
+  Object.assign(state, seed()); state.demo=false; state.entries=[]; state.sessions=[]; state.profile={name:'',concerns:[],goals:[],tone:'',voice:{recorded:false},createdAt:todayKey()};
   save(); startOnboarding();
 }
 
@@ -743,9 +910,10 @@ let mfLines=[], mfSeed=todayKey();
 function renderManifest(){
   const p=state.profile; if(!p.goals.includes(state.ui.goal)) state.ui.goal=p.goals[0]||'confidence';
   const g=GOALS[state.ui.goal], T=TONES[p.tone||'gentle'];
-  mfLines=buildScript({goal:state.ui.goal,minutes:state.ui.minutes,tone:p.tone||'gentle',name:p.name,seed:mfSeed+state.ui.goal+state.ui.minutes});
+  const src=voiceSource('manifest');
+  mfLines= src.mode==='pack' ? DEMO_PACK.manifest.lines : buildScript({goal:state.ui.goal,minutes:state.ui.minutes,tone:p.tone||'gentle',name:p.name,seed:mfSeed+state.ui.goal+state.ui.minutes});
   $('#manifest').innerHTML=`
-    <div class="topbar"><div><div class="eyebrow">Manifest · 顯化腳本</div><h1 class="title">今天，<br>對自己說什麼？</h1></div></div>
+    <div class="topbar"><div><div class="eyebrow">Meditate · 冥想引導</div><h1 class="title">今天，<br>對自己說什麼？</h1></div></div>
     <label class="label">目標</label>
     <div class="row" style="flex-wrap:wrap;gap:8px;margin-bottom:16px" id="mf-goals">${p.goals.map(k=>`<button class="chip goal" data-k="${k}" style="${k===state.ui.goal?'border-color:var(--moon);color:var(--moon)':''}">${GOALS[k].emoji} ${esc(GOALS[k].name)}</button>`).join('')}<button class="chip" id="mf-addgoal">＋</button></div>
     <div class="row between" style="margin-bottom:16px">
@@ -755,8 +923,8 @@ function renderManifest(){
     </div>
     <div class="orb-wrap"><div class="orb idle" id="mf-orb"><span class="phase" id="mf-phase">READY</span></div></div>
     <div class="row between" style="margin:8px 0 12px">
-      <div class="eyebrow">${mfLines.length} 句 · 約 ${state.ui.minutes} 分鐘 · 讀了你 ${state.entries.length} 篇日記</div>
-      <div class="row"><button class="btn sm ghost" id="mf-regen">↻ 換一版</button>${state.settings.claudeKey?`<button class="btn sm ghost" id="mf-ai">✦ AI 深度</button>`:''}</div>
+      <div class="eyebrow">${mfLines.length} 句 · 約 ${state.ui.minutes} 分鐘${src.mode==='pack'?' · 示範音檔':' · 讀了你 '+state.entries.length+' 篇日記'}</div>
+      <div class="row">${src.mode==='pack'?'':'<button class="btn sm ghost" id="mf-regen">↻ 換一版</button>'}${state.settings.claudeKey?`<button class="btn sm ghost" id="mf-ai">✦ AI 深度</button>`:''}</div>
     </div>
     <div class="script" id="mf-script">${mfLines.map(l=>`<div class="line ${l.kind}">${esc(l.t)}</div>`).join('')}</div>
     <div class="player">
@@ -764,27 +932,29 @@ function renderManifest(){
       <div class="ctl">
         <button class="play" id="mf-play" aria-label="播放"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button>
         <div class="time" id="mf-time">00:00 / ${pad(state.ui.minutes)}:00</div>
-        <div class="voice-src">${p.voice?.voiceId?'<b>你的聲音</b>ElevenLabs 複製聲':p.voice?.recorded?'<b>系統聲音</b>樣本已錄 · 加入金鑰即可複製':'<b>系統聲音</b>錄音後可換成你的聲音'}</div>
+        <button class="voice-src" id="mf-voice" title="切換聲音"><b>${src.mode==='pack'?'✦ ':''}${esc(src.label)}</b>${esc(src.sub)}</button>
       </div>
     </div>`;
   $$('#mf-goals [data-k]').forEach(b=>b.onclick=()=>{state.ui.goal=b.dataset.k;save();renderManifest();});
   $('#mf-addgoal').onclick=()=>openGoalsSheet(renderManifest);
   $$('#mf-min button').forEach(b=>b.onclick=()=>{state.ui.minutes=+b.dataset.m;save();renderManifest();});
   $$('#mf-tone button').forEach(b=>b.onclick=()=>{state.profile.tone=b.dataset.t;save();renderManifest();});
-  $('#mf-regen').onclick=()=>{ mfSeed=String(Math.random()); renderManifest(); toast('換了一版 ✦'); };
+  $('#mf-voice').onclick=()=>openVoiceSheet(renderManifest);
+  $('#mf-regen')&&($('#mf-regen').onclick=()=>{ mfSeed=String(Math.random()); renderManifest(); toast('換了一版 ✦'); });
   $('#mf-ai')&&($('#mf-ai').onclick=async()=>{ const b=$('#mf-ai'); b.textContent='生成中…'; b.disabled=true; try{ const l=await generateWithClaude({goal:state.ui.goal,minutes:state.ui.minutes,tone:p.tone,name:p.name}); if(l){ mfLines=l; $('#mf-script').innerHTML=l.map(x=>`<div class="line ${x.kind}">${esc(x.t)}</div>`).join(''); toast('AI 讀了你的日記，寫了新的一版'); } }catch(e){ toast(String(e.message||e)); } b.textContent='✦ AI 深度'; b.disabled=false; });
-  bindPlayer('mf', mfLines, TONES[p.tone||'gentle'].rate, 'manifest');
+  bindPlayer('mf', mfLines, TONES[p.tone||'gentle'].rate, 'manifest', src);
 }
-function bindPlayer(prefix, lines, rate, type){
+function bindPlayer(prefix, lines, rate, type, src){
   const play=$(`#${prefix}-play`), orb=$(`#${prefix}-orb`), phase=$(`#${prefix}-phase`), bar=$(`#${prefix}-bar`), time=$(`#${prefix}-time`), list=$(`#${prefix}-script`);
-  const total=estimateMs(lines,rate); let phaseT=null;
+  const total= src.mode==='pack' ? DEMO_PACK[type].audio[demoVoice()].dur*1000 : estimateMs(lines,rate); let phaseT=null;
+  time.textContent=`00:00 / ${pad(Math.floor(total/60000))}:${pad(Math.floor(total/1000)%60)}`;
   const setPlaying=on=>{ play.innerHTML=on?'<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>':'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>'; orb.classList.toggle('idle',!on); if(!on){phase.textContent='READY';clearInterval(phaseT);} };
   const breathe=()=>{ const seq=[['吸氣',4000],['停',4000],['吐氣',6000]]; let i=0; const step=()=>{ phase.textContent=seq[i][0]; phaseT=setTimeout(()=>{i=(i+1)%3;step();},seq[i][1]); }; step(); };
   play.onclick=()=>{
     if(player.playing){ stopPlayback(); setPlaying(false); return; }
     setPlaying(true); breathe();
     const t0=Date.now();
-    playLines(lines,{rate,mode:type,onTick:({idx,pct,done,stopped})=>{
+    playLines(lines,{rate,mode:type,src,onTick:({idx,pct,done,stopped})=>{
       if(stopped){ $$('.line',list).forEach(l=>l.classList.remove('now','done')); return; }
       $$('.line',list).forEach((l,i)=>{ l.classList.toggle('now',i===idx); l.classList.toggle('done',idx>=0&&i<idx); });
       if(idx>=0){ const el=$$('.line',list)[idx]; el&&el.scrollIntoView({block:'center',behavior:'smooth'}); }
@@ -797,12 +967,13 @@ function bindPlayer(prefix, lines, rate, type){
 /* ---------- SLEEP ---------- */
 let slLines=[];
 function renderSleep(){
-  const p=state.profile; slLines=buildSleep({goals:p.goals,name:p.name});
+  const p=state.profile, src=voiceSource('sleep');
+  slLines= src.mode==='pack' ? DEMO_PACK.sleep.lines : buildSleep({goals:p.goals,name:p.name});
   $('#sleep').innerHTML=`
-    <div class="topbar"><div><div class="eyebrow">Sleep · 睡前催眠導引</div><h1 class="title">帶著目標<br>入睡。</h1></div></div>
-    <p class="note" style="max-width:36ch;margin-bottom:10px">入睡前的 θ 波狀態，是潛意識最願意接收暗示的時候。導引會先放鬆身體、倒數，再把你的 ${p.goals.length} 個目標輕輕放進去。</p>
+    <div class="topbar"><div><div class="eyebrow">Sleep · 睡前放鬆導引</div><h1 class="title">帶著目標<br>入睡。</h1></div></div>
+    <p class="note" style="max-width:36ch;margin-bottom:10px">入睡前的 θ 波狀態，是大腦最容易接收正向暗示的時候。導引會先放鬆身體、倒數，再把你的 ${p.goals.length} 個目標輕輕放進去。</p>
     <div class="orb-wrap"><div class="orb sleep idle" id="sl-orb"><span class="phase" id="sl-phase">READY</span></div></div>
-    <div class="row between" style="margin:6px 0 12px"><div class="eyebrow">${slLines.length} 句 · 約 12 分鐘</div>
+    <div class="row between" style="margin:6px 0 12px"><div class="eyebrow">${slLines.length} 句 · ${src.mode==='pack'?'示範音檔 · 約 2 分鐘':'約 12 分鐘'}</div>
       <div class="row"><button class="btn sm ghost" id="sl-noise" aria-pressed="false">◌ 環境音</button><button class="btn sm ghost" id="sl-dim">◐ 調暗螢幕</button></div></div>
     <div class="script" id="sl-script">${slLines.map(l=>`<div class="line ${l.kind}">${esc(l.t)}</div>`).join('')}</div>
     <div class="player">
@@ -810,10 +981,11 @@ function renderSleep(){
       <div class="ctl">
         <button class="play" id="sl-play" aria-label="播放"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button>
         <div class="time" id="sl-time">00:00 / 12:00</div>
-        <div class="voice-src">${p.voice?.voiceId?'<b>你的聲音</b>放慢 0.8×':'<b>系統聲音</b>放慢 0.8×'}</div>
+        <button class="voice-src" id="sl-voice" title="切換聲音"><b>${src.mode==='pack'?'✦ ':''}${esc(src.label)}</b>${src.mode==='pack'?esc(src.sub):'放慢 0.8× · '+esc(src.sub)}</button>
       </div>
     </div>`;
-  bindPlayer('sl', slLines, .8, 'sleep');
+  bindPlayer('sl', slLines, .8, 'sleep', src);
+  $('#sl-voice').onclick=()=>openVoiceSheet(renderSleep);
   $('#sl-noise').onclick=e=>{ const on=toggleNoise(); e.currentTarget.setAttribute('aria-pressed',on); e.currentTarget.textContent=on?'◉ 環境音':'◌ 環境音'; };
   $('#sl-dim').onclick=()=>{ $('#dim').classList.add('on'); tickClock(); };
 }
@@ -899,63 +1071,103 @@ function renderMe(){
     <div class="card voicecard" style="--p:${pct}%"><div class="ring"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 12h2M8 8v8M12 5v14M16 9v6M20 11v2"/></svg></div>
       <div style="flex:1"><b>${v.voiceId?'你的聲音已就緒':v.recorded?'樣本已錄製，等待複製':'還沒有聲音樣本'}</b><span>${v.voiceId?`Voice ID ${esc(v.voiceId.slice(0,8))}… · ${v.seconds} 秒樣本`:v.recorded?`${v.seconds} 秒 · ${fmtDate(v.at)} · 加入 ElevenLabs 金鑰後重錄即可複製`:'30 到 60 秒，安靜的房間'}</span></div>
       <button class="btn sm soft" id="me-rec">${v.recorded?'重錄':'錄音'}</button></div>
-    <div class="section"><div class="section-h"><h2>我的目標</h2><button class="more" id="me-goals">調整 →</button></div>
+    <div class="section"><div class="section-h"><h2>最近的狀態</h2><button class="more" id="me-con">調整 →</button></div>
+      <div class="row" style="flex-wrap:wrap;gap:8px">${(p.concerns||[]).map(k=>CONCERNS[k]?`<span class="chip">${CONCERNS[k].emoji} ${esc(CONCERNS[k].name)}</span>`:'').join('')||'<span class="note">還沒選</span>'}</div></div>
+    <div class="section"><div class="section-h"><h2>我的方向</h2><button class="more" id="me-goals">調整 →</button></div>
       <div class="row" style="flex-wrap:wrap;gap:8px">${p.goals.map(k=>`<span class="chip goal">${GOALS[k].emoji} ${esc(GOALS[k].name)}</span>`).join('')||'<span class="note">還沒選目標</span>'}<span class="chip">${TONES[p.tone]?.emoji||''} ${esc(TONES[p.tone]?.name||'未選語氣')}</span></div></div>
     <div class="section"><div class="section-h"><h2>方案</h2><span class="more">NT$ · 月繳</span></div>
       <div class="plans">
-        <div class="plan"><div class="pn">Free</div><div class="pp"><b>0</b> /月</div><ul><li>1 個目標 · 每日一段 3 分鐘腳本</li><li>系統聲音</li><li>心情與感恩日記</li></ul></div>
-        <div class="plan best"><span class="chip moon badge">最多人選</span><div class="pn">Glow</div><div class="pp"><b>290</b> /月 · 年繳 2,490</div><ul><li>無限腳本 · 3 種語氣 · 3 個目標</li><li><b>聲音複製</b>：用你的聲音唸給你聽</li><li>睡前催眠導引 · 環境音</li><li>30 天心情洞察</li></ul><button class="btn primary block" style="margin-top:14px" id="me-glow">開始 7 天試用</button></div>
-        <div class="plan"><div class="pn">Muse</div><div class="pp"><b>790</b> /月</div><ul><li>Glow 全部功能</li><li><b>AI 深度個人化</b>：腳本讀你的日記重寫</li><li>每週一封 AI 回顧信 · 目標調頻</li><li>Mumu Soul Care 茶飲 85 折</li></ul></div>
+        <div class="plan"><div class="pn">Free</div><div class="pp"><b>0</b> /月</div><ul><li>1 個目標 · 每日一段 3 分鐘冥想</li><li>系統聲音</li><li>心情與感恩日記</li></ul></div>
+        <div class="plan best"><span class="chip moon badge">最多人選</span><div class="pn">Glow</div><div class="pp"><b>290</b> /月 · 年繳 2,490</div><ul><li>無限冥想引導 · 3 種語氣 · 3 個目標</li><li><b>聲音複製</b>：用你的聲音唸給你聽</li><li>睡前放鬆導引 · 環境音</li><li>30 天心情洞察</li></ul><button class="btn primary block" style="margin-top:14px" id="me-glow">開始 7 天試用</button></div>
+        <div class="plan"><div class="pn">Muse</div><div class="pp"><b>790</b> /月</div><ul><li>Glow 全部功能</li><li><b>AI 深度個人化</b>：引導詞讀你的日記重寫</li><li>每週一封 AI 回顧信 · 目標調頻</li><li>Mumu Soul Care 茶飲 85 折</li></ul></div>
       </div></div>
     <div class="section"><div class="section-h"><h2>連接（選填）</h2></div>
       <div class="card"><div class="field"><label class="label" for="k-eleven">ElevenLabs API key · 聲音複製</label><input class="input" id="k-eleven" type="password" placeholder="xi-…" value="${esc(s.elevenKey)}"></div>
-      <div class="field"><label class="label" for="k-claude">Claude API key · AI 深度腳本</label><input class="input" id="k-claude" type="password" placeholder="sk-ant-…" value="${esc(s.claudeKey)}"></div>
+      <div class="field"><label class="label" for="k-claude">Claude API key · AI 深度引導詞</label><input class="input" id="k-claude" type="password" placeholder="sk-ant-…" value="${esc(s.claudeKey)}"></div>
       <p class="note">金鑰只存在這個瀏覽器。正式版會走後端（見 backend/），金鑰不會進到手機。</p>
-      <button class="btn soft sm" style="margin-top:10px" id="k-save">儲存</button></div></div>
+      <div class="row" style="margin-top:10px;gap:8px"><button class="btn soft sm" id="k-save">儲存</button><button class="btn ghost sm" id="k-voice">${s.voiceId?'聲音：'+esc(s.voiceName||s.voiceId.slice(0,8)):'選擇播放聲音'}</button></div></div></div>
     <div class="section"><div class="section-h"><h2>資料</h2></div>
       <div class="kv"><span>日記</span><b>${state.entries.length} 篇</b><span>自我對話</span><b>${state.sessions.reduce((a,x)=>a+x.min,0)} 分鐘</b><span>加入</span><b>${fmtDate(p.createdAt||todayKey())}</b></div>
       <div class="row" style="margin-top:14px;gap:8px"><button class="btn ghost sm" id="me-export">匯出 JSON</button><button class="btn ghost sm" id="me-reset">${state.demo?'清除範例，重新開始':'重設'}</button></div></div>`;
   $('#me-rec').onclick=openRecorderSheet;
   $('#me-goals').onclick=()=>openGoalsSheet(renderMe);
-  $('#me-edit').onclick=()=>sheet(`<h2>怎麼稱呼你？</h2><p class="sub">腳本裡會用這個名字叫你。</p><input class="input" id="sh-name" value="${esc(p.name)}" style="margin-bottom:16px"><button class="btn primary block" id="sh-ok">儲存</button>`,b=>{ $('#sh-ok',b).onclick=()=>{ state.profile.name=$('#sh-name',b).value.trim(); save(); closeSheet(); renderMe(); }; });
+  $('#me-con').onclick=()=>openConcernsSheet(renderMe);
+  $('#me-edit').onclick=()=>sheet(`<h2>怎麼稱呼你？</h2><p class="sub">引導詞裡會用這個名字叫你。</p><input class="input" id="sh-name" value="${esc(p.name)}" style="margin-bottom:16px"><button class="btn primary block" id="sh-ok">儲存</button>`,b=>{ $('#sh-ok',b).onclick=()=>{ state.profile.name=$('#sh-name',b).value.trim(); save(); closeSheet(); renderMe(); }; });
   $('#me-glow').onclick=()=>toast('Demo：正式版會接 Stripe / TapPay 訂閱');
-  $('#k-save').onclick=()=>{ state.settings.elevenKey=$('#k-eleven').value.trim(); state.settings.claudeKey=$('#k-claude').value.trim(); save(); toast('已儲存'); renderMe(); };
+  $('#k-save').onclick=()=>{ state.settings.elevenKey=$('#k-eleven').value.trim(); state.settings.claudeKey=$('#k-claude').value.trim(); if(state.settings.elevenKey&&!state.settings.voiceId){ state.settings.voiceId=DEMO_VOICES.melo.id; state.settings.voiceName=DEMO_VOICES.melo.name; } save(); toast('已儲存'); renderMe(); };
+  $('#k-voice').onclick=()=>openVoiceSheet(renderMe);
   $('#me-export').onclick=()=>{ const a=document.createElement('a'); a.href='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(state,null,2)); a.download=`melomood-${todayKey()}.json`; a.click(); };
   $('#me-reset').onclick=startReal;
 }
 function openGoalsSheet(after){
-  sheet(`<h2>你的目標</h2><p class="sub">最多 3 個。腳本會輪流圍著它們寫。</p><div class="opts" id="sh-goals">${goalOptions(state.profile.goals)}</div><button class="btn primary block" id="sh-ok" style="margin-top:18px">完成</button>`,b=>{
+  sheet(`<h2>你的方向</h2><p class="sub">最多 3 個。引導詞會輪流圍著它們寫。</p><div class="opts" id="sh-goals">${goalOptions(state.profile.goals)}</div><button class="btn primary block" id="sh-ok" style="margin-top:18px">完成</button>`,b=>{
     const sel=new Set(state.profile.goals); bindGoalOptions(b,sel);
     $('#sh-ok',b).onclick=()=>{ if(!sel.size) return toast('至少選一個'); state.profile.goals=[...sel]; save(); closeSheet(); after&&after(); };
   });
 }
 function goalOptions(selected){ return Object.entries(GOALS).map(([k,g])=>`<button class="opt" data-k="${k}" aria-pressed="${selected.includes(k)}"><span class="em">${g.emoji}</span><div><b>${esc(g.name)}</b><span>${esc(g.hint)}</span></div><span class="tick"></span></button>`).join(''); }
 function bindGoalOptions(root,sel){ $$('.opt',root).forEach(b=>b.onclick=()=>{ const k=b.dataset.k; if(sel.has(k)) sel.delete(k); else { if(sel.size>=3) return toast('最多 3 個，先放下一個'); sel.add(k); } b.setAttribute('aria-pressed',sel.has(k)); }); }
+function openVoiceSheet(after){
+  const s=state.settings;
+  if(!s.elevenKey){
+    sheet(`<h2>播放聲音</h2><p class="sub">兩段示範音檔（🎤 音樂 × 💅 Baddie × 3 分，以及睡前導引）可以選聲音。其他組合暫時用系統聲音。</p>
+      <div class="list" id="sh-demo">${Object.entries(DEMO_VOICES).map(([k,v])=>`<button class="opt" data-k="${k}" aria-pressed="${k===demoVoice()}"><span class="em">${v.emoji}</span><div><b>${esc(v.name)}</b><span>${esc(v.sub)}</span></div><span class="tick"></span></button>`).join('')}
+        <div class="opt" style="opacity:.7"><span class="em">🔊</span><div><b>系統聲音</b><span>其他所有組合 · 瀏覽器內建 zh-TW 語音</span></div></div>
+      </div>
+      <p class="note" style="margin:14px 0">想要每一段都是真人聲音？到「我 → 連接」貼上 ElevenLabs API key，就能用這兩個聲音唸任何引導，或錄音複製你自己的。</p>
+      <button class="btn ghost block" id="sh-go">去設定金鑰</button>`,b=>{
+      $$('#sh-demo .opt[data-k]',b).forEach(o=>o.onclick=()=>{ s.demoVoice=o.dataset.k; save(); closeSheet(); toast('聲音：'+DEMO_VOICES[s.demoVoice].name); after&&after(); });
+      $('#sh-go',b).onclick=()=>{ closeSheet(); go('me'); }; });
+    return;
+  }
+  sheet(`<h2>播放聲音</h2><p class="sub">你 ElevenLabs 帳號裡的聲音。複製聲與中文聲音排前面。</p><div class="list" id="sh-voices"><p class="note">載入中…</p></div>`, async b=>{
+    try{
+      const acct=await loadVoices(); const box=$('#sh-voices',b);
+      const curated=Object.values(DEMO_VOICES).map(v=>({id:v.id,name:v.name,cat:'curated',lang:v.sub}));
+      const vs=[...curated, ...acct.filter(v=>!curated.some(c=>c.id===v.id))];
+      box.innerHTML=vs.map(v=>`<button class="opt" data-id="${esc(v.id)}" data-name="${esc(v.name)}" aria-pressed="${v.id===s.voiceId}"><span class="em">${v.cat==='curated'?(v.id===DEMO_VOICES.melo.id?'✦':'🌑'):v.cat==='cloned'?'✦':v.lang==='zh'?'中':'🔊'}</span><div><b>${esc(v.name)}</b><span>${v.cat==='curated'?esc(v.lang):(v.cat==='cloned'?'複製聲':v.cat||'')+(v.lang?' · '+esc(v.lang):'')}</span></div><span class="tick"></span></button>`).join('')||'<p class="note">帳號裡沒有聲音。先在「我」錄一段來複製。</p>';
+      $$('.opt',box).forEach(o=>o.onclick=()=>{ s.voiceId=o.dataset.id; s.voiceName=o.dataset.name; ttsCache.clear(); save(); closeSheet(); toast('聲音：'+s.voiceName); after&&after(); });
+    }catch(e){ $('#sh-voices',b).innerHTML=`<p class="note">載入失敗（${esc(e.message||e)}）。檢查金鑰，或這個頁面是否允許連外。</p>`; }
+  });
+}
 function openRecorderSheet(){
   sheet(`<h2>錄下你的聲音</h2><p class="sub">唸這段話，30 到 60 秒。唸得像在跟自己說話，不用完美。</p><div id="sh-rec"></div>`,b=>{ sheet._cleanup=mountRecorder($('#sh-rec',b),{onDone:()=>{ closeSheet(); toast('聲音樣本已更新 ✦'); go('me'); }}); });
 }
 
 /* ---------- ONBOARDING ---------- */
-let obStep=1; const obSel=new Set(); let obTone=''; let obRecCleanup=null;
-function startOnboarding(){ obStep=1; obSel.clear(); obTone=''; go('onboard'); renderOb(); }
+let obStep=1; const obSel=new Set(); const obCon=new Set(); let obTone=''; let obMin=3; let obRecCleanup=null;
+function startOnboarding(){ obStep=1; obSel.clear(); obCon.clear(); obTone=''; obMin=3; go('onboard'); renderOb(); }
 function renderOb(){
   $$('.ob-step').forEach(s=>s.classList.toggle('active',+s.dataset.step===obStep));
   $$('.ob-progress i').forEach((i,n)=>i.classList.toggle('on',n<obStep));
   $('#ob-back').hidden=obStep===1;
-  $('#ob-next').textContent=obStep===3?'開始':'下一步';
-  if(obStep===1){ $('#ob-goals').innerHTML=goalOptions([...obSel]); bindGoalOptions($('#ob-goals'),obSel); $('#ob-name').value=state.profile.name||''; }
-  if(obStep===2){ $('#ob-tones').innerHTML=Object.entries(TONES).map(([k,t])=>`<button class="opt tone" data-t="${k}" aria-pressed="${obTone===k}"><span class="em">${t.emoji}</span><div><b>${esc(t.name)}</b><span>${esc(t.hint)}</span></div><span class="tick"></span></button>`).join('');
+  $('#ob-next').textContent=obStep===4?'開始':'下一步';
+  if(obStep===1){ $('#ob-name').value=state.profile.name||''; $('#ob-concerns').innerHTML=concernOptions([...obCon]); bindConcernOptions($('#ob-concerns'),obCon); }
+  if(obStep===2){ $('#ob-goals').innerHTML=goalOptions([...obSel]); bindGoalOptions($('#ob-goals'),obSel);
+    $$('#ob-min button').forEach(b=>{ b.setAttribute('aria-pressed',+b.dataset.m===obMin); b.onclick=()=>{ obMin=+b.dataset.m; $$('#ob-min button').forEach(x=>x.setAttribute('aria-pressed',x===b)); }; }); }
+  if(obStep===3){ $('#ob-tones').innerHTML=Object.entries(TONES).map(([k,t])=>`<button class="opt tone" data-t="${k}" aria-pressed="${obTone===k}"><span class="em">${t.emoji}</span><div><b>${esc(t.name)}</b><span>${esc(t.hint)}</span></div><span class="tick"></span></button>`).join('');
     $$('#ob-tones .opt').forEach(b=>b.onclick=()=>{ obTone=b.dataset.t; $$('#ob-tones .opt').forEach(x=>x.setAttribute('aria-pressed',x===b)); }); }
-  if(obStep===3){ obRecCleanup=mountRecorder($('#ob-rec'),{onDone:()=>{ toast('聲音樣本已存 ✦'); finishOb(); }}); }
+  if(obStep===4){ obRecCleanup=mountRecorder($('#ob-rec'),{onDone:()=>{ toast('聲音樣本已存 ✦'); finishOb(); }}); }
 }
 $('#ob-next').onclick=()=>{
-  if(obStep===1){ const name=$('#ob-name').value.trim(); if(!name) return toast('先告訴我你的名字'); if(!obSel.size) return toast('至少選一個目標'); state.profile.name=name; state.profile.goals=[...obSel]; obStep=2; }
-  else if(obStep===2){ if(!obTone) return toast('選一種語氣'); state.profile.tone=obTone; obStep=3; }
+  if(obStep===1){ const name=$('#ob-name').value.trim(); if(!name) return toast('先告訴我你的名字'); if(!obCon.size) return toast('點一個最有感的'); state.profile.name=name; state.profile.concerns=[...obCon];
+    if(!obSel.size) [...obCon].forEach(c=>{ const g=CONCERNS[c].goal; if(g&&obSel.size<3) obSel.add(g); }); obStep=2; }
+  else if(obStep===2){ if(!obSel.size) return toast('至少選一個方向'); state.profile.goals=[...obSel]; state.ui.minutes=obMin;
+    if(!obTone){ obTone=[...obCon].some(c=>CONCERNS[c].tone==='gentle')?'gentle':'firm'; } obStep=3; }
+  else if(obStep===3){ if(!obTone) return toast('選一種語氣'); state.profile.tone=obTone; obStep=4; }
   else { finishOb(); return; }
   save(); renderOb();
 };
 $('#ob-back').onclick=()=>{ if(obStep>1){ obRecCleanup&&obRecCleanup(); obStep--; renderOb(); } };
 function finishOb(){ obRecCleanup&&obRecCleanup(); state.demo=false; state.ui.goal=state.profile.goals[0]; save(); go('home'); toast(`歡迎，${state.profile.name} ✦`); }
+function concernOptions(selected){ return Object.entries(CONCERNS).map(([k,c])=>`<button class="con" data-k="${k}" aria-pressed="${selected.includes(k)}"><span class="em">${c.emoji}</span><b>${esc(c.name)}</b><span>${esc(c.hint)}</span></button>`).join(''); }
+function bindConcernOptions(root,sel){ $$('.con',root).forEach(b=>b.onclick=()=>{ const k=b.dataset.k; if(sel.has(k)) sel.delete(k); else { if(sel.size>=3) return toast('最多 3 個'); sel.add(k); } b.setAttribute('aria-pressed',sel.has(k)); }); }
+function openConcernsSheet(after){
+  sheet(`<h2>最近的狀態</h2><p class="sub">最多 3 個。引導詞的開頭會先回應這些。</p><div class="grid2" id="sh-con">${concernOptions(state.profile.concerns||[])}</div><button class="btn primary block" id="sh-ok" style="margin-top:18px">完成</button>`,b=>{
+    const sel=new Set(state.profile.concerns||[]); bindConcernOptions(b,sel);
+    $('#sh-ok',b).onclick=()=>{ state.profile.concerns=[...sel]; save(); closeSheet(); after&&after(); };
+  });
+}
 
 /* ---------- theme ---------- */
 function applyTheme(t){ if(t) document.documentElement.setAttribute('data-theme',t); else document.documentElement.removeAttribute('data-theme'); $$('[data-theme-set]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.themeSet===t)); state.settings.theme=t; save(); }
