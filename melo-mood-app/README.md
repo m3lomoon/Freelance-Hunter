@@ -10,6 +10,30 @@
 情境、目標、語氣、呼吸節奏、環境音全部用漸層色塊當識別，數字用 Syne 粗體大字，標記用酸黃三角。
 `.mesh` + `.g-*`（方塊）與 `.gw-*`（寬版 hero）兩組漸層，共 12 個色系。
 
+## 語言
+
+繁體中文（原始）· 简体中文 · English。左側或「我 → 語言」切換，介面、引導詞與**語音都會跟著換**。
+簡體用完整字元表加一份台灣／大陸詞彙對照（訊息→消息、螢幕→屏幕、金鑰→密钥、聲音複製→声音克隆…）。
+英文是逐句翻譯的字典；翻不完整的句子會整句保留中文，不會出現半中半英。
+
+## App icon 與安裝
+
+`assets/icon-*.png` 是同一套 mesh 漸層加同心圓標記（與「冥想」分頁圖示同源）。
+PWA manifest 在執行時產生，所以放在任何網址都能安裝：
+**iOS Safari** 分享 → 加入主畫面；**Android Chrome** 選單 → 安裝應用程式。裝完就是全螢幕、有 icon 的 App。
+
+## 怎麼給別人試用
+
+| 方式 | 做法 | 適合 |
+|---|---|---|
+| **Artifact 連結** | 我發佈的那個連結，右上角分享給任何人 | 最快，傳給朋友看一眼 |
+| **GitHub Pages** | repo → Settings → Pages → 選 `claude/personalized-manifestation-app-x3a8j4` 分支、根目錄；網址是 `https://m3lomoon.github.io/Freelance-Hunter/melo-mood-app/` | Beta 名單、固定網址、可加到主畫面 |
+| **Netlify Drop** | 把 `melo-mood-app/` 整個資料夾拖到 app.netlify.com/drop | 不想動 Git，30 秒有網址 |
+| **本機** | 見下方 | 自己測麥克風與金鑰 |
+
+麥克風錄音需要 https 或 localhost，所以 Pages / Netlify 都可以，直接開檔案不行。
+每個人的資料各自存在自己的瀏覽器，互不干擾。
+
 ## 立刻試用
 
 ```bash
@@ -53,6 +77,7 @@ cd melo-mood-app && python3 -m http.server 8080
 melo-mood-app/
 ├─ index.html                     # 整個 App
 ├─ assets/*.mp3                   # Melo 聲音的預錄音檔（mono 48kbps）
+├─ assets/icon-*.png              # App icon（192 / 512 / 1024 / maskable）
 ├─ BUSINESS.md                    # SaaS 商業計畫
 └─ backend/
    ├─ supabase/schema.sql         # 資料表 + RLS
