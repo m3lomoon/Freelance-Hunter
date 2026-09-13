@@ -860,6 +860,21 @@ function buildScene(key,{minutes,tone,name}={}){
   S.close.forEach(t=>L(t,'close',1400));
   return lines;
 }
+/* fixed, unshuffled version of a scenario's script: the only stable order that lets
+   Recording Studio clips (indexed positionally) line up with playback every time */
+function sceneScript(key,name){
+  const S=SCENES[key]; if(!S) return [];
+  const T=TONES[S.tone||'gentle'];
+  const who=name||state.profile.name||'你';
+  const lines=[]; const L=(t,kind,pause)=>lines.push({t,kind,pause});
+  L(`${who}，${SCENE_GREET[S.cat]||'給自己這幾分鐘。'}`,'open',1700);
+  S.open.forEach((t,i)=>L(t.replace('{name}',who),'open',i?1600:1800));
+  breathLines(S.breath,S.rounds).forEach(l=>lines.push(l));
+  (S.steps||[]).forEach(t=>L(t,'vision',5000));
+  S.aff.forEach((t,i)=>{ L(t,'aff',2000); if((i+1)%4===0 && T.punch) L(T.punch[Math.floor(i/4)%T.punch.length],'punch',1400); });
+  S.close.forEach(t=>L(t,'close',1400));
+  return lines;
+}
 function sceneStats(key){
   const rs=(state.ratings||[]).filter(r=>r.scene===key && r.after!=null);
   if(!rs.length) return null;
@@ -1015,7 +1030,7 @@ const VOICES = {
   brand:{name:'Melo 品牌聲', role:'品牌旁白 · 較明亮', g:'lime', id:'ZGNKRFGTTnfytxotHN56',
     bio:'為 Melo Mood 設計的品牌聲，比複製聲亮一點、精神一點，適合早晨與專注類。目前還在 fine-tune，完成前會自動改用複製聲。'},
   mine:{name:'你自己的聲音', role:'你錄的', g:'rose', own:true,
-    bio:'自我參照效應：同一句話，用自己的聲音聽，記得比較久、也比較信。免費做法：在「我 → 聲音錄音室」把每日練習與睡前導引的固定句子錄一遍，完全不用金鑰。想要任何情境冥想都用你的聲音、句子還能無限生成，就錄 30 秒交給 ElevenLabs 複製（需要金鑰）。'},
+    bio:'自我參照效應：同一句話，用自己的聲音聽，記得比較久、也比較信。免費做法：在「我 → 聲音錄音室」把每日練習、睡前導引、或任何一個情境冥想的固定句子錄一遍（也可以在該段播放頁直接點「錄這一段」），完全不用金鑰、不經過任何第三方。想要句子每次都不一樣、自動生成，才需要錄 30 秒交給 ElevenLabs 複製（需要金鑰）。'},
   system:{name:'系統聲音', role:'裝置內建 · 一定能播', g:'slate', browser:true,
     bio:'瀏覽器內建的語音，不需要金鑰、不需要網路，任何語言與任何一段引導都能唸。品質比不上前面幾個，但永遠都在。'},
 };
@@ -1103,12 +1118,13 @@ function voiceSource(kind, exact){
   if(st.mode==='eleven'){ s.voiceId=st.id; s.voiceName=V.name;
     return {mode:'eleven', label:V.name, sub:V.role, voice:k}; }
   // recorded-in-studio clips only line up with the exact fixed script they were read from
-  if(exact && k==='mine' && ['manifest','sleep'].includes(kind)){
+  if(exact && k==='mine' && (kind==='manifest' || kind==='sleep' || SCENES[kind])){
     const oc=ownCounts()[kind];
-    if(oc.total>0 && oc.done===oc.total) return {mode:'own', label:'你的聲音', sub:(kind==='sleep'?'你錄的睡前導引':'你錄的每日練習'), voice:'mine', packKind:kind};
-    return {mode:'browser', label:'系統聲音', sub: oc.done>0?`錄音室還缺 ${oc.total-oc.done} 句 · 先用系統聲音`:'去「我」開錄音室 · 免金鑰', voice:'system'};
+    if(oc && oc.total>0 && oc.done===oc.total) return {mode:'own', label:'你的聲音', sub:ownSub(kind), voice:'mine', packKind:kind};
+    return {mode:'browser', label:'系統聲音', sub: oc&&oc.done>0?`錄音室還缺 ${oc.total-oc.done} 句 · 先用系統聲音`:'去「我」開錄音室 · 免金鑰', voice:'system'};
   }
   const P=DEMO_PACK[kind];
+  if(!P) return {mode:'browser', label:'系統聲音', sub:'加金鑰或去錄音室錄，就能用你的聲音', voice:'system'};
   if(lang()!=='tw') return {mode:'browser', label:'系統聲音', sub:'預錄音檔只有中文版 · 加金鑰可用任何語言', voice:'system'};
   // the recordings call the listener Melody by name; anyone else gets a voice that says theirs
   if((state.profile.name||'')!=='Melody') return {mode:'browser', label:'系統聲音', sub:`預錄音檔唸的是別人的名字 · 加金鑰就會唸「${state.profile.name||'你'}」`, voice:'system'};
@@ -1116,6 +1132,7 @@ function voiceSource(kind, exact){
   if(fits){ const v=VOICES[demoVoice()]; return {mode:'pack', label:v.name, sub:'預錄示範 · '+v.role, voice:demoVoice()}; }
   return {mode:'browser', label:'系統聲音', sub:`${V.name}要金鑰才能唸這一段 · 先用系統聲音`, voice:'system'};
 }
+function ownSub(kind){ if(kind==='sleep') return '你錄的睡前導引'; if(kind==='manifest') return '你錄的每日練習'; const S=SCENES[kind]; return S?`你錄的「${S.name}」`:'你的聲音'; }
 
 /* ---------- recording studio: your own voice, zero API key, ever ----------
    Users without ElevenLabs read the same fixed daily-practice and sleep scripts
@@ -1129,14 +1146,19 @@ function studioLines(){
   ['manifest','sleep'].forEach(kind=>{
     DEMO_PACK[kind].lines.forEach((l,i)=>{ if(speakableLine(l)) out.push({kind, i, t:withName(l.t), section: kind==='sleep'?'睡前導引':'每日練習'}); });
   });
+  Object.entries(SCENES).forEach(([key,S])=>{
+    sceneScript(key).forEach((l,i)=>{ if(speakableLine(l)) out.push({kind:key, i, t:l.t, section:S.name}); });
+  });
   return out;
 }
 function ownCounts(){
   const all=studioLines();
   const have=new Set(state.profile.voice?.ownClips||[]);
-  const byKind=kind=>{ const ls=all.filter(l=>l.kind===kind); return {done:ls.filter(l=>have.has(`${l.kind}:${l.i}`)).length, total:ls.length}; };
-  const manifest=byKind('manifest'), sleep=byKind('sleep');
-  return {manifest, sleep, all:{done:manifest.done+sleep.done, total:manifest.total+sleep.total}};
+  const kinds=[...new Set(all.map(l=>l.kind))];
+  const byKind={};
+  kinds.forEach(kind=>{ const ls=all.filter(l=>l.kind===kind); byKind[kind]={done:ls.filter(l=>have.has(`${l.kind}:${l.i}`)).length, total:ls.length}; });
+  byKind.all={done:all.filter(l=>have.has(`${l.kind}:${l.i}`)).length, total:all.length};
+  return byKind;
 }
 function voiceDB(){
   return new Promise((res,rej)=>{
@@ -1762,16 +1784,17 @@ function renderScene(){
   const S=sceneOf(k); if(!S) return backToLib();
   const nameMatches=(state.profile.name||'')==='Melody';   // the recordings greet Melody by name
   const B=BREATHS[S.breath], useAudio=!!SCENE_AUDIO[k] && nameMatches && lang()==='tw' && !(state.settings.elevenKey&&state.settings.voiceId);
-  const lines= useAudio ? SCENE_AUDIO[k].lines : buildScene(k,{tone:S.tone,name:p.name});
-  const st=sceneStats(k), fav=isFav('scene:'+k);
   const src= useAudio ? {mode:'pack',label:VOICES[demoVoice()].name,sub:'預錄真人聲音 · '+VOICES[demoVoice()].role,voice:demoVoice()}
-                      : voiceSource('manifest');
+                      : voiceSource(k, true);
+  const lines= useAudio ? SCENE_AUDIO[k].lines : src.mode==='own' ? sceneScript(k,p.name) : buildScene(k,{tone:S.tone,name:p.name});
+  const st=sceneStats(k), fav=isFav('scene:'+k);
+  const offerRecord = !useAudio && src.mode==='browser' && chosenVoice()==='mine' && !!SCENES[k];
   if(!useAudio && SCENE_AUDIO[k] && !nameMatches) src.sub=`預錄音檔唸的是別人的名字 · 加金鑰就會唸「${state.profile.name||'你'}」`;
   $('#manifest').innerHTML=`
     <div class="row between" style="margin-bottom:14px"><button class="btn ghost sm" id="sc-back">← 冥想庫</button>
       <button class="btn ghost sm" id="sc-fav" aria-pressed="${fav}">${fav?'★ 已收藏':'☆ 收藏'}</button></div>
     <div class="topbar"><div><div class="eyebrow">${CATS[S.cat]?.name||'自訂'} · ${S.min} 分鐘</div><h1 class="title">${esc(S.name)}</h1></div></div>
-    <div class="vrow">${voiceChip(src)}<button class="vchip" id="v-pace"><b>◷ ${esc(pace().name)}</b><span class="vcaret">▾</span></button></div>
+    <div class="vrow">${voiceChip(src)}<button class="vchip" id="v-pace"><b>◷ ${esc(pace().name)}</b><span class="vcaret">▾</span></button>${offerRecord?'<button class="vchip" id="mf-recmine">🎙 錄這一段的聲音</button>':''}</div>
     <p class="note" style="max-width:36ch;margin-bottom:12px">${esc(S.hint||'')}</p>
     <div class="whycard"><div class="eyebrow">${esc(B.name)} · ${B.steps.map(s=>s[0]+' '+s[1]).join(' → ')}</div><p>${esc(B.why)}</p></div>
     ${S.metric?`<div class="section"><label class="label">開始前，你的「${esc(S.metric)}」有多強？<span class="note">選了才能看到效果</span></label>
@@ -1794,6 +1817,7 @@ function renderScene(){
   $('#mf-voice').onclick=()=>openVoiceSheet(renderManifest);
   bindVoiceChip($('#manifest'), renderManifest);
   $('#v-pace')&&($('#v-pace').onclick=()=>openPaceSheet(renderManifest));
+  $('#mf-recmine')&&($('#mf-recmine').onclick=()=>openStudioSheet(k));
   $('#sc-amb').onclick=openAmbientSheet;
   $('#mf-pace')&&($('#mf-pace').onclick=()=>openPaceSheet(renderScene));
   $('#sc-ai')&&($('#sc-ai').onclick=()=>aiRewrite(k,S));
@@ -1810,10 +1834,11 @@ function renderDaily(){
   const fixedScript = src.mode==='pack' || src.mode==='own';
   const lines= !fixedScript ? buildScript({goal:state.ui.goal,minutes:state.ui.minutes,tone:p.tone||'gentle',name:p.name,seed:mfSeed+state.ui.goal+state.ui.minutes})
     : src.mode==='own' ? DEMO_PACK.manifest.lines.map(l=>({...l,t:withName(l.t)})) : DEMO_PACK.manifest.lines;
+  const offerRecord = src.mode==='browser' && chosenVoice()==='mine';
   $('#manifest').innerHTML=`
     <div class="row between" style="margin-bottom:14px"><button class="btn ghost sm" id="sc-back">← 冥想庫</button></div>
     <div class="topbar"><div><div class="eyebrow">每日練習</div><h1 class="title">今天，<br>對自己說什麼？</h1></div></div>
-    <div class="vrow">${voiceChip(src)}<button class="vchip" id="v-pace"><b>◷ ${esc(pace().name)}</b><span class="vcaret">▾</span></button></div>
+    <div class="vrow">${voiceChip(src)}<button class="vchip" id="v-pace"><b>◷ ${esc(pace().name)}</b><span class="vcaret">▾</span></button>${offerRecord?'<button class="vchip" id="mf-recmine">🎙 錄這一段的聲音</button>':''}</div>
     <label class="label">方向</label>
     <div class="row" style="flex-wrap:wrap;gap:8px;margin-bottom:16px" id="mf-goals">${p.goals.map(k=>`<button class="chip goal" data-k="${k}" style="${k===state.ui.goal?'border-color:var(--moon);color:var(--moon)':''}"><i class="sw xs mesh g-${GOALS[k].g}"></i>${esc(GOALS[k].name)}</button>`).join('')}<button class="chip" id="mf-addgoal">＋</button></div>
     <div class="row between" style="margin-bottom:16px">
@@ -1843,6 +1868,7 @@ function renderDaily(){
   $('#mf-voice').onclick=()=>openVoiceSheet(renderManifest);
   bindVoiceChip($('#manifest'), renderManifest);
   $('#v-pace')&&($('#v-pace').onclick=()=>openPaceSheet(renderManifest));
+  $('#mf-recmine')&&($('#mf-recmine').onclick=()=>openStudioSheet('manifest'));
   $('#sc-amb').onclick=openAmbientSheet;
   $('#mf-regen')&&($('#mf-regen').onclick=()=>{ mfSeed=String(Math.random()); renderDaily(); toast('換了一版 ✦'); });
   bindPlayer('mf', lines, TONES[p.tone||'gentle'].rate, 'manifest', src, {packKey:src.mode==='pack'?'manifest':null, sceneKey:'daily', minutes:state.ui.minutes});
@@ -2220,9 +2246,10 @@ function renderSleep(){
   const fixedScript = src.mode==='pack' || src.mode==='own';
   slLines= !fixedScript ? buildSleep({goals:p.goals,name:p.name})
     : src.mode==='own' ? DEMO_PACK.sleep.lines.map(l=>({...l,t:withName(l.t)})) : DEMO_PACK.sleep.lines;
+  const offerRecord = src.mode==='browser' && chosenVoice()==='mine';
   $('#sleep').innerHTML=`
     <div class="topbar"><div><div class="eyebrow">Sleep · 睡前放鬆導引</div><h1 class="title">帶著目標<br>入睡。</h1></div></div>
-    <div class="vrow">${voiceChip(src)}<button class="vchip" id="v-pace"><b>◷ ${esc(pace().name)}</b><span class="vcaret">▾</span></button></div>
+    <div class="vrow">${voiceChip(src)}<button class="vchip" id="v-pace"><b>◷ ${esc(pace().name)}</b><span class="vcaret">▾</span></button>${offerRecord?'<button class="vchip" id="sl-recmine">🎙 錄這一段的聲音</button>':''}</div>
     <p class="note" style="max-width:36ch;margin-bottom:10px">入睡前的 θ 波狀態，是大腦最容易接收正向暗示的時候。導引會先放鬆身體、倒數，再把你的 ${p.goals.length} 個目標輕輕放進去。</p>
     <div class="orb-wrap"><div class="orb sleep idle" id="sl-orb"><span class="phase" id="sl-phase">READY</span></div></div>
     <div class="row between" style="margin:6px 0 12px"><div class="eyebrow">${slLines.length} 句 · ${src.mode==='pack'?'示範音檔 · 約 2 分鐘':src.mode==='own'?'你的聲音 · 約 2 分鐘':'約 12 分鐘'}</div>
@@ -2240,6 +2267,7 @@ function renderSleep(){
   $('#sl-voice').onclick=()=>openVoiceSheet(renderSleep);
   bindVoiceChip($('#sleep'), renderSleep);
   $('#v-pace')&&($('#v-pace').onclick=()=>openPaceSheet(renderSleep));
+  $('#sl-recmine')&&($('#sl-recmine').onclick=()=>openStudioSheet('sleep'));
   $('#sl-noise').onclick=openAmbientSheet;
   $('#sl-dim').onclick=()=>{ $('#dim').classList.add('on'); tickClock(); };
 }
@@ -2314,7 +2342,7 @@ function renderMe(){
       <div style="flex:1"><b>${v.voiceId?'你的聲音已就緒':v.recorded?'樣本已錄製，等待複製':'還沒有聲音樣本'}</b><span>${v.voiceId?`Voice ID ${esc(v.voiceId.slice(0,8))}… · ${v.seconds} 秒樣本`:v.recorded?`${v.seconds} 秒 · ${fmtDate(v.at)} · 加入 ElevenLabs 金鑰後重錄即可複製`:'30 到 60 秒，安靜的房間'}</span></div>
       <button class="btn sm soft" id="me-rec">${v.recorded?'重錄':'錄音'}</button></div>
     <div class="section"><div class="section-h"><h2>聲音錄音室</h2><span class="more">免金鑰</span></div>
-      <div class="card"><div style="flex:1"><b>${oc.all.done>0?`已錄 ${oc.all.done} / ${oc.all.total} 句`:'把每日練習與睡前導引的固定句子錄一遍'}</b><span>${oc.all.done>=oc.all.total&&oc.all.total>0?'兩段都錄完了，選「你自己的聲音」就能播':oc.all.done>0?'錄完一段的所有句子，那段就能用你的聲音播放':'不用 ElevenLabs 金鑰，錄完就能用自己的聲音聽'}</span></div>
+      <div class="card"><div style="flex:1"><b>${oc.all.done>0?`已錄 ${oc.all.done} / ${oc.all.total} 句`:'把每日練習、睡前導引與每個情境冥想都錄一遍'}</b><span>${oc.all.done>=oc.all.total&&oc.all.total>0?'全部錄完了，選「你自己的聲音」就能播':oc.all.done>0?'錄完哪一段的所有句子，那一段就能用你的聲音播放；也可以在任何一段的播放頁直接點「錄這一段」':'不用 ElevenLabs 金鑰，錄完就能用自己的聲音聽；也可以只錄常用的那幾段就好'}</span></div>
         <button class="btn sm soft" id="me-studio">${oc.all.done>0?'繼續錄':'開始錄'}</button></div></div>
     <div class="section"><div class="section-h"><h2>收藏</h2><button class="more" id="me-favs">全部 →</button></div>
       <div class="lrows">${(state.favs||[]).map(id=>catalogueById()[id]).filter(Boolean).slice(0,3).map(listRow).join('')||'<p class="note">還沒有收藏。在任何一段旁邊點 ♥。</p>'}</div></div>
@@ -2405,17 +2433,18 @@ function openRecorderSheet(){
   sheet(`<h2>錄下你的聲音</h2><p class="sub">唸這段話，30 到 60 秒。唸得像在跟自己說話，不用完美。</p><div id="sh-rec"></div>`,b=>{ sheet._cleanup=mountRecorder($('#sh-rec',b),{onDone:()=>{ closeSheet(); toast('聲音樣本已更新 ✦'); go('me'); }}); });
 }
 /* ---------- studio: one fixed line at a time, no key required ---------- */
-let studioIdx=0;
-function openStudioSheet(){
-  const all=studioLines();
+let studioIdx=0; let studioFilter=null;
+function openStudioSheet(onlyKind){
+  const all=onlyKind ? studioLines().filter(l=>l.kind===onlyKind) : studioLines();
   if(!all.length) return;
+  studioFilter=onlyKind||null;
   const have=new Set(state.profile.voice?.ownClips||[]);
   const firstOpen=all.findIndex(l=>!have.has(`${l.kind}:${l.i}`));
   studioIdx=firstOpen<0?0:firstOpen;
   sheet(`<h2>聲音錄音室</h2><p class="sub">照著唸就好，不用背。每句錄好會自動存起來，中途離開也不會不見，不會上傳到任何地方。</p><div id="studio-body"></div>`, b=>renderStudioLine(b));
 }
 function renderStudioLine(root){
-  const all=studioLines(); if(!all.length) return;
+  const all=studioFilter ? studioLines().filter(l=>l.kind===studioFilter) : studioLines(); if(!all.length) return;
   if(studioIdx>=all.length) studioIdx=all.length-1;
   const line=all[studioIdx];
   const have=new Set(state.profile.voice?.ownClips||[]);
@@ -2468,7 +2497,7 @@ function renderStudioLine(root){
   $('#st-next',host).onclick=()=>{
     if(studioIdx<all.length-1) goto(studioIdx+1);
     else { stop(); cancelAnimationFrame(raf); closeSheet(); toast('全部錄完了 ✦ 去聽聽自己的聲音');
-      state.ui.scene='daily'; state.ui.view='scene'; save(); go('manifest'); }
+      state.ui.scene=(studioFilter && SCENES[studioFilter]) ? studioFilter : 'daily'; state.ui.view='scene'; save(); go('manifest'); }
   };
   sheet._cleanup=()=>{ stop(); cancelAnimationFrame(raf); };
 }
