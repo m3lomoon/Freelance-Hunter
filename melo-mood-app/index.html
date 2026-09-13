@@ -711,7 +711,7 @@ const BREATHS = {
 /* ---------- scenario library ---------- */
 const CATS = {rescue:{name:'急救',hint:'現在就不舒服'},before:{name:'出發前',hint:'進場之前的 60 秒'},daily:{name:'每天',hint:'固定時段的練習'},ritual:{name:'儀式',hint:'慢下來的時刻'}};
 const SCENES = {
-  anxiety:{name:'焦慮急救',g:'aqua',cat:'rescue',min:2,breath:'physio',rounds:3,tone:'gentle',hint:'心跳很快、腦袋停不下來',
+  anxiety:{name:'焦慮急救',g:'aqua',cat:'rescue',min:3,breath:'physio',rounds:3,tone:'gentle',hint:'心跳很快、腦袋停不下來',
     metric:'焦慮',
     open:['好，停一下。你現在是安全的。','把腳掌踩在地上，感覺地板在那裡。'],
     steps:['說出五個你看得到的東西。不用出聲，心裡數就好。','四個你摸得到的。','三個你聽得到的聲音。','兩個你聞得到的。','一個你嚐得到的。'],
@@ -727,7 +727,7 @@ const SCENES = {
     open:['出門前，先回到自己身上。','看著鏡子裡的那個人，不要急著挑毛病。'],
     aff:['今天我不是去被挑選的，我也在挑選。','我不需要表演，我只要在場。','有趣的人會覺得我有趣，這就夠了。','如果不合拍，那不是我不夠好，只是頻率不同。','我可以緊張，緊張只是我在乎。','我允許自己享受今天晚上。'],
     close:['好了。帶著這個頻率出門。']},
-  stage:{name:'上台前',g:'magenta',cat:'before',min:2,breath:'box',rounds:4,tone:'baddie',hint:'演出、直播、鏡頭前',
+  stage:{name:'上台前',g:'magenta',cat:'before',min:3,breath:'box',rounds:4,tone:'baddie',hint:'演出、直播、鏡頭前',
     metric:'緊張',
     open:['燈還沒亮，這一分鐘是你的。','腳掌踩實，膝蓋放鬆，重心往下沉。'],
     steps:['想像第一個音、第一句話出口的樣子。順順的，就這樣。'],
@@ -738,7 +738,7 @@ const SCENES = {
     open:['手指停在那個按鈕上，先呼吸。'],
     aff:['我的作品不需要所有人喜歡。','數字不是我的價值，數字只是數字。','會共鳴的人自然會留下。','我發布的是我，不是我的完美版本。','演算法不是老師，我不需要它的批准。','我今天做了創作者會做的事：把東西送出去。'],
     close:['好，按下去。','然後去做別的事，不要一直重整。']},
-  anger:{name:'情緒降溫',g:'ember',cat:'rescue',min:2,breath:'physio',rounds:4,tone:'firm',hint:'很生氣、想立刻回訊息',
+  anger:{name:'情緒降溫',g:'ember',cat:'rescue',min:3,breath:'physio',rounds:4,tone:'firm',hint:'很生氣、想立刻回訊息',
     metric:'火氣',
     open:['先不要回覆。訊息可以等，你的神經系統不行。','如果可以，站起來走三步。'],
     steps:['把感覺放在身體的某個位置：胸口？喉嚨？肚子？只是看著它。'],
