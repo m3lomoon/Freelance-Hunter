@@ -2118,13 +2118,23 @@ function ambOn(kind){
   if(kind==='white'){ const lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=7000; lp.connect(g); noise('white',lp); }
   if(kind==='brown'){ const lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=420; lp.connect(g); noise('brown',lp); }
   if(kind==='rain'){
-    const hp=ctx.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=700;
-    const lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=6000;
+    const hp=ctx.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=650;
+    const lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=6500;
     hp.connect(lp); lp.connect(g); noise('white',hp);
+    const gustLfo=ctx.createOscillator(); gustLfo.type='sine'; gustLfo.frequency.value=.045+Math.random()*.03;
+    const gustGain=ctx.createGain(); gustGain.gain.value=900;
+    gustLfo.connect(gustGain); gustGain.connect(lp.frequency); gustLfo.start(); nodes.push(gustLfo);
+    const dropBuf=(()=>{ const n=Math.round(ctx.sampleRate*.05), b=ctx.createBuffer(1,n,ctx.sampleRate), d=b.getChannelData(0);
+      for(let i=0;i<n;i++) d[i]=(Math.random()*2-1)*(1-i/n); return b; })();
     const drip=()=>{ if(!ambient?.layers[kind]) return; const t=ctx.currentTime;
-      const o=ctx.createOscillator(), og=ctx.createGain(); o.type='sine'; o.frequency.setValueAtTime(900+Math.random()*700,t); o.frequency.exponentialRampToValueAtTime(300,t+.12);
-      og.gain.setValueAtTime(.06,t); og.gain.exponentialRampToValueAtTime(.0001,t+.16); o.connect(og); og.connect(g); o.start(t); o.stop(t+.2);
-      timer=setTimeout(drip,400+Math.random()*1400); }; drip();
+      const s=ctx.createBufferSource(); s.buffer=dropBuf;
+      const bp=ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=1800+Math.random()*2600; bp.Q.value=2.5+Math.random()*2;
+      const dg=ctx.createGain(); dg.gain.value=.045+Math.random()*.05;
+      s.connect(bp); bp.connect(dg);
+      if(ctx.createStereoPanner){ const pan=ctx.createStereoPanner(); pan.pan.value=Math.random()*1.6-.8; dg.connect(pan); pan.connect(g); }
+      else dg.connect(g);
+      s.start(t); s.stop(t+.06);
+      timer=setTimeout(drip,90+Math.random()*260); }; drip();
   }
   if(kind==='ocean'){
     const lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=600; lp.connect(g); noise('brown',lp);
