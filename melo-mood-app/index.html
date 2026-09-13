@@ -318,6 +318,11 @@ p{margin:0}
 .stat .n small{font-family:var(--mono);font-size:10px;color:var(--onmesh-faint);font-weight:400;margin-left:4px;letter-spacing:.08em}
 .tick-mark{position:absolute;z-index:1;right:12px;bottom:14px;width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:8px solid var(--moon)}
 
+/* forest */
+.forest-grid{display:flex;flex-wrap:wrap;gap:8px}
+.ftree{width:52px;height:52px;border-radius:14px;display:grid;place-items:center;color:#0C0C0E;cursor:default}
+.ftree .fi svg{width:26px;height:26px}
+
 /* mood row */
 .moods{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
 .mood{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 4px 10px;border-radius:var(--r-md);background:var(--raised);border:1px solid transparent;transition:border-color .15s,transform .12s}
@@ -578,6 +583,8 @@ textarea.input{min-height:90px;resize:vertical}
       <section class="screen" id="journal" aria-label="日記"></section>
       <!-- ============ ME ============ -->
       <section class="screen" id="me" aria-label="我"></section>
+      <!-- ============ FOREST ============ -->
+      <section class="screen" id="forest" aria-label="森林"></section>
       <section class="screen" id="favs" aria-label="收藏"></section>
     </div>
 
@@ -587,6 +594,7 @@ textarea.input{min-height:90px;resize:vertical}
       <button data-go="sleep"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5z"/></svg>睡眠</button>
       <button data-go="journal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M5 4h11a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2z"/><path d="M8 4v16M11 9h4M11 13h4"/></svg>日記</button>
       <button data-go="me"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="9" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>我</button>
+      <button data-go="forest"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21v-6"/><path d="M8 15a4 4 0 1 1 3-6.6A3.5 3.5 0 1 1 16 11a4 4 0 0 1-1 7.9H9A4 4 0 0 1 8 15z"/></svg>森林</button>
     </nav>
 
     <div class="sheet-bg" id="sheet-bg"></div>
@@ -609,6 +617,7 @@ const $$ = (s, r=document) => [...r.querySelectorAll(s)];
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const pad = n => String(n).padStart(2,'0');
 const todayKey = (d=new Date()) => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const halfDayKey = (d=new Date()) => todayKey(d)+(d.getHours()<12?'-am':'-pm');
 const daysAgo = n => { const d=new Date(); d.setDate(d.getDate()-n); return todayKey(d); };
 
 /* ---------- content ---------- */
@@ -656,6 +665,23 @@ const MOODS = [
   {v:1,l:'很低',c:'#8C86A8'},{v:2,l:'有點累',c:'#A88FBF'},{v:3,l:'平靜',c:'#7FD1B9'},{v:4,l:'不錯',c:'#F3B08F'},{v:5,l:'發光',c:'#F49AC1'},
 ];
 const TAGS = ['工作','創作','家人','關係','身體','金錢','靈性','休息'];
+/* daily-rotating journal prompts: works offline, upgraded by Claude when a key is set */
+const JOURNAL_IDEAS = [
+  {grat:['一次深呼吸','窗外的光','沒有勉強自己'],note:'今天有什麼事，是你原本以為做不到、後來做到的？'},
+  {grat:['一杯剛好的溫度','一句被聽懂的話','身體今天的支持'],note:'如果今天可以重來一次，你會對自己說什麼？'},
+  {grat:['一個沒有勉強的微笑','手機放下的那幾分鐘','一首剛好的歌'],note:'今天什麼時候感覺最像自己？'},
+  {grat:['意外的空檔','一件準時完成的事','有人記得你'],note:'今天有什麼情緒，是你還沒說出口的？'},
+  {grat:['陽台的風','一次好好的呼吸','沒說出口但收到的關心'],note:'今天你對自己最溫柔的一刻是什麼？'},
+  {grat:['一個誠實的不要','安靜的十分鐘','身體發出的一個訊號'],note:'今天有什麼，你其實可以更早原諒自己？'},
+  {grat:['一次順順的對話','沒有比較的一刻','剛好收到的訊息'],note:'今天有沒有哪個瞬間，讓你想放慢下來？'},
+  {grat:['一個新的想法','沒有拖延的五分鐘','身邊的一個小細節'],note:'今天你在照顧誰？誰又在照顧你？'},
+  {grat:['一次好好的休息','沒去比較的社群媒體','一個小小的勇敢'],note:'今天有什麼事，比昨天更輕鬆一點？'},
+  {grat:['一杯水','一次深呼吸帶來的鬆','沒有預期的驚喜'],note:'今天有沒有哪句話，你想留給明天的自己？'},
+  {grat:['一個好夢或好眠','一次被理解的感覺','手上這件在做的事'],note:'今天什麼讓你覺得，自己正在往前走？'},
+  {grat:['一次拒絕','安靜下來的空間','身體今天做到的事'],note:'今天有沒有什麼，你其實已經準備好放下了？'},
+  {grat:['一個提醒你的小訊號','一次沒有崩潰的煩躁','剛好路過的一句話'],note:'今天有什麼，是你希望被看見、但還沒說的？'},
+  {grat:['一次深呼吸的空隙','一個讓你笑出來的瞬間','沒有硬撐的一段時間'],note:'今天結束前，你最想放下的一件事是什麼？'},
+];
 const readText = () => `${state.profile.name||'我'}。我是夏日的風，也是深夜的海。我允許自己慢下來，也允許自己被看見。今天，我把注意力放在我想要的地方，讓每一個字，都成為我的頻率。`;
 const CONCERNS = {
   sleep:{name:'睡不好',g:'cobalt',hint:'入睡難、半夜醒',goal:'health',tone:'gentle',
@@ -862,7 +888,7 @@ function load(){
 /* the demo lives behind an explicit choice, so nobody is greeted as Melody */
 function blank(){
   const d=seed();
-  return {...d, demo:false, entries:[], sessions:[], ratings:[], favs:[], custom:{},
+  return {...d, demo:false, entries:[], sessions:[], ratings:[], favs:[], custom:{}, journalPrompts:{date:'',grat:[],note:'',src:''},
     profile:{name:'',concerns:[],goals:[],tone:'',voice:{recorded:false},createdAt:todayKey()}};
 }
 function loadDemo(){ Object.assign(state, seed()); save(); go('home'); toast('這是範例資料，隨時可以清掉'); }
@@ -870,6 +896,8 @@ function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e
 /* favourites used to be bare scene keys; catalogue ids are namespaced */
 if(Array.isArray(state.favs)) state.favs=state.favs.map(f=>f.includes(':')||f==='daily'||f==='sleep'?f:'scene:'+f);
 if(!state.settings.voice) state.settings.voice = state.settings.demoVoice || 'melo';
+if(!state.journalPrompts) state.journalPrompts={date:'',grat:[],note:'',src:''};
+if(!state.forest) state.forest={trees:[],hiddenAt:null};
 function seed(){
   const g = [['創作','關係'],['工作','身體'],['靈性'],['創作','金錢'],['休息'],['關係','家人'],['工作'],['創作'],['身體','靈性'],['金錢','工作'],['關係'],['創作','靈性']];
   const moods = [4,3,5,4,2,4,3,5,4,3,4,5];
@@ -885,7 +913,12 @@ function seed(){
     sessions:[{date:daysAgo(7),type:'manifest',min:7,scene:'daily'},{date:daysAgo(5),type:'manifest',min:2,scene:'anxiety'},{date:daysAgo(4),type:'sleep',min:12},{date:daysAgo(3),type:'manifest',min:1,scene:'meeting'},{date:daysAgo(2),type:'manifest',min:2,scene:'anxiety'},{date:daysAgo(1),type:'sleep',min:12},{date:daysAgo(1),type:'manifest',min:3,scene:'focus'}],
     settings:{elevenKey:'',claudeKey:'',theme:'',voiceId:'',voiceName:'',voice:'melo',lang:'tw',pace:'slow',ambVol:.3,reminder:''},
     ratings:[{scene:'anxiety',before:8,after:4,date:daysAgo(2)},{scene:'anxiety',before:7,after:3,date:daysAgo(5)},{scene:'meeting',before:6,after:3,date:daysAgo(3)}],
-    favs:['scene:anxiety','scene:meeting','breath:physio'], custom:{},
+    favs:['scene:anxiety','scene:meeting','breath:physio'], custom:{}, journalPrompts:{date:'',grat:[],note:'',src:''},
+    forest:{trees:[
+      {id:'demot0',at:Date.now()-1000*60*60*20,min:22,tier:'sapling'},
+      {id:'demot1',at:Date.now()-1000*60*60*44,min:8,tier:'sprout'},
+      {id:'demot2',at:Date.now()-1000*60*60*68,min:97,tier:'giant'},
+    ],hiddenAt:null},
     ui:{goal:'music',minutes:3,view:'lib',scene:null,breath:'physio',before:null},
   };
 }
@@ -1383,15 +1416,85 @@ function go(id){
   $$('#nav button').forEach(b=>b.toggleAttribute('aria-current',b.dataset.go===id)&&b.setAttribute('aria-current','page'));
   $$('#nav button').forEach(b=>{ if(b.dataset.go!==id) b.removeAttribute('aria-current'); });
   $('#nav').style.display = (id==='onboard'||id==='favs')?'none':'';
-  ({home:renderHome,manifest:renderManifest,sleep:renderSleep,journal:renderJournal,me:renderMe,favs:renderFavs}[id]||(()=>{}))();
+  ({home:renderHome,manifest:renderManifest,sleep:renderSleep,journal:renderJournal,me:renderMe,favs:renderFavs,forest:renderForest}[id]||(()=>{}))();
   $('#'+id).scrollTop=0;
 }
 $$('#nav button').forEach(b=>b.onclick=()=>go(b.dataset.go));
 
+/* ---------- FOREST: leave the phone, grow a tree ---------- */
+const FOREST_MIN_MS = 3*60*1000;      // ignore checks shorter than this — noise, not a break
+const FOREST_CAP_MS = 12*60*60*1000;  // cap absurd gaps (phone off for days) so the tier still makes sense
+const FOREST_TIERS = [
+  {min:0,  key:'sprout', name:'幼苗',  g:'slate'},
+  {min:15, key:'sapling',name:'小樹苗',g:'mint'},
+  {min:45, key:'tree',   name:'樹',    g:'jade'},
+  {min:90, key:'giant',  name:'巨木',  g:'lime'},
+];
+function forestTier(mins){ let t=FOREST_TIERS[0]; for(const x of FOREST_TIERS) if(mins>=x.min) t=x; return t; }
+function forestTreeSVG(key){
+  const d={
+    sprout:'M12 20v-6M12 14c-2 0-3.5-1.5-3.5-3.5S10 7 12 7s3.5 1.5 3.5 3.5S14 14 12 14z',
+    sapling:'M12 20V9M12 9C9.2 9 7 6.9 7 4.1M12 9c2.8 0 5-2.1 5-4.9M12 14.6c-2.2 0-4-1.7-4-3.9M12 14.6c2.2 0 4-1.7 4-3.9',
+    tree:'M12 20v-5M8 15a4 4 0 1 1 3-6.6A3.5 3.5 0 1 1 16 11a4 4 0 0 1-1 7.9H9A4 4 0 0 1 8 15z',
+    giant:'M12 20v-6M7 14a4.6 4.6 0 1 1 3.4-7.7A4 4 0 1 1 17 9.8a4.6 4.6 0 0 1-1.2 8.9H8.2A4.6 4.6 0 0 1 7 14zM12 14v-2',
+  }[key]||'';
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="${d}"/></svg>`;
+}
+function forestMinutes(ms){ return Math.max(1, Math.round(ms/60000)); }
+function forestFmtMin(mins){ if(mins<60) return mins+' 分鐘'; const h=Math.floor(mins/60), m=mins%60; return m? `${h} 小時 ${m} 分`: `${h} 小時`; }
+function forestAgo(ts){
+  const s=Math.floor((Date.now()-ts)/1000);
+  if(s<60) return '剛剛'; if(s<3600) return Math.floor(s/60)+' 分鐘前'; if(s<86400) return Math.floor(s/3600)+' 小時前';
+  const d=Math.floor(s/86400); return d<7? d+' 天前' : fmtDate(todayKey(new Date(ts)));
+}
+function landTree(gapMs){
+  if(!gapMs || gapMs<FOREST_MIN_MS) return;
+  const mins=forestMinutes(Math.min(gapMs,FOREST_CAP_MS)), tier=forestTier(mins);
+  state.forest.trees.unshift({id:'t'+Date.now(), at:Date.now(), min:mins, tier:tier.key});
+  if(state.forest.trees.length>300) state.forest.trees.length=300;
+  save();
+  toast(`你離開了 ${forestFmtMin(mins)} · 種了一棵${tier.name}`);
+  if($('#forest')?.classList.contains('active')) renderForest();
+}
+function armForestWatch(){
+  const onHidden=()=>{ if(!state.forest.hiddenAt){ state.forest.hiddenAt=Date.now(); save(); } };
+  const onVisible=()=>{ if(state.forest.hiddenAt){ const gap=Date.now()-state.forest.hiddenAt; state.forest.hiddenAt=null; landTree(gap); } };
+  document.addEventListener('visibilitychange', ()=>{ document.hidden ? onHidden() : onVisible(); });
+  window.addEventListener('pagehide', onHidden);
+  if(!document.hidden && state.forest.hiddenAt) onVisible(); // reconcile a gap from a session that never came back
+}
+function forestToday(){ const d0=new Date(); d0.setHours(0,0,0,0); return state.forest.trees.filter(t=>t.at>=d0.getTime()).reduce((s,t)=>s+t.min,0); }
+function forestLongest(){ return state.forest.trees.reduce((m,t)=>Math.max(m,t.min),0); }
+function forestStreak(){
+  const days=new Set(state.forest.trees.map(t=>todayKey(new Date(t.at))));
+  let n=0; for(let i=0;i<365;i++){ if(days.has(daysAgo(i))) n++; else if(i>0) break; } return n;
+}
+function renderForest(){
+  const trees=state.forest.trees, todayMin=forestToday(), longest=forestLongest();
+  const hrs=todayMin>=60, dispVal=hrs?Math.floor(todayMin/60):todayMin, dispUnit=hrs?'HR':'MIN';
+  $('#forest').innerHTML=`
+    <div class="topbar"><div><div class="eyebrow">離開手機，就在長大</div><h1 class="title">森林</h1></div></div>
+    <div class="section">
+      <div class="stats">
+        <div class="stat mesh g-lime"><div class="n">${forestStreak()}<small>DAYS</small></div><div class="l">連續種樹</div><i class="tick-mark"></i></div>
+        <div class="stat mesh g-mint"><div class="n">${dispVal}<small>${dispUnit}</small></div><div class="l">今天累積</div><i class="tick-mark"></i></div>
+        <div class="stat mesh g-jade"><div class="n">${trees.length}<small>×</small></div><div class="l">森林總數</div><i class="tick-mark"></i></div>
+      </div>
+    </div>
+    ${trees.length?`
+    <div class="section">
+      <div class="section-h"><h2>你的森林</h2><span class="more">最長一次 ${esc(forestFmtMin(longest))}</span></div>
+      <div class="forest-grid">${trees.slice(0,60).map(t=>{const tier=FOREST_TIERS.find(x=>x.key===t.tier)||FOREST_TIERS[0];return `<div class="ftree mesh g-${tier.g}" title="${esc(forestFmtMin(t.min)+' · '+forestAgo(t.at))}"><span class="fi">${forestTreeSVG(t.tier)}</span></div>`;}).join('')}</div>
+    </div>`:`
+    <div class="section"><div class="card" style="padding:24px;text-align:center"><p class="note" style="font-size:13px">森林還是空的。把這個分頁放著，離開手機超過 3 分鐘，回來就會看到第一棵樹。</p></div></div>`}
+    <div class="section"><p class="note">離開這個分頁（鎖螢幕、切到別的 App）超過 3 分鐘，回來就自動種下一棵樹。離開越久，樹越大：幼苗 → 小樹苗 → 樹 → 巨木（90 分鐘以上）。不用按開始，也不會因為提早回來而枯萎。</p></div>
+  `;
+}
+
 /* ---------- HOME ---------- */
 function renderHome(){
   const p=state.profile, g=GOALS[p.goals[0]||'confidence'], T=TONES[p.tone||'gentle'];
-  const r=rng(todayKey()+p.goals.join()); const quote=pick(g.aff,r);
+  const r=rng(halfDayKey()+p.goals.join()); const quote=pick(g.aff,r);
   const today=state.entries.find(e=>e.date===todayKey());
   const mins=state.sessions.reduce((s,x)=>s+x.min,0);
   $('#home').innerHTML=`
@@ -1836,6 +1939,39 @@ async function aiLines(name,when){
     return d.content.filter(x=>x.type==='text').map(x=>x.text).join('\n').split(/\n+/).map(x=>x.trim().replace(/^[-•\d.、]+\s*/,'')).filter(Boolean).slice(0,5);
   }catch(e){ toast('AI 生成失敗：'+(e.message||e)); return []; }
 }
+/* ---------- journal prompts: rotate daily, upgraded by Claude when a key is set ---------- */
+function todaysPrompt(){
+  const jp=state.journalPrompts||(state.journalPrompts={date:'',grat:[],note:'',src:''});
+  if(jp.date!==todayKey()){
+    const r=rng('jprompt'+todayKey()), pick=JOURNAL_IDEAS[Math.floor(r()*JOURNAL_IDEAS.length)];
+    Object.assign(jp,{date:todayKey(),grat:[...pick.grat],note:pick.note,src:'fallback'}); save();
+  }
+  return jp;
+}
+async function aiJournalPrompt(){
+  if(!state.settings.claudeKey) return null;
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{
+      'content-type':'application/json','x-api-key':state.settings.claudeKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-opus-5',max_tokens:300,
+        system:'用繁體中文（台灣口語，溫柔但具體）寫今天的日記提示。輸出剛好 4 行，不要編號、不要標題、不要引號：前 3 行是「三件感謝」欄位的短提示（每行 2 到 6 個字，像「一次深呼吸」「陽台的風」這種具體小事，人、物、感覺、身體、意外的小事都可以，不要每天都同一種類型），第 4 行是「今天的筆記」欄位的一句開放式提問或引導句（15 到 30 字，鼓勵自由書寫，不做心理或醫療建議）。',
+        messages:[{role:'user',content:`今天日期：${todayKey()}，寫一組新的、跟平常不一樣的提示。`}]})});
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const d=await res.json();
+    if(d.stop_reason==='refusal') return null;
+    const lines=d.content.filter(x=>x.type==='text').map(x=>x.text).join('\n').split(/\n+/).map(x=>x.trim().replace(/^[-•\d.、]+\s*/,'')).filter(Boolean);
+    return lines.length>=4 ? {grat:lines.slice(0,3), note:lines[3]} : null;
+  }catch(e){ return null; }
+}
+function refreshPromptFromAI(){
+  if(!state.settings.claudeKey || (state.journalPrompts.date===todayKey() && state.journalPrompts.src==='ai')) return;
+  aiJournalPrompt().then(res=>{
+    if(!res) return;
+    state.journalPrompts={date:todayKey(),grat:res.grat,note:res.note,src:'ai'}; save();
+    const noteEl=$('#sh-note'); if(noteEl && !noteEl.value) noteEl.placeholder=res.note;
+    $$('[data-g]').forEach((el,i)=>{ if(!el.value && res.grat[i]) el.placeholder=res.grat[i]; });
+  });
+}
 
 /* ---------- MEDITATE: breath practice ---------- */
 let pacer=null;
@@ -2132,13 +2268,14 @@ function moodChart(){
 }
 function openEntrySheet(e){
   const isNew=!e; e=e||{id:'e'+Date.now(),date:todayKey(),mood:3,gratitude:[],note:'',tags:[]};
+  const idea=todaysPrompt();
   sheet(`<h2>${isNew?'今天的日記':(e.date===todayKey()?'今天的日記':fmtDate(e.date)+' 的日記')}</h2><p class="sub">先選心情，再寫三件感謝。不用寫多，寫真的。</p>
     <label class="label">心情</label>
     <div class="moods" id="sh-moods" style="margin-bottom:16px">${MOODS.map(m=>`<button class="mood" data-v="${m.v}" aria-pressed="${e.mood===m.v}">${faceSVG(m.v)}<span class="lbl">${m.l}</span></button>`).join('')}</div>
     <label class="label">三件感謝</label>
-    <div class="grat" style="margin-bottom:16px">${[0,1,2].map(i=>`<div class="g"><input class="input" data-g="${i}" placeholder="${['一件小事','一個人','一種感覺'][i]}" value="${esc(e.gratitude[i]||'')}"></div>`).join('')}</div>
+    <div class="grat" style="margin-bottom:16px">${[0,1,2].map(i=>{const val=e.gratitude[i]||'',ph=e.demo&&val?val:(idea.grat[i]||['一件小事','一個人','一種感覺'][i]);return `<div class="g"><input class="input" data-g="${i}" placeholder="${esc(ph)}" value="${esc(e.demo?'':val)}"></div>`;}).join('')}</div>
     <label class="label">今天的筆記</label>
-    <textarea class="input" id="sh-note" placeholder="腦袋裡的東西，倒出來就好。">${esc(e.note||'')}</textarea>
+    <textarea class="input" id="sh-note" placeholder="${esc(e.demo&&e.note?e.note:(idea.note||'腦袋裡的東西，倒出來就好。'))}">${esc(e.demo?'':(e.note||''))}</textarea>
     <label class="label" style="margin-top:14px">標籤</label>
     <div class="tagrow" id="sh-tags" style="margin-bottom:22px">${TAGS.map(t=>`<button data-t="${t}" aria-pressed="${(e.tags||[]).includes(t)}">${t}</button>`).join('')}</div>
     <div class="row"><button class="btn primary block" id="sh-save">儲存</button>${!isNew?'<button class="btn ghost" id="sh-del">刪除</button>':''}</div>`,
@@ -2153,6 +2290,7 @@ function openEntrySheet(e){
       save(); closeSheet(); renderJournal(); toast(grat.length>=3?'三件感謝 ✦ 潛意識收到了':'記錄了 ✦');
     };
     $('#sh-del',body)&&($('#sh-del',body).onclick=()=>{ state.entries=state.entries.filter(x=>x.id!==e.id); save(); closeSheet(); renderJournal(); });
+    if(!e.demo) refreshPromptFromAI();
   });
 }
 
@@ -2376,7 +2514,7 @@ function effRows(){
 }
 function openShareSheet(){
   const p=state.profile, g=GOALS[p.goals[0]||'confidence'];
-  const r=rng(todayKey()+p.goals.join()); const quote=pick(g.aff,r);
+  const r=rng(halfDayKey()+p.goals.join()); const quote=pick(g.aff,r);
   sheet(`<h2>分享卡</h2><p class="sub">長按圖片存起來，或直接截圖發限動。</p><canvas id="sharec" style="width:100%;border-radius:var(--r-md);display:block"></canvas>`, b=>{
     const c=$('#sharec',b), W=1080, H=1920; c.width=W; c.height=H; const x=c.getContext('2d');
     const cs=getComputedStyle(document.documentElement);
@@ -2447,6 +2585,7 @@ $$('.plate .langbar button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.
 /* ---------- boot ---------- */
 if('speechSynthesis' in window){ speechSynthesis.getVoices(); speechSynthesis.onvoiceschanged=()=>speechSynthesis.getVoices(); }
 armReminder();
+armForestWatch();
 if(!state.profile.name){ startOnboarding(); } else { go('home'); }
 applyLang();
 </script>
