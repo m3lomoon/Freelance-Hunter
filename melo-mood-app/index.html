@@ -534,7 +534,7 @@ textarea.input{min-height:90px;resize:vertical}
 
       <!-- ============ ONBOARDING ============ -->
       <section class="screen" id="onboard" aria-label="開始設定">
-        <div class="ob-progress"><i class="on"></i><i></i><i></i><i></i></div>
+        <div class="ob-progress"><i class="on"></i><i></i><i></i><i></i><i></i></div>
 
         <div class="ob-step active" data-step="1">
           <h1 class="ob-h">嗨。<br>最近想改善<span class="lat">什麼</span>？</h1>
@@ -547,6 +547,12 @@ textarea.input{min-height:90px;resize:vertical}
         </div>
 
         <div class="ob-step" data-step="2">
+          <h1 class="ob-h">你比較信<br>哪一種<span class="lat">語言</span>？</h1>
+          <p class="ob-p">同一個呼吸練習，我可以用能量、頻率、宇宙的語言解釋，也可以用神經科學、生理機制的語言解釋。選你比較聽得進去的，之後「為什麼有效」都會照這個寫。之後隨時可以換。</p>
+          <div class="opts" id="ob-lens"></div>
+        </div>
+
+        <div class="ob-step" data-step="3">
           <h1 class="ob-h">你想往<br><span class="lat">哪裡</span>去？</h1>
           <p class="ob-p">選 1 到 3 個方向。每天的練習會輪流圍著它們。</p>
           <label class="label">方向（最多 3 個）</label>
@@ -555,13 +561,13 @@ textarea.input{min-height:90px;resize:vertical}
           <div class="seg" id="ob-min"><button data-m="3" aria-pressed="true">3 分</button><button data-m="7" aria-pressed="false">7 分</button><button data-m="12" aria-pressed="false">12 分</button></div>
         </div>
 
-        <div class="ob-step" data-step="3">
+        <div class="ob-step" data-step="4">
           <h1 class="ob-h">你想聽到<br>哪一種<span class="lat">語氣</span>？</h1>
           <p class="ob-p">同一句話，用不同語氣說出來的感覺完全不同。之後隨時可以換。</p>
           <div class="opts" id="ob-tones"></div>
         </div>
 
-        <div class="ob-step" data-step="4">
+        <div class="ob-step" data-step="5">
           <h1 class="ob-h">錄下<br>你的<span class="lat">聲音</span></h1>
           <p class="ob-p">唸下面這段話，約 30 到 60 秒。這段樣本會用來複製你的聲音，讓引導由「你」唸給你聽。可以先跳過。</p>
           <div id="ob-rec"></div>
@@ -718,20 +724,39 @@ const CONCERNS = {
     sleep:'你的潛意識整晚都在為你收集靈感。'},
 };
 
-/* ---------- breath patterns (the science layer) ---------- */
+/* ---------- breath patterns: science framing + a spiritual framing of the same mechanism,
+   shown according to state.profile.lens (picked in onboarding, changeable in 我 → 語言) ---------- */
 const BREATHS = {
   physio:{name:'生理嘆息',g:'ember',hint:'兩段吸氣＋長吐 · 降壓最快的一招',why:'Stanford Huberman lab：兩段吸氣重新撐開肺泡，長吐氣拉高副交感活性，一分鐘內心率就會掉。',
+    whySpirit:'兩段吸氣把卡住的能量重新撐開，長長的一口吐氣，把不屬於你的頻率一次排出去。',
     steps:[['吸氣',4],['再吸一小口',2],['長長地吐',8]],rounds:5,color:'rose'},
   box:{name:'方箱呼吸',g:'iris',hint:'4-4-4-4 · 上場前穩住手',why:'海豹部隊與運動員上場前的標準流程，等長的四拍讓注意力有地方放，手抖會停。',
+    whySpirit:'四個等長的拍子，在你身邊畫出一個看不見的方框，把散掉的能量重新收回中心。',
     steps:[['吸氣',4],['停住',4],['吐氣',4],['停住',4]],rounds:4,color:'moon'},
   b478:{name:'4-7-8 助眠',g:'cobalt',hint:'吸 4 停 7 吐 8 · 躺著做',why:'吐氣長度接近吸氣兩倍時，迷走神經張力上升，是最常被拿來對付入睡困難的節奏。',
+    whySpirit:'吐氣拉得比吸氣長很多，把白天累積的雜訊一層層放掉，把身體交給更深的休息頻率。',
     steps:[['吸氣',4],['停住',7],['吐氣',8]],rounds:4,color:'jade'},
   coherent:{name:'共振呼吸',g:'aqua',hint:'5-5 · 每分鐘 6 次',why:'每分鐘 6 次時心率變異度（HRV）達到最高，情緒調節與專注力都在這個頻率上最穩。',
+    whySpirit:'每分鐘六次，是心與宇宙節奏對上的頻率。這個速度會把你的能量場重新調回一致。',
     steps:[['吸氣',5],['吐氣',5]],rounds:6,color:'jade'},
   calm46:{name:'4-6 安撫',g:'mint',hint:'吐氣比吸氣長 · 隨時能做',why:'最溫和的版本，捷運上、會議中都能做，沒有人看得出來。',
+    whySpirit:'吐氣比吸氣長一點點，像溫柔地把緊繃的能量往下、往外放，隨時隨地都能做，不用別人知道。',
     steps:[['吸氣',4],['吐氣',6]],rounds:6,color:'moon'},
   energize:{name:'提振呼吸',g:'lime',hint:'6-2 · 早晨開機',why:'吸氣長、吐氣短會提高交感活性，用來取代第二杯咖啡。',
+    whySpirit:'吸氣拉長、吐氣短促，把清晨還沒醒的能量重新點亮，喚醒你今天要用的頻率。',
     steps:[['深深吸氣',6],['快速吐掉',2]],rounds:6,color:'rose'},
+};
+/* which explanation to show, based on the lens chosen in onboarding (or changed later in 我 → 語言) */
+function breathWhy(B){
+  const lens=state.profile.lens||'both';
+  if(lens==='spiritual') return B.whySpirit||B.why;
+  if(lens==='science') return B.why;
+  return B.whySpirit ? `${B.whySpirit} ${B.why}` : B.why;
+}
+const LENSES = {
+  spiritual:{name:'靈性派',g:'violet',hint:'能量、頻率、直覺、宇宙'},
+  science:{name:'科學派',g:'aqua',hint:'神經科學、生理機制、實證研究'},
+  both:{name:'兩者都要',g:'mint',hint:'兩種語言都想聽，各半'},
 };
 
 /* ---------- scenario library ---------- */
@@ -904,7 +929,7 @@ function load(){
 function blank(){
   const d=seed();
   return {...d, demo:false, entries:[], sessions:[], ratings:[], favs:[], custom:{}, journalPrompts:{date:'',grat:[],note:'',src:''},
-    profile:{name:'',concerns:[],goals:[],tone:'',voice:{recorded:false},createdAt:todayKey()}};
+    profile:{name:'',concerns:[],goals:[],tone:'',lens:'',voice:{recorded:false},createdAt:todayKey()}};
 }
 function loadDemo(){ Object.assign(state, seed()); save(); go('home'); toast('這是範例資料，隨時可以清掉'); }
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
@@ -913,6 +938,7 @@ if(Array.isArray(state.favs)) state.favs=state.favs.map(f=>f.includes(':')||f===
 if(!state.settings.voice) state.settings.voice = state.settings.demoVoice || 'melo';
 if(!state.journalPrompts) state.journalPrompts={date:'',grat:[],note:'',src:''};
 if(!state.forest) state.forest={trees:[],hiddenAt:null};
+if(!state.profile.lens) state.profile.lens='both';
 function seed(){
   const g = [['創作','關係'],['工作','身體'],['靈性'],['創作','金錢'],['休息'],['關係','家人'],['工作'],['創作'],['身體','靈性'],['金錢','工作'],['關係'],['創作','靈性']];
   const moods = [4,3,5,4,2,4,3,5,4,3,4,5];
@@ -923,7 +949,7 @@ function seed(){
   const entries = moods.map((m,i)=>({id:'demo'+i,date:daysAgo(11-i),mood:m,gratitude:grats[i],note:notes[i],tags:g[i],demo:true}));
   return {
     demo:true,
-    profile:{name:'Melody',concerns:['sleep','focus'],goals:['music','wealth','confidence'],tone:'baddie',voice:{recorded:true,seconds:42,at:daysAgo(3),voiceId:''},createdAt:daysAgo(11)},
+    profile:{name:'Melody',concerns:['sleep','focus'],goals:['music','wealth','confidence'],tone:'baddie',lens:'both',voice:{recorded:true,seconds:42,at:daysAgo(3),voiceId:''},createdAt:daysAgo(11)},
     entries,
     sessions:[{date:daysAgo(7),type:'manifest',min:7,scene:'daily'},{date:daysAgo(5),type:'manifest',min:2,scene:'anxiety'},{date:daysAgo(4),type:'sleep',min:12},{date:daysAgo(3),type:'manifest',min:1,scene:'meeting'},{date:daysAgo(2),type:'manifest',min:2,scene:'anxiety'},{date:daysAgo(1),type:'sleep',min:12},{date:daysAgo(1),type:'manifest',min:3,scene:'focus'}],
     settings:{elevenKey:'',claudeKey:'',theme:'',voiceId:'',voiceName:'',voice:'melo',lang:'tw',pace:'slow',ambVol:.3,reminder:''},
@@ -1796,7 +1822,7 @@ function renderScene(){
     <div class="topbar"><div><div class="eyebrow">${CATS[S.cat]?.name||'自訂'} · ${S.min} 分鐘</div><h1 class="title">${esc(S.name)}</h1></div></div>
     <div class="vrow">${voiceChip(src)}<button class="vchip" id="v-pace"><b>◷ ${esc(pace().name)}</b><span class="vcaret">▾</span></button>${offerRecord?'<button class="vchip" id="mf-recmine">🎙 錄這一段的聲音</button>':''}</div>
     <p class="note" style="max-width:36ch;margin-bottom:12px">${esc(S.hint||'')}</p>
-    <div class="whycard"><div class="eyebrow">${esc(B.name)} · ${B.steps.map(s=>s[0]+' '+s[1]).join(' → ')}</div><p>${esc(B.why)}</p></div>
+    <div class="whycard"><div class="eyebrow">${esc(B.name)} · ${B.steps.map(s=>s[0]+' '+s[1]).join(' → ')}</div><p>${esc(breathWhy(B))}</p></div>
     ${S.metric?`<div class="section"><label class="label">開始前，你的「${esc(S.metric)}」有多強？<span class="note">選了才能看到效果</span></label>
       <div class="dots" id="sc-before">${[...Array(11)].map((_,i)=>`<button data-v="${i}" aria-pressed="${state.ui.before===i}">${i}</button>`).join('')}</div>
       ${st?`<p class="note" style="margin-top:8px">過去 ${st.n} 次，這段平均讓你的${esc(S.metric)}降了 <b style="color:var(--jade)">${st.drop.toFixed(1)} 分</b>。</p>`:''}</div>`:''}
@@ -2010,7 +2036,7 @@ function renderBreath(){
       <button class="btn ghost sm" id="br-edit">自訂秒數</button></div>
     <div class="topbar"><div><div class="eyebrow">呼吸練習 · 無語音</div><h1 class="title">${esc(B.name)}</h1></div></div>
     <div class="vrow"><button class="vchip" id="br-snd" aria-pressed="${breathOn}"><span class="vav mesh g-${breathOn?'mint':'slate'}"></span><b>${breathOn?'呼吸音效 開':'呼吸音效 關'}</b></button></div>
-    <p class="note" style="max-width:36ch;margin-bottom:14px">${esc(B.why)}</p>
+    <p class="note" style="max-width:36ch;margin-bottom:14px">${esc(breathWhy(B))}</p>
     <div class="pacerwrap">
       <div class="pacer" id="pacer"><div class="pring"></div><div class="pcore" id="pcore"></div>
         <div class="ptext"><b id="plabel">準備</b><span id="pcount">${cycle} 秒 / 回合</span></div></div>
@@ -2349,6 +2375,9 @@ function renderMe(){
     <div class="section"><div class="section-h"><h2>語言</h2><span class="more">Language</span></div>
       <div class="seg" id="me-lang">${Object.entries(LANGS).map(([k,n])=>`<button data-l="${k}" aria-pressed="${k===lang()}" translate="no">${n}</button>`).join('')}</div>
       <p class="note" style="margin-top:8px">介面、引導詞與語音都會跟著換。預錄音檔只有中文版。</p></div>
+    <div class="section"><div class="section-h"><h2>你比較信哪一種語言</h2><span class="more">靈性 / 科學</span></div>
+      <div class="opts" id="me-lens">${Object.entries(LENSES).map(([k,l])=>`<button class="opt" data-k="${k}" aria-pressed="${(p.lens||'both')===k}"><i class="em sw lg mesh g-${l.g}"></i><div><b>${esc(l.name)}</b><span>${esc(l.hint)}</span></div><span class="tick"></span></button>`).join('')}</div>
+      <p class="note" style="margin-top:8px">決定呼吸練習「為什麼有效」要用哪一種說法解釋。</p></div>
     <div class="section"><div class="section-h"><h2>最近的狀態</h2><button class="more" id="me-con">調整 →</button></div>
       <div class="row" style="flex-wrap:wrap;gap:8px">${(p.concerns||[]).map(k=>CONCERNS[k]?`<span class="chip"><i class="sw xs mesh g-${CONCERNS[k].g}"></i>${esc(CONCERNS[k].name)}</span>`:'').join('')||'<span class="note">還沒選</span>'}</div></div>
     <div class="section"><div class="section-h"><h2>我的方向</h2><button class="more" id="me-goals">調整 →</button></div>
@@ -2380,6 +2409,7 @@ function renderMe(){
   $('#me-goals').onclick=()=>openGoalsSheet(renderMe);
   $('#me-con').onclick=()=>openConcernsSheet(renderMe);
   $$('#me-lang button').forEach(b=>b.onclick=()=>{ setLang(b.dataset.l); renderMe(); });
+  $$('#me-lens .opt').forEach(b=>b.onclick=()=>{ state.profile.lens=b.dataset.k; save(); renderMe(); toast('已切換：'+LENSES[b.dataset.k].name); });
   $('#me-favs').onclick=()=>go('favs');
   bindItems($('#me'));
   $('#me-edit').onclick=()=>sheet(`<h2>怎麼稱呼你？</h2><p class="sub">引導詞裡會用這個名字叫你。</p><input class="input" id="sh-name" value="${esc(p.name)}" style="margin-bottom:16px"><button class="btn primary block" id="sh-ok">儲存</button>`,b=>{ $('#sh-ok',b).onclick=()=>{ state.profile.name=$('#sh-name',b).value.trim(); save(); closeSheet(); renderMe(); }; });
@@ -2503,27 +2533,30 @@ function renderStudioLine(root){
 }
 
 /* ---------- ONBOARDING ---------- */
-let obStep=1; const obSel=new Set(); const obCon=new Set(); let obTone=''; let obMin=3; let obRecCleanup=null;
-function startOnboarding(){ obStep=1; obSel.clear(); obCon.clear(); obTone=''; obMin=3; go('onboard'); renderOb(); }
+let obStep=1; const obSel=new Set(); const obCon=new Set(); let obTone=''; let obLens=''; let obMin=3; let obRecCleanup=null;
+function startOnboarding(){ obStep=1; obSel.clear(); obCon.clear(); obTone=''; obLens=''; obMin=3; go('onboard'); renderOb(); }
 function renderOb(){
   $$('.ob-step').forEach(s=>s.classList.toggle('active',+s.dataset.step===obStep));
   $$('.ob-progress i').forEach((i,n)=>i.classList.toggle('on',n<obStep));
   $('#ob-back').hidden=obStep===1;
-  $('#ob-next').textContent=obStep===4?'開始':'下一步';
+  $('#ob-next').textContent=obStep===5?'開始':'下一步';
   if(obStep===1){ $('#ob-name').value=state.profile.name||'';
     $('#ob-demo').onclick=()=>loadDemo(); $('#ob-concerns').innerHTML=concernOptions([...obCon]); bindConcernOptions($('#ob-concerns'),obCon); }
-  if(obStep===2){ $('#ob-goals').innerHTML=goalOptions([...obSel]); bindGoalOptions($('#ob-goals'),obSel);
+  if(obStep===2){ $('#ob-lens').innerHTML=Object.entries(LENSES).map(([k,l])=>`<button class="opt" data-k="${k}" aria-pressed="${obLens===k}"><i class="em sw lg mesh g-${l.g}"></i><div><b>${esc(l.name)}</b><span>${esc(l.hint)}</span></div><span class="tick"></span></button>`).join('');
+    $$('#ob-lens .opt').forEach(b=>b.onclick=()=>{ obLens=b.dataset.k; $$('#ob-lens .opt').forEach(x=>x.setAttribute('aria-pressed',x===b)); }); }
+  if(obStep===3){ $('#ob-goals').innerHTML=goalOptions([...obSel]); bindGoalOptions($('#ob-goals'),obSel);
     $$('#ob-min button').forEach(b=>{ b.setAttribute('aria-pressed',+b.dataset.m===obMin); b.onclick=()=>{ obMin=+b.dataset.m; $$('#ob-min button').forEach(x=>x.setAttribute('aria-pressed',x===b)); }; }); }
-  if(obStep===3){ $('#ob-tones').innerHTML=Object.entries(TONES).map(([k,t])=>`<button class="opt tone" data-t="${k}" aria-pressed="${obTone===k}"><i class="em sw lg mesh g-${t.g}"></i><div><b>${esc(t.name)}</b><span>${esc(t.hint)}</span></div><span class="tick"></span></button>`).join('');
+  if(obStep===4){ $('#ob-tones').innerHTML=Object.entries(TONES).map(([k,t])=>`<button class="opt tone" data-t="${k}" aria-pressed="${obTone===k}"><i class="em sw lg mesh g-${t.g}"></i><div><b>${esc(t.name)}</b><span>${esc(t.hint)}</span></div><span class="tick"></span></button>`).join('');
     $$('#ob-tones .opt').forEach(b=>b.onclick=()=>{ obTone=b.dataset.t; $$('#ob-tones .opt').forEach(x=>x.setAttribute('aria-pressed',x===b)); }); }
-  if(obStep===4){ obRecCleanup=mountRecorder($('#ob-rec'),{onDone:()=>{ toast('聲音樣本已存 ✦'); finishOb(); }}); }
+  if(obStep===5){ obRecCleanup=mountRecorder($('#ob-rec'),{onDone:()=>{ toast('聲音樣本已存 ✦'); finishOb(); }}); }
 }
 $('#ob-next').onclick=()=>{
   if(obStep===1){ const name=$('#ob-name').value.trim(); if(!name) return toast('先告訴我你的名字'); if(!obCon.size) return toast('點一個最有感的'); state.profile.name=name; state.profile.concerns=[...obCon];
     if(!obSel.size) [...obCon].forEach(c=>{ const g=CONCERNS[c].goal; if(g&&obSel.size<3) obSel.add(g); }); obStep=2; }
-  else if(obStep===2){ if(!obSel.size) return toast('至少選一個方向'); state.profile.goals=[...obSel]; state.ui.minutes=obMin;
-    if(!obTone){ obTone=[...obCon].some(c=>CONCERNS[c].tone==='gentle')?'gentle':'firm'; } obStep=3; }
-  else if(obStep===3){ if(!obTone) return toast('選一種語氣'); state.profile.tone=obTone; obStep=4; }
+  else if(obStep===2){ state.profile.lens=obLens||'both'; obStep=3; }
+  else if(obStep===3){ if(!obSel.size) return toast('至少選一個方向'); state.profile.goals=[...obSel]; state.ui.minutes=obMin;
+    if(!obTone){ obTone=[...obCon].some(c=>CONCERNS[c].tone==='gentle')?'gentle':'firm'; } obStep=4; }
+  else if(obStep===4){ if(!obTone) return toast('選一種語氣'); state.profile.tone=obTone; obStep=5; }
   else { finishOb(); return; }
   save(); renderOb();
 };
