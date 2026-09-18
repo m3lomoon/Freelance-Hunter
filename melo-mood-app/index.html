@@ -375,6 +375,9 @@ p{margin:0}
 .line.breath{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);background:transparent;padding:2px 14px}
 .line.now{background:var(--moon-ink);color:var(--text);box-shadow:0 0 0 1px var(--moon) inset}
 .line.done{opacity:.5}
+.line.tline{padding-right:40px}
+.line .ldots{position:absolute;top:8px;right:8px;background:none;border:none;color:var(--faint);font-size:13px;cursor:pointer;padding:4px 6px;line-height:1}
+.line .ldots:hover{color:var(--moon)}
 
 /* orb player */
 .player{position:sticky;bottom:-30px;margin:18px -22px -110px;padding:16px 22px 24px;background:linear-gradient(180deg,transparent,var(--surface) 30%);z-index:3}
@@ -857,6 +860,43 @@ const SITU = {
     aff:['我可以從很小的一步開始。','停下來不是失敗，是休息。','我不用補回錯過的，只要接著走。','今天做五分鐘就算數。','我還在這裡，這就是證據。','重新開始，我已經做過很多次了。']},
 };
 const SCENE_GREET={rescue:'我在這裡。先不用處理任何事。',before:'進去之前，這幾分鐘是你的。',daily:'今天先從這裡開始。',ritual:'慢下來，什麼都不用做。'};
+
+/* ---------- theme plaza: pure affirmation lists, browsable by broad life topic
+   rather than by situation — each line is standalone, no breath/steps, and can
+   be favourited/copied/shared on its own. ---------- */
+const THEME_SETS = {
+  fightLow:{name:'走出低潮',g:'slate',hint:'給撐不住的那幾天',lines:[
+    '我允許自己今天不太好，這不代表我一直都會這樣。','低潮會過去，就像每一次一樣。','我不需要假裝很好，我只需要撐過今天。',
+    '休息不是放棄，是在為下一步存力氣。','我值得被溫柔對待，尤其是被我自己。','我的情緒不是我的全部，它只是路過。',
+    '我允許自己哭，然後允許自己站起來。','今天我只做一件小事，那就夠了。','我比我以為的更有韌性。',
+    '我不用一個人扛，開口求助不是弱。','我正在學會愛那個還沒完全好的自己。','明天的我，會感謝今天撐住的自己。']},
+  habit:{name:'戒掉壞習慣',g:'lime',hint:'一次一小步',lines:[
+    '我可以改變，因為我已經在改變的路上。','一次失手不等於失敗，我隨時可以重新開始。','我選擇讓身體感覺好的那個版本的自己。',
+    '渴望會來，也會走，我只需要撐過這幾分鐘。','我不需要完美，我只需要比昨天更靠近一點。','我在建立的是新的我，不是懲罰舊的我。',
+    '每一次我說不，我都在投票給我想成為的人。','我的意志力是可以練出來的肌肉。','我允許自己找到不傷害自己的方式紓壓。',
+    '我為自己的每一小步感到驕傲。','我不是在戒掉什麼，我是在選擇自己。','我值得一個不被壞習慣控制的人生。']},
+  family:{name:'家人關係',g:'amber',hint:'愛裡也可以有界線',lines:[
+    '我可以愛他們，也可以有自己的界線。','他們的情緒不是我的責任，我可以愛但不用背。','我允許家人用他們的方式表達愛，即使那不是我要的方式。',
+    '我可以是大人，也可以偶爾當回小孩。','我選擇先照顧好自己，才有力氣照顧家人。','過去的傷，我正在慢慢放下，不是為了他們，是為了我自己。',
+    '我可以誠實地說出我的需要。','家不是完美的地方，但可以是安全的地方。','我尊重他們的選擇，也尊重我自己的。',
+    '我允許這段關係慢慢變好，不用急著和解。','我感謝他們給我的，也原諒他們沒給我的。','我正在成為我想成為的那種家人。']},
+  positive:{name:'正向思考',g:'mint',hint:'練習先看見好的',lines:[
+    '我選擇看見今天的一件好事。','我的念頭會影響我的一天，所以我挑好的先想。','挑戰是換了個樣子的機會。',
+    '我不用假裝快樂，我只是願意找找看光在哪。','我今天的態度，是我今天唯一能完全掌控的事。','我允許自己期待好事發生。',
+    '我看見的世界，是我願意看見的世界。','小小的感謝，會累積成大大的改變。','我可以同時難過，也同時相信會變好。',
+    '每個結束，都是另一件事的開始。','我選擇專注在我能做的，而不是我不能控制的。','我的心情不是天氣，我可以決定要不要撐傘。']},
+  growth:{name:'自我成長',g:'violet',hint:'往前一點點就好',lines:[
+    '我今天的我，不需要跟昨天的我比較，只需要往前一點點。','不舒服的成長，也是成長。','我允許自己犯錯，那是我在學習的證據。',
+    '我正在變成一個連自己都會佩服的人。','我的潛力比我以為的更大。','每一次跨出舒適圈，我都在長大。',
+    '我不追求完美，我追求持續。','我願意誠實面對自己不想面對的部分。','我的過去塑造了我，但不能定義我。',
+    '我允許自己慢慢來，成長不是比賽。','我在為十年後的自己，做現在的決定。','我值得投資在自己身上。']},
+  gratitude:{name:'感恩練習',g:'rose',hint:'從匱乏走回豐盛',lines:[
+    '我感謝今天還活著、還能呼吸的這件事。','我感謝那些看似平凡、其實很珍貴的小事。','我感謝身邊願意留下來的人。',
+    '我感謝過去的挫折，它們讓我變成現在的我。','我感謝我的身體，帶我走過每一天。','我感謝今天的陽光、或今天的雨。',
+    '我感謝那些曾經教會我什麼是不要的人。','我感謝自己，願意每天都再試一次。','我感謝手邊擁有的，而不是先看沒有的。',
+    '我感謝這一刻，因為它只會發生一次。','我感謝我的家，不管它長什麼樣子。','感恩讓我從匱乏，走回豐盛。']},
+};
+function themeScript(key){ const T=THEME_SETS[key]; return T? T.lines.map(t=>({t,kind:'aff',pause:2200})) : []; }
 /* ---------- scenario script builder ---------- */
 function breathLines(patternKey, rounds){
   const B=BREATHS[patternKey]; if(!B) return [];
@@ -928,7 +968,7 @@ function load(){
 /* the demo lives behind an explicit choice, so nobody is greeted as Melody */
 function blank(){
   const d=seed();
-  return {...d, demo:false, entries:[], sessions:[], ratings:[], favs:[], custom:{}, journalPrompts:{date:'',grat:[],note:'',src:''},
+  return {...d, demo:false, entries:[], sessions:[], ratings:[], favs:[], favLines:[], custom:{}, journalPrompts:{date:'',grat:[],note:'',src:''},
     profile:{name:'',concerns:[],goals:[],tone:'',lens:'',voice:{recorded:false},createdAt:todayKey()}};
 }
 function loadDemo(){ Object.assign(state, seed()); save(); go('home'); toast('這是範例資料，隨時可以清掉'); }
@@ -939,6 +979,7 @@ if(!state.settings.voice) state.settings.voice = state.settings.demoVoice || 'me
 if(!state.journalPrompts) state.journalPrompts={date:'',grat:[],note:'',src:''};
 if(!state.forest) state.forest={trees:[],hiddenAt:null};
 if(!state.profile.lens) state.profile.lens='both';
+if(!state.favLines) state.favLines=[];
 function seed(){
   const g = [['創作','關係'],['工作','身體'],['靈性'],['創作','金錢'],['休息'],['關係','家人'],['工作'],['創作'],['身體','靈性'],['金錢','工作'],['關係'],['創作','靈性']];
   const moods = [4,3,5,4,2,4,3,5,4,3,4,5];
@@ -954,7 +995,7 @@ function seed(){
     sessions:[{date:daysAgo(7),type:'manifest',min:7,scene:'daily'},{date:daysAgo(5),type:'manifest',min:2,scene:'anxiety'},{date:daysAgo(4),type:'sleep',min:12},{date:daysAgo(3),type:'manifest',min:1,scene:'meeting'},{date:daysAgo(2),type:'manifest',min:2,scene:'anxiety'},{date:daysAgo(1),type:'sleep',min:12},{date:daysAgo(1),type:'manifest',min:3,scene:'focus'}],
     settings:{elevenKey:'',claudeKey:'',theme:'',voiceId:'',voiceName:'',voice:'melo',lang:'tw',pace:'slow',ambVol:.3,reminder:''},
     ratings:[{scene:'anxiety',before:8,after:4,date:daysAgo(2)},{scene:'anxiety',before:7,after:3,date:daysAgo(5)},{scene:'meeting',before:6,after:3,date:daysAgo(3)}],
-    favs:['scene:anxiety','scene:meeting','breath:physio'], custom:{}, journalPrompts:{date:'',grat:[],note:'',src:''},
+    favs:['scene:anxiety','scene:meeting','breath:physio'], favLines:[{id:'fl:growth:3',theme:'自我成長',text:'我正在變成一個連自己都會佩服的人。'}], custom:{}, journalPrompts:{date:'',grat:[],note:'',src:''},
     forest:{trees:[
       {id:'demot0',at:Date.now()-1000*60*60*20,min:22,tier:'sapling'},
       {id:'demot1',at:Date.now()-1000*60*60*44,min:8,tier:'sprout'},
@@ -1144,7 +1185,7 @@ function voiceSource(kind, exact){
   if(st.mode==='eleven'){ s.voiceId=st.id; s.voiceName=V.name;
     return {mode:'eleven', label:V.name, sub:V.role, voice:k}; }
   // recorded-in-studio clips only line up with the exact fixed script they were read from
-  if(exact && k==='mine' && (kind==='manifest' || kind==='sleep' || SCENES[kind])){
+  if(exact && k==='mine' && (kind==='manifest' || kind==='sleep' || SCENES[kind] || THEME_SETS[kind])){
     const oc=ownCounts()[kind];
     if(oc && oc.total>0 && oc.done===oc.total) return {mode:'own', label:'你的聲音', sub:ownSub(kind), voice:'mine', packKind:kind};
     return {mode:'browser', label:'系統聲音', sub: oc&&oc.done>0?`錄音室還缺 ${oc.total-oc.done} 句 · 先用系統聲音`:'去「我」開錄音室 · 免金鑰', voice:'system'};
@@ -1158,7 +1199,7 @@ function voiceSource(kind, exact){
   if(fits){ const v=VOICES[demoVoice()]; return {mode:'pack', label:v.name, sub:'預錄示範 · '+v.role, voice:demoVoice()}; }
   return {mode:'browser', label:'系統聲音', sub:`${V.name}要金鑰才能唸這一段 · 先用系統聲音`, voice:'system'};
 }
-function ownSub(kind){ if(kind==='sleep') return '你錄的睡前導引'; if(kind==='manifest') return '你錄的每日練習'; const S=SCENES[kind]; return S?`你錄的「${S.name}」`:'你的聲音'; }
+function ownSub(kind){ if(kind==='sleep') return '你錄的睡前導引'; if(kind==='manifest') return '你錄的每日練習'; const S=SCENES[kind]||THEME_SETS[kind]; return S?`你錄的「${S.name}」`:'你的聲音'; }
 
 /* ---------- recording studio: your own voice, zero API key, ever ----------
    Users without ElevenLabs read the same fixed daily-practice and sleep scripts
@@ -1174,6 +1215,9 @@ function studioLines(){
   });
   Object.entries(SCENES).forEach(([key,S])=>{
     sceneScript(key).forEach((l,i)=>{ if(speakableLine(l)) out.push({kind:key, i, t:l.t, section:S.name}); });
+  });
+  Object.entries(THEME_SETS).forEach(([key,T])=>{
+    themeScript(key).forEach((l,i)=>{ if(speakableLine(l)) out.push({kind:key, i, t:l.t, section:T.name}); });
   });
   return out;
 }
@@ -1634,7 +1678,7 @@ const SCENE_AUDIO = {
 Object.values(SCENE_AUDIO).forEach(P=>{ P.at=P.lines.map(l=>l[2]); P.lines=P.lines.map(([t,kind])=>({t,kind,pause:1500})); });
 
 /* ---------- catalogue: every item shares one shape, so feeds and lists stay honest ---------- */
-const TYPES={scene:'情境冥想',daily:'每日練習',breath:'呼吸練習',amb:'環境音',sleep:'睡前導引'};
+const TYPES={scene:'情境冥想',daily:'每日練習',breath:'呼吸練習',amb:'環境音',sleep:'睡前導引',theme:'主題清單'};
 function breathMin(B,rounds){ const cyc=B.steps.reduce((s,x)=>s+x[1],0); return Math.max(1,Math.round(cyc*(rounds||B.rounds)/60)); }
 function catalogue(){
   const out=[];
@@ -1644,6 +1688,7 @@ function catalogue(){
   Object.entries(BREATHS).forEach(([k,B])=>out.push({id:'breath:'+k,kind:'breath',key:k,name:B.name,hint:B.hint,g:B.g,type:TYPES.breath,dur:breathMin(B)+' 分'}));
   Object.entries(AMB).forEach(([k,A])=>out.push({id:'amb:'+k,kind:'amb',key:k,name:A.name,hint:A.hint,g:A.g,type:TYPES.amb,dur:'可一直開著'}));
   out.push({id:'sleep',kind:'sleep',key:'sleep',name:'睡前放鬆導引',hint:'身體掃描 → 倒數 → 帶著方向入睡',g:'cobalt',type:TYPES.sleep,dur:'12 分'});
+  Object.entries(THEME_SETS).forEach(([k,T])=>out.push({id:'theme:'+k,kind:'theme',key:k,name:T.name,hint:T.hint,g:T.g,type:TYPES.theme,dur:T.lines.length+' 句'}));
   return out;
 }
 const catalogueById=()=>Object.fromEntries(catalogue().map(i=>[i.id,i]));
@@ -1653,6 +1698,7 @@ function openItem(i){
   else if(i.kind==='breath'){ go('manifest'); openBreath(i.key); }
   else if(i.kind==='sleep'){ go('sleep'); }
   else if(i.kind==='amb'){ go('sleep'); setTimeout(openAmbientSheet,220); }
+  else if(i.kind==='theme'){ go('manifest'); openThemeSet(i.key); }
 }
 const isFav=id=>(state.favs||[]).includes(id);
 function toggleFav(id){ state.favs=state.favs||[]; const i=state.favs.indexOf(id); i<0?state.favs.push(id):state.favs.splice(i,1); save(); return i<0; }
@@ -1732,12 +1778,16 @@ function openInviteSheet(){
 function renderFavs(){
   const all=catalogueById();
   const items=(state.favs||[]).map(id=>all[id]).filter(Boolean);
+  const lns=state.favLines||[];
   $('#favs').innerHTML=`
-    <div class="sticky-h"><button class="iconbtn" id="fv-back" aria-label="返回">‹</button><h1>收藏</h1><span class="cnt">${items.length}</span></div>
+    <div class="sticky-h"><button class="iconbtn" id="fv-back" aria-label="返回">‹</button><h1>收藏</h1><span class="cnt">${items.length+lns.length}</span></div>
     ${items.length?`<div class="lrows">${items.map(listRow).join('')}</div>`
-      :`<p class="note" style="margin-top:40px;text-align:center">還沒有收藏。<br>在任何一段旁邊點 ♥ 就會出現在這裡。</p>`}`;
+      :`<p class="note" style="margin-top:40px;text-align:center">還沒有收藏。<br>在任何一段旁邊點 ♥ 就會出現在這裡。</p>`}
+    ${lns.length?`<div class="section" style="margin-top:18px"><div class="section-h"><h2>收藏的語句</h2><span class="more">${lns.length} 句</span></div>
+      <div class="script">${lns.map(l=>`<div class="line aff tline"><span style="font-size:11px;color:var(--faint);display:block;margin-bottom:4px">${esc(l.theme)}</span>${esc(l.text)}<button class="ldots" data-id="${esc(l.id)}" aria-label="移除收藏">✕</button></div>`).join('')}</div></div>`:''}`;
   $('#fv-back').onclick=()=>go('me');
   bindItems($('#favs'));
+  $$('#favs .ldots').forEach(b=>b.onclick=()=>{ toggleFavLine(b.dataset.id); toast('取消收藏'); renderFavs(); });
 }
 
 /* ---------- MEDITATE: library ---------- */
@@ -1745,6 +1795,7 @@ function renderManifest(){
   const v=state.ui.view||'lib';
   if(v==='scene') return renderScene();
   if(v==='breath') return renderBreath();
+  if(v==='theme') return renderThemeSet();
   return renderLibrary();
 }
 function sceneCard(k){
@@ -1774,6 +1825,11 @@ function renderLibrary(){
       <div class="brow">${Object.entries(BREATHS).map(([k,b])=>`<button class="bchip mesh g-${b.g}" data-breath="${k}"><b>${esc(b.name)}</b><span>${b.steps.map(s=>s[1]).join('-')}</span></button>`).join('')}</div>
     </div>
 
+    <div class="section">
+      <div class="section-h"><h2>主題廣場</h2><span class="more">逐句的肯定語，按主題找</span></div>
+      <div class="scards">${Object.entries(THEME_SETS).map(([k,T])=>`<button class="scard mesh g-${T.g}" data-theme="${k}"><span class="sc-b"><b>${esc(T.name)}</b>${isFav('theme:'+k)?'<i class="fav">★</i>':''}</span><span class="sc-h">${esc(T.hint)}</span><span class="sc-f"><i>${T.lines.length} 句</i></span></button>`).join('')}</div>
+    </div>
+
     ${favs.length?`<div class="section"><div class="section-h"><h2>★ 收藏</h2></div><div class="scards">${favs.map(sceneCard).join('')}</div></div>`:''}
     ${recent.length?`<div class="section"><div class="section-h"><h2>最近聽過</h2></div><div class="scards">${recent.map(sceneCard).join('')}</div></div>`:''}
 
@@ -1795,11 +1851,13 @@ function renderLibrary(){
   $('#rec-go').onclick=()=>openScene(rec);
   $$('#manifest [data-scene]').forEach(b=>b.onclick=()=>openScene(b.dataset.scene));
   $$('#manifest [data-breath]').forEach(b=>b.onclick=()=>openBreath(b.dataset.breath));
+  $$('#manifest [data-theme]').forEach(b=>b.onclick=()=>openThemeSet(b.dataset.theme));
   $('#add-scene').onclick=openCustomSheet;
   $('#daily-go').onclick=()=>openScene('daily');
 }
 function openScene(k){ state.ui.scene=k; state.ui.view='scene'; state.ui.before=null; save(); renderManifest(); $('#manifest').scrollTop=0; }
 function openBreath(k){ state.ui.breath=k; state.ui.view='breath'; save(); renderManifest(); $('#manifest').scrollTop=0; }
+function openThemeSet(k){ state.ui.theme=k; state.ui.view='theme'; save(); renderManifest(); $('#manifest').scrollTop=0; }
 function backToLib(){ stopPlayback(); state.ui.view='lib'; save(); renderManifest(); }
 
 /* ---------- MEDITATE: scene player ---------- */
@@ -1898,6 +1956,63 @@ function renderDaily(){
   $('#sc-amb').onclick=openAmbientSheet;
   $('#mf-regen')&&($('#mf-regen').onclick=()=>{ mfSeed=String(Math.random()); renderDaily(); toast('換了一版 ✦'); });
   bindPlayer('mf', lines, TONES[p.tone||'gentle'].rate, 'manifest', src, {packKey:src.mode==='pack'?'manifest':null, sceneKey:'daily', minutes:state.ui.minutes});
+}
+/* ---------- theme plaza: pure affirmation lists, browsable by topic ---------- */
+function renderThemeSet(){
+  const k=state.ui.theme, T=THEME_SETS[k]; if(!T) return backToLib();
+  const src=voiceSource(k, true);
+  const lines=themeScript(k);
+  const fav=isFav('theme:'+k);
+  const offerRecord = src.mode==='browser' && chosenVoice()==='mine';
+  $('#manifest').innerHTML=`
+    <div class="row between" style="margin-bottom:14px"><button class="btn ghost sm" id="sc-back">← 冥想庫</button>
+      <button class="btn ghost sm" id="sc-fav" aria-pressed="${fav}">${fav?'★ 已收藏':'☆ 收藏'}</button></div>
+    <div class="topbar"><div><div class="eyebrow">主題清單 · ${T.lines.length} 句</div><h1 class="title">${esc(T.name)}</h1></div></div>
+    <div class="vrow">${voiceChip(src)}<button class="vchip" id="v-pace"><b>◷ ${esc(pace().name)}</b><span class="vcaret">▾</span></button>${offerRecord?'<button class="vchip" id="mf-recmine">🎙 錄這一段的聲音</button>':''}</div>
+    <p class="note" style="max-width:36ch;margin-bottom:12px">${esc(T.hint)}</p>
+    <div class="orb-wrap"><div class="orb idle" id="mf-orb"><span class="phase" id="mf-phase">READY</span></div></div>
+    <div class="row between" style="margin:6px 0 12px"><div class="eyebrow">點任何一句可以單獨收藏、複製或分享</div>
+      <div class="row"><button class="btn sm ghost" id="mf-pace">◷ ${esc(pace().name)}</button><button class="btn sm ghost" id="sc-amb">◌ 環境音</button></div></div>
+    <div class="script" id="mf-script">${lines.map((l,i)=>`<div class="line ${l.kind} tline" data-i="${i}">${esc(l.t)}<button class="ldots" data-i="${i}" aria-label="這一句的更多選項">${isFavLine('fl:'+k+':'+i)?'♥':'···'}</button></div>`).join('')}</div>
+    <div class="player">
+      <div class="bar"><i id="mf-bar"></i></div>
+      <div class="ctl">
+        <button class="play" id="mf-play" aria-label="播放"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button>
+        <div class="time" id="mf-time">00:00</div>
+        <button class="voice-src" id="mf-voice"><b>${esc(src.label)}</b>${esc(src.sub)}</button>
+      </div>
+    </div>`;
+  $('#sc-back').onclick=backToLib;
+  $('#sc-fav').onclick=()=>{ toggleFav('theme:'+k); renderThemeSet(); };
+  $('#mf-voice').onclick=()=>openVoiceSheet(renderManifest);
+  bindVoiceChip($('#manifest'), renderManifest);
+  $('#v-pace')&&($('#v-pace').onclick=()=>openPaceSheet(renderManifest));
+  $('#mf-recmine')&&($('#mf-recmine').onclick=()=>openStudioSheet(k));
+  $('#sc-amb').onclick=openAmbientSheet;
+  $('#mf-pace')&&($('#mf-pace').onclick=()=>openPaceSheet(renderThemeSet));
+  $$('#mf-script .ldots').forEach(b=>b.onclick=e=>{ e.stopPropagation(); openLineSheet(k,+b.dataset.i); });
+  bindPlayer('mf', lines, .95, k, src, {sceneKey:k});
+}
+const isFavLine = id => (state.favLines||[]).some(f=>f.id===id);
+function toggleFavLine(id,theme,text){
+  state.favLines=state.favLines||[];
+  const i=state.favLines.findIndex(f=>f.id===id);
+  if(i<0){ state.favLines.push({id,theme,text}); save(); return true; }
+  state.favLines.splice(i,1); save(); return false;
+}
+function openLineSheet(themeKey,idx){
+  const text=THEME_SETS[themeKey].lines[idx], id=`fl:${themeKey}:${idx}`;
+  const render=b=>{
+    const on=isFavLine(id);
+    $('#sheet-body').innerHTML=`<p class="sub" style="font-size:17px;line-height:1.6;color:var(--text);margin-bottom:18px">${esc(text)}</p>
+      <button class="btn ${on?'primary':'soft'} block" id="ln-fav" style="margin-bottom:10px">${on?'♥ 已收藏這一句':'♡ 收藏這一句'}</button>
+      <button class="btn ghost block" id="ln-copy" style="margin-bottom:10px">複製文字</button>
+      ${navigator.share?'<button class="btn ghost block" id="ln-share">分享這一句</button>':''}`;
+    $('#ln-fav').onclick=()=>{ toggleFavLine(id,THEME_SETS[themeKey].name,text); toast(isFavLine(id)?'已收藏 ✦':'取消收藏'); render(); renderThemeSet(); };
+    $('#ln-copy').onclick=async()=>{ try{ await navigator.clipboard.writeText(text); toast('已複製'); }catch(e){ toast('複製失敗'); } };
+    $('#ln-share')&&($('#ln-share').onclick=async()=>{ try{ await navigator.share({text}); }catch(e){} });
+  };
+  sheet('', render);
 }
 function askAfter(k,S){
   sheet(`<h2>現在呢？</h2><p class="sub">同一個「${esc(S.metric)}」，現在幾分？這是唯一能證明有效的方式。</p>
@@ -2527,7 +2642,9 @@ function renderStudioLine(root){
   $('#st-next',host).onclick=()=>{
     if(studioIdx<all.length-1) goto(studioIdx+1);
     else { stop(); cancelAnimationFrame(raf); closeSheet(); toast('全部錄完了 ✦ 去聽聽自己的聲音');
-      state.ui.scene=(studioFilter && SCENES[studioFilter]) ? studioFilter : 'daily'; state.ui.view='scene'; save(); go('manifest'); }
+      if(studioFilter && THEME_SETS[studioFilter]){ state.ui.theme=studioFilter; state.ui.view='theme'; }
+      else { state.ui.scene=(studioFilter && SCENES[studioFilter]) ? studioFilter : 'daily'; state.ui.view='scene'; }
+      save(); go('manifest'); }
   };
   sheet._cleanup=()=>{ stop(); cancelAnimationFrame(raf); };
 }
