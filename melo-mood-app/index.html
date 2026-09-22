@@ -1461,6 +1461,25 @@ function recCtx(){
   if(recAC.state==='suspended') recAC.resume();
   return recAC;
 }
+/* when recording can't work, say why up front instead of failing silently in small print.
+   Most common case: an embedded preview (claude.ai artifact iframe) where the browser blocks the mic. */
+const FRAME_MIC='你現在開的是預覽頁，瀏覽器為了安全在預覽裡擋住了麥克風，不是 App 壞掉。用正式網址打開（直接在 Safari / Chrome 開，不是預覽）就能錄。';
+function micBlocked(){
+  if(!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) return window.self!==window.top ? FRAME_MIC : '這個瀏覽器不支援錄音，請用 Safari 或 Chrome 打開。';
+  if(!window.isSecureContext) return '錄音需要 https 網址才能用。';
+  try{ if(document.featurePolicy && !document.featurePolicy.allowsFeature('microphone')) return FRAME_MIC; }catch(e){}
+  return '';
+}
+function micErrorMsg(e){
+  if(e?.name==='NotAllowedError') return window.self!==window.top ? FRAME_MIC : '麥克風權限被拒絕了：點網址列左邊的設定，把麥克風打開，再按一次。';
+  if(e?.name==='NotFoundError') return '找不到麥克風，確認耳機或麥克風有接好。';
+  return '沒辦法開啟麥克風（'+(e?.message||e)+'）。可以先跳過，之後再錄。';
+}
+function showMicWarn(host,msg,btn){
+  let w=host.querySelector('.micwarn');
+  if(!w){ w=document.createElement('div'); w.className='helpnote micwarn'; host.prepend(w); }
+  w.textContent=msg; if(btn){ btn.style.opacity=.4; btn.setAttribute('aria-disabled','true'); }
+}
 function mountRecorder(host, {onDone}){
   host.innerHTML = `<div class="rec">
     <div class="read">${esc(readText())}</div>
@@ -1480,8 +1499,10 @@ function mountRecorder(host, {onDone}){
     for(let i=0;i<data.length;i++){ const x=i/data.length*cv.width, y=an?(data[i]/128)*cv.height/2:cv.height/2; i?ctx.lineTo(x,y):ctx.moveTo(x,y);} ctx.stroke(); raf=requestAnimationFrame(draw); };
   draw();
   const stop=()=>{ rec&&rec.state!=='inactive'&&rec.stop(); clearInterval(tick); stream&&stream.getTracks().forEach(t=>t.stop()); an=null; btn.classList.remove('on'); btn.setAttribute('aria-label','開始錄音'); };
+  const blocked=micBlocked(); if(blocked){ showMicWarn(host,blocked,btn); rs.textContent='這裡不能錄音，看上面的說明'; }
   btn.onclick=async()=>{
     if(rec&&rec.state==='recording'){ stop(); return; }
+    if(blocked){ toast('這裡不能錄音 · 看上面的說明'); return; }
     try{
       stream=await navigator.mediaDevices.getUserMedia({audio:true});
       const ac=recCtx(); an=ac.createAnalyser(); an.fftSize=256; ac.createMediaStreamSource(stream).connect(an);
@@ -1489,7 +1510,7 @@ function mountRecorder(host, {onDone}){
       rec.onstop=()=>{ blob=new Blob(chunks,{type:rec.mimeType||'audio/webm'}); use.disabled=secs<5; rs.textContent=secs<5?'太短了，至少 5 秒':'錄好了 · 可以試聽或使用'; if(secs>=5){ const a=$('.rt',host); a.style.cursor='pointer'; a.title='試聽'; a.onclick=()=>new Audio(URL.createObjectURL(blob)).play(); } };
       rec.start(); t0=Date.now(); btn.classList.add('on'); btn.setAttribute('aria-label','停止錄音'); rs.textContent='錄音中… 再按一次停止';
       tick=setInterval(()=>{ secs=Math.round((Date.now()-t0)/1000); rt.textContent=`${pad(Math.floor(secs/60))}:${pad(secs%60)}`; if(secs>=90) stop(); },250);
-    }catch(e){ rs.textContent='麥克風沒有權限。可以先跳過，之後在「我」裡再錄。'; }
+    }catch(e){ const m=micErrorMsg(e); showMicWarn(host,m); rs.textContent='沒有開始錄音 · 看上面的說明'; toast('麥克風沒有打開'); }
   };
   use.onclick=async()=>{
     stop();
@@ -2766,8 +2787,10 @@ function renderStudioLine(root){
   draw();
   const stop=()=>{ rec&&rec.state!=='inactive'&&rec.stop(); clearInterval(tick); stream&&stream.getTracks().forEach(t=>t.stop()); an=null; btn.classList.remove('on'); btn.setAttribute('aria-label','開始錄音'); };
   const goto=i=>{ stop(); cancelAnimationFrame(raf); studioIdx=i; renderStudioLine(root); };
+  const blocked=micBlocked(); if(blocked){ showMicWarn(host,blocked,btn); rs.textContent='這裡不能錄音，看上面的說明'; }
   btn.onclick=async()=>{
     if(rec&&rec.state==='recording'){ stop(); return; }
+    if(blocked){ toast('這裡不能錄音 · 看上面的說明'); return; }
     try{
       stream=await navigator.mediaDevices.getUserMedia({audio:true});
       const ac=recCtx(); an=ac.createAnalyser(); an.fftSize=256; ac.createMediaStreamSource(stream).connect(an);
@@ -2781,7 +2804,7 @@ function renderStudioLine(root){
       };
       rec.start(); const t0=Date.now(); btn.classList.add('on'); btn.setAttribute('aria-label','停止錄音'); rs.textContent='錄音中… 再按一次停止';
       tick=setInterval(()=>{ secs=Math.round((Date.now()-t0)/1000); rt.textContent=`${pad(Math.floor(secs/60))}:${pad(secs%60)}`; if(secs>=20) stop(); },250);
-    }catch(e){ rs.textContent='麥克風沒有權限。可以先跳過，之後再回來錄。'; }
+    }catch(e){ const m=micErrorMsg(e); showMicWarn(host,m); rs.textContent='沒有開始錄音 · 看上面的說明'; toast('麥克風沒有打開'); }
   };
   $('#st-prev',host).onclick=()=>goto(Math.max(0,studioIdx-1));
   $('#st-skip',host).onclick=()=>{
