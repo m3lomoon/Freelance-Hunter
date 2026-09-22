@@ -376,6 +376,9 @@ p{margin:0}
 .line.now{background:var(--moon-ink);color:var(--text);box-shadow:0 0 0 1px var(--moon) inset}
 .line.done{opacity:.5}
 .line.tline{padding-right:40px}
+.helpnote{font-size:12.5px;line-height:1.75;color:var(--muted);border-left:2px solid var(--rose);padding:4px 0 4px 12px;margin:0 0 16px}
+.helpnote a{color:var(--text);text-decoration:underline;text-underline-offset:3px}
+.helpnote span{color:var(--faint)}
 .line .ldots{position:absolute;top:8px;right:8px;background:none;border:none;color:var(--faint);font-size:13px;cursor:pointer;padding:4px 6px;line-height:1}
 .line .ldots:hover{color:var(--moon)}
 
@@ -1319,6 +1322,15 @@ const player = {timer:null,phaseT:null,idx:0,lines:[],onTick:null,playing:false,
 /* every playLines() call gets a new session id; a loop parked on an await (TTS fetch,
    IndexedDB load, audio.onended) must check it, or it resumes into the next session */
 const alive=s=>player.playing&&player.session===s;
+/* if the phone auto-locks mid-session, mobile browsers suspend speech and the guide just stops */
+let wakeLock=null;
+async function keepAwake(on){
+  try{
+    if(on){ if(wakeLock||!navigator.wakeLock) return; wakeLock=await navigator.wakeLock.request('screen'); wakeLock.addEventListener('release',()=>{ wakeLock=null; }); }
+    else if(wakeLock){ const w=wakeLock; wakeLock=null; await w.release(); }
+  }catch(e){ wakeLock=null; }
+}
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible' && (player.playing||pacer)) keepAwake(true); });
 const ttsCache = new Map();
 function estimateMs(lines, rate){ return lines.reduce((s,l)=>s+Math.max(600,l.t.length*230/rate)+l.pause,0); }
 /* the first voice a device lists is often its oldest, most robotic one. Neural voices
@@ -1334,7 +1346,7 @@ function bestVoice(want){
 const langVoice=()=>bestVoice(speechLang());
 const zhVoice=()=>bestVoice('zh-TW');
 function stopPlayback(){
-  player.playing=false; clearTimeout(player.timer); clearTimeout(player.phaseT);
+  player.playing=false; clearTimeout(player.timer); clearTimeout(player.phaseT); keepAwake(false);
   try{ speechSynthesis.cancel(); }catch(e){}
   if(player.audio){ player.audio.pause(); player.audio.src=''; player.audio=null; }
   player.onTick && player.onTick({idx:-1,pct:0,done:false,stopped:true});
@@ -1344,6 +1356,7 @@ async function playLines(lines, {rate=.9, onTick, onDone, mode='manifest', src, 
   const session=++player.session;
   if(!src || src.mode!=='pack'){ lines=paced(lines); rate=pacedRate(rate); }
   player.lines=lines; player.idx=0; player.playing=true; player.onTick=onTick; player.total=estimateMs(lines,rate); player.startedAt=Date.now();
+  keepAwake(true);
   if(src?.mode==='pack'){ playPack(pack||DEMO_PACK[mode], onTick, onDone); return; }
   if(src?.mode==='own'){
     try{ await playOwnPack(src.packKind||mode, lines, onTick, onDone); return; }
@@ -1941,6 +1954,7 @@ function renderScene(){
     <div class="topbar"><div><div class="eyebrow">${CATS[S.cat]?.name||'自訂'} · ${mins} 分鐘</div><h1 class="title">${esc(S.name)}</h1></div></div>
     <div class="vrow">${voiceChip(src)}<button class="vchip" id="v-pace"><b>◷ ${esc(pace().name)}</b><span class="vcaret">▾</span></button>${offerRecord?'<button class="vchip" id="mf-recmine">🎙 錄這一段的聲音</button>':''}</div>
     <p class="note" style="max-width:36ch;margin-bottom:12px">${esc(S.hint||'')}</p>
+    ${S.cat==='rescue'?helpNote():''}
     ${durControllable?`<label class="label">想放多久</label>
     <div class="seg" id="sc-min" style="margin-bottom:14px">${[...new Set([1,3,S.min,7,12])].sort((a,b)=>a-b).map(m=>`<button data-m="${m}" aria-pressed="${m===mins}">${m} 分</button>`).join('')}</div>
     <p class="note" style="margin:-8px 0 14px">句子數不變，只有中間跟自己相處的安靜時間變長變短。</p>`:''}
@@ -2025,6 +2039,10 @@ function renderDaily(){
   bindPlayer('mf', lines, TONES[p.tone||'gentle'].rate, 'manifest', src, {packKey:src.mode==='pack'?'manifest':null, sceneKey:'daily'});
 }
 /* ---------- theme plaza: pure affirmation lists, browsable by topic ---------- */
+/* shown wherever the content touches distress: rescue scenes, 走出低潮, and the profile */
+function helpNote(){
+  return `<div class="helpnote"><b>如果你現在真的很辛苦</b>，不用一個人撐：<a href="tel:1925">安心專線 1925</a>（24 小時）· <a href="tel:1995">生命線 1995</a> · <a href="tel:1980">張老師 1980</a><br><span>Melo Mood 是陪你練習的工具，不是醫療或心理治療。</span></div>`;
+}
 function renderThemeSet(){
   stopPlayback();
   const k=state.ui.theme, T=THEME_SETS[k]; if(!T) return backToLib();
@@ -2038,6 +2056,7 @@ function renderThemeSet(){
     <div class="topbar"><div><div class="eyebrow">主題清單 · ${T.lines.length} 句</div><h1 class="title">${esc(T.name)}</h1></div></div>
     <div class="vrow">${voiceChip(src)}<button class="vchip" id="v-pace"><b>◷ ${esc(pace().name)}</b><span class="vcaret">▾</span></button>${offerRecord?'<button class="vchip" id="mf-recmine">🎙 錄這一段的聲音</button>':''}</div>
     <p class="note" style="max-width:36ch;margin-bottom:12px">${esc(T.hint)}</p>
+    ${k==='fightLow'?helpNote():''}
     <div class="orb-wrap"><div class="orb idle" id="mf-orb"><span class="phase" id="mf-phase">READY</span></div></div>
     <div class="row between" style="margin:6px 0 12px"><div class="eyebrow">點任何一句可以單獨收藏、複製或分享</div>
       <div class="row"><button class="btn sm ghost" id="mf-pace">◷ ${esc(pace().name)}</button><button class="btn sm ghost" id="sc-amb">◌ 環境音</button></div></div>
@@ -2296,6 +2315,8 @@ function startPacer(k,rounds){
     label.textContent=name; count.textContent=sec+' 秒';
     const grow=/吸/.test(name), hold=/停/.test(name);
     breathCue(hold?'hold':grow?'in':'out', sec);
+    // a light tap on each phase change, so you can follow with eyes closed (Android; iOS ignores it)
+    if(breathOn && navigator.vibrate){ try{ navigator.vibrate(hold?0:grow?35:[15,60,15]); }catch(e){} }
     if(!reduce){ core.style.transition=`transform ${sec}s cubic-bezier(.4,0,.3,1)`; core.style.transform=`scale(${grow?1:hold?(core.style.transform.match(/[\d.]+/)?.[0]||1):.45})`; }
     clearInterval(tick);
     tick=setInterval(()=>{ left--; count.textContent=Math.max(0,left)+' 秒';
@@ -2303,9 +2324,9 @@ function startPacer(k,rounds){
       if(left<=0){ clearInterval(tick); step++; if(step>=B.steps.length){ step=0; round++; rEl.textContent=round; } run(); } },1000);
     pacer={stop:()=>{clearInterval(tick);}};
   };
-  core.style.transform='scale(.45)'; run();
+  core.style.transform='scale(.45)'; keepAwake(true); run();
 }
-function stopPacer(){ if(pacer){ pacer.stop(); pacer=null; } const c=$('#pcore'); if(c){ c.style.transition='transform .6s'; c.style.transform='scale(.45)'; } }
+function stopPacer(){ keepAwake(false); if(pacer){ pacer.stop(); pacer=null; } const c=$('#pcore'); if(c){ c.style.transition='transform .6s'; c.style.transform='scale(.45)'; } }
 function openPaceSheet(after){
   sheet(`<h2>唸的速度</h2><p class="sub">太快反而讓人更緊張。不確定就選「慢」，那是預設。</p>
     <div class="opts">${Object.entries(PACES).map(([k,v])=>`<button class="opt" data-p="${k}" aria-pressed="${k===(state.settings.pace||'slow')}"><i class="em sw lg mesh g-${k==='calm'?'mint':k==='slow'?'cobalt':'lime'}"></i><div><b>${esc(v.name)}</b><span>${esc(v.hint)}</span></div><span class="tick"></span></button>`).join('')}</div>`, b=>{
@@ -2427,17 +2448,32 @@ function ambOff(kind){
   setTimeout(()=>L.stop(),800);
   if(!Object.keys(ambient.layers).length) setTimeout(stopAmbient,900);
 }
-function stopAmbient(){ if(!ambient) return; const a=ambient; ambient=null; Object.values(a.layers).forEach(L=>L.stop()); try{ a.ctx.close(); }catch(e){} }
+function stopAmbient(){ clearTimeout(ambTimer); ambTimer=null; if(!ambient) return; const a=ambient; ambient=null; Object.values(a.layers).forEach(L=>L.stop()); try{ a.ctx.close(); }catch(e){} }
+/* sleep timer: ambience fades out over ~30s instead of playing (and draining battery) all night */
+let ambTimer=null;
+function setAmbTimer(min){
+  clearTimeout(ambTimer); ambTimer=null; state.settings.ambTimer=min; save();
+  if(!min || !ambient) return;
+  ambTimer=setTimeout(()=>{
+    const a=ambient; if(!a) return;
+    try{ a.master.gain.setTargetAtTime(.0001,a.ctx.currentTime,8); }catch(e){}
+    setTimeout(()=>{ if(ambient===a) stopAmbient(); },30000);
+  }, min*60000);
+}
 function ambOnCount(){ return ambient?Object.keys(ambient.layers).length:0; }
 function openAmbientSheet(){
   sheet(`<h2>環境音</h2><p class="sub">可以疊。全部即時合成，不用下載音檔，也能跟引導一起播。</p>
     <div class="list" id="am">${Object.entries(AMB).map(([k,a])=>`<button class="opt" data-k="${k}" aria-pressed="${!!ambient?.layers[k]}"><i class="em sw lg mesh g-${a.g}"></i><div><b>${esc(a.name)}</b><span>${esc(a.hint)}</span></div><span class="tick"></span></button>`).join('')}</div>
     <div class="field" style="margin-top:16px"><label class="label">音量<b style="float:right;font-family:var(--mono)" id="amv">${Math.round((state.settings.ambVol??.3)*100)}%</b></label><input type="range" class="rng" id="amr" min="0" max="100" value="${Math.round((state.settings.ambVol??.3)*100)}"></div>
+    <label class="label">定時關閉 <span class="note">睡著後慢慢淡出</span></label>
+    <div class="seg" id="am-timer" style="margin-bottom:16px">${[0,15,30,60].map(m=>`<button data-m="${m}" aria-pressed="${(state.settings.ambTimer||0)===m}">${m?m+' 分':'不關'}</button>`).join('')}</div>
     <button class="btn ghost block" id="am-off">全部關掉</button>`, b=>{
     $$('#am .opt',b).forEach(o=>o.onclick=()=>{
-      const k=o.dataset.k, on=o.getAttribute('aria-pressed')==='true';
+      const k=o.dataset.k, on=o.getAttribute('aria-pressed')==='true', wasSilent=!ambient;
       on?ambOff(k):ambOn(k); o.setAttribute('aria-pressed',!on);
+      if(!on && wasSilent && state.settings.ambTimer) setAmbTimer(state.settings.ambTimer);   // timer counts from when sound starts
     });
+    $$('#am-timer button',b).forEach(x=>x.onclick=()=>{ const m=+x.dataset.m; setAmbTimer(m); $$('#am-timer button',b).forEach(y=>y.setAttribute('aria-pressed',y===x)); toast(m?`${m} 分鐘後環境音會慢慢淡出`:'環境音不會自動關'); });
     $('#amr',b).oninput=e=>{ const v=e.target.value/100; state.settings.ambVol=v; $('#amv',b).textContent=e.target.value+'%'; if(ambient) ambient.master.gain.value=Math.max(.0001,v); save(); };
     $('#am-off',b).onclick=()=>{ stopAmbient(); closeSheet(); toast('環境音關了'); };
   });
@@ -2464,7 +2500,7 @@ function bindPlayer(prefix, lines, rate, type, src, opts={}){
         if(ln&&ln.kind==='breath'&&ln.sec) breathCue(/停/.test(ln.t)?'hold':/吸/.test(ln.t)?'in':'out', ln.sec); }
       if(idx>=0){ const el=$$('.line',list)[idx]; el&&el.scrollIntoView({block:'center',behavior:'smooth'}); }
       const el=(Date.now()-t0); bar.style.width=(pct*100)+'%'; time.textContent=`${pad(Math.floor(el/60000))}:${pad(Math.floor(el/1000)%60)} / ${pad(Math.floor(total/60000))}:${pad(Math.floor(total/1000)%60)}`;
-      if(done){ setPlaying(false); state.sessions.push({date:todayKey(),type,min:Math.max(1,Math.round(total/60000)),scene:opts.sceneKey}); save();
+      if(done){ setPlaying(false); keepAwake(false); state.sessions.push({date:todayKey(),type,min:Math.max(1,Math.round(total/60000)),scene:opts.sceneKey}); save();
         if(opts.onFinish) opts.onFinish(); else toast(type==='sleep'?'晚安 ✦':'完成 ✦ 帶著這個頻率走進今天'); }
     }});
   };
@@ -2611,9 +2647,12 @@ function renderMe(){
         <p class="note" style="margin-top:10px">瀏覽器提醒只在這個分頁開著時有效。包成 App 之後會換成系統推播。</p></div></div>
     <div class="section"><div class="section-h"><h2>分享卡</h2><span class="more">IG 限動尺寸</span></div>
       <button class="btn ghost sm" id="me-share">做一張今日肯定語 →</button></div>
+    <div class="section"><div class="section-h"><h2>安全與隱私</h2></div>
+      ${helpNote()}
+      <p class="note">你的日記、心情和錄音只存在這台裝置上，不會上傳。只有在你自己貼上 ElevenLabs / Claude 金鑰時，才會把要唸的句子或聲音樣本送去那兩家服務。換手機前記得先「匯出備份」。</p></div>
     <div class="section"><div class="section-h"><h2>資料</h2></div>
       <div class="kv"><span>日記</span><b>${state.entries.length} 篇</b><span>練習時間</span><b>${state.sessions.reduce((a,x)=>a+x.min,0)} 分鐘</b><span>前後評分</span><b>${(state.ratings||[]).length} 次</b><span>加入</span><b>${fmtDate(p.createdAt||todayKey())}</b></div>
-      <div class="row" style="margin-top:14px;gap:8px"><button class="btn ghost sm" id="me-export">匯出資料</button><button class="btn ghost sm" id="me-reset">${state.demo?'清除範例，重新開始':'重設'}</button></div></div>`;
+      <div class="row" style="margin-top:14px;gap:8px;flex-wrap:wrap"><button class="btn ghost sm" id="me-export">匯出備份</button><button class="btn ghost sm" id="me-import">匯入備份</button><button class="btn ghost sm" id="me-reset">${state.demo?'清除範例，重新開始':'重設'}</button></div></div>`;
   $('#me-rec').onclick=openRecorderSheet;
   $('#me-studio').onclick=()=>openStudioSheet();
   $('#me-goals').onclick=()=>openGoalsSheet(renderMe);
@@ -2626,7 +2665,22 @@ function renderMe(){
   $('#me-glow').onclick=()=>toast('Demo：正式版會接 Stripe / TapPay 訂閱');
   $('#k-save').onclick=()=>{ state.settings.elevenKey=$('#k-eleven').value.trim(); state.settings.claudeKey=$('#k-claude').value.trim(); if(state.settings.elevenKey&&!state.settings.voiceId){ state.settings.voiceId=DEMO_VOICES.brand.id; state.settings.voiceName=DEMO_VOICES.brand.name; } save(); toast('已儲存'); renderMe(); };
   $('#k-voice').onclick=()=>openVoiceSheet(renderMe);
-  $('#me-export').onclick=()=>sheet(`<h2>你的資料</h2><p class="sub">全選複製，貼到任何地方存起來。</p><textarea class="input" style="min-height:220px;font-family:var(--mono);font-size:11px" readonly>${esc(JSON.stringify(state,null,2))}</textarea>`);
+  // API keys never go into a backup: it ends up pasted into notes apps and chats
+  $('#me-export').onclick=()=>sheet(`<h2>匯出備份</h2><p class="sub">複製起來貼到備忘錄。換手機時用「匯入備份」貼回來就好。</p><textarea class="input" id="ex-json" style="min-height:200px;font-family:var(--mono);font-size:11px" readonly>${esc(JSON.stringify({...state,settings:{...state.settings,elevenKey:'',claudeKey:''}},null,2))}</textarea>
+    <button class="btn primary block" id="ex-copy" style="margin-top:14px">複製全部</button>
+    <p class="note" style="margin-top:10px">不含金鑰，也不含錄音檔（檔案太大），錄音只存在這台裝置。</p>`, b=>{
+    $('#ex-copy',b).onclick=async()=>{ try{ await navigator.clipboard.writeText($('#ex-json',b).value); toast('已複製 ✦ 貼到備忘錄存起來'); }catch(e){ $('#ex-json',b).select(); toast('請手動全選複製'); } };
+  });
+  $('#me-import').onclick=()=>sheet(`<h2>匯入備份</h2><p class="sub">貼上之前「匯出備份」複製的內容。會取代這台裝置上現在的資料。</p><textarea class="input" id="im-json" style="min-height:180px;font-family:var(--mono);font-size:11px" placeholder="{ … }"></textarea><button class="btn primary block" id="im-ok" style="margin-top:14px">還原</button>`, b=>{
+    $('#im-ok',b).onclick=()=>{
+      let d; try{ d=JSON.parse($('#im-json',b).value); }catch(e){ return toast('格式不對，要貼完整的匯出內容'); }
+      if(!d||typeof d!=='object'||!d.profile||!d.settings) return toast('這看起來不是 Melo Mood 的備份');
+      if(!confirm('用這份備份取代現在的資料？')) return;
+      d.settings={...d.settings, elevenKey:state.settings.elevenKey, claudeKey:state.settings.claudeKey};   // keep this device's keys
+      try{ localStorage.setItem(KEY, JSON.stringify(d)); }catch(e){ return toast('存不進去，可能是空間不夠'); }
+      location.reload();   // re-run boot + migrations on the restored data
+    };
+  });
   $('#me-share').onclick=openShareSheet;
   $('#rm-on').onclick=()=>{ const t=$('#rm-time').value; if(!t) return; state.settings.reminder=t; save(); armReminder(); renderMe(); toast('提醒設在每天 '+t); };
   $('#rm-off')&&($('#rm-off').onclick=()=>{ state.settings.reminder=''; save(); armReminder(); renderMe(); toast('提醒關掉了'); });
