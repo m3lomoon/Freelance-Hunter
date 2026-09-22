@@ -524,6 +524,10 @@ textarea.input{min-height:90px;resize:vertical}
 .ss-pre[aria-pressed="true"]{border-color:#fff}
 .ss-pre b{font-size:13px}
 .ss-pics{font-size:18px;letter-spacing:2px}
+.pl-status{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.pl-status b{display:block;font-size:15px}
+.pl-status span{display:block;font-size:12px;color:var(--muted);margin-top:2px;overflow-wrap:anywhere}
+.ss-lock{position:absolute;top:10px;right:10px;font-family:var(--mono);font-size:9px;letter-spacing:.08em;padding:3px 7px;border-radius:var(--r-pill);background:rgba(0,0,0,.35);color:#fff}
 .ss-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .ss-tile{position:relative;overflow:hidden;border-radius:var(--r-md);color:var(--onmesh);filter:saturate(.25) brightness(.62);border:2px solid transparent;transition:filter .25s,border-color .25s}
 .ss-tile.on{filter:none;border-color:rgba(255,255,255,.85)}
@@ -2029,7 +2033,7 @@ function renderScene(){
   $('#mf-recmine')&&($('#mf-recmine').onclick=()=>openStudioSheet(k));
   $('#sc-amb').onclick=openAmbientSheet;
   $('#mf-pace')&&($('#mf-pace').onclick=()=>openPaceSheet(renderScene));
-  $('#sc-ai')&&($('#sc-ai').onclick=()=>aiRewrite(k,S));
+  $('#sc-ai')&&($('#sc-ai').onclick=()=>gate('aiRewrite','AI 讀你的日記重寫引導詞')&&aiRewrite(k,S));
   $$('#sc-min button').forEach(b=>b.onclick=()=>{ sceneMin=+b.dataset.m; renderScene(); });
   $$('#sc-before button').forEach(b=>b.onclick=()=>{ state.ui.before=+b.dataset.v; $$('#sc-before button').forEach(x=>x.setAttribute('aria-pressed',x===b)); });
   bindPlayer('mf', lines, TONES[S.tone||'gentle'].rate, 'manifest', src, {
@@ -2624,6 +2628,7 @@ function openAmbientSheet(){
     <button class="btn ghost block" id="am-off">全部關掉</button>`, b=>{
     $$('#am .opt',b).forEach(o=>o.onclick=()=>{
       const k=o.dataset.k, on=o.getAttribute('aria-pressed')==='true';
+      if(!on && !FREE_SOUNDS.includes(k) && !can('sleepSoundPlus')){ closeSheet(); gate('sleepSoundPlus','「'+AMB[k].name+'」'); return; }
       ambToggle(k,!on); o.setAttribute('aria-pressed',!on);
     });
     $$('#am-timer button',b).forEach(x=>x.onclick=()=>{ const m=+x.dataset.m; setAmbTimer(m); $$('#am-timer button',b).forEach(y=>y.setAttribute('aria-pressed',y===x)); toast(m?`${m} 分鐘後環境音會慢慢淡出`:'環境音不會自動關'); });
@@ -2678,7 +2683,7 @@ function renderSleepSounds(){
       <div class="brow" id="ss-presets">${AMB_PRESETS.map(pr=>`<button class="ss-pre mesh g-${pr.g}" data-k="${pr.k}"><span class="ss-pics">${pr.mix.map(m=>AMB[m[0]].ic).join('')}</span><b>${esc(pr.name)}</b></button>`).join('')}</div></div>
     <div class="section"><div class="section-h"><h2>自己混</h2><span class="more">可以疊，每層各自調音量</span></div>
       <div class="ss-grid" id="ss-grid">${Object.entries(AMB).map(([k,a])=>`<div class="ss-tile mesh g-${a.g}" data-k="${k}">
-        <button class="ss-tog" data-k="${k}" aria-pressed="false" aria-label="${esc(a.name)}"><span class="ss-ic">${a.ic}</span><b>${esc(a.name)}</b><i>${esc(a.hint)}</i></button>
+        <button class="ss-tog" data-k="${k}" aria-pressed="false" aria-label="${esc(a.name)}"><span class="ss-ic">${a.ic}</span>${!FREE_SOUNDS.includes(k)&&!can('sleepSoundPlus')?'<span class="ss-lock">Glow</span>':''}<b>${esc(a.name)}</b><i>${esc(a.hint)}</i></button>
         <input type="range" class="ss-vol" data-k="${k}" min="5" max="100" value="${Math.round(ambLayerVol(k)*100)}" aria-label="${esc(a.name)} 音量"></div>`).join('')}</div></div>
     <div class="section"><div class="section-h"><h2>睡著以後</h2></div>
       <label class="label">定時關閉 <span class="note">時間到會用 30 秒慢慢淡出</span></label>
@@ -2703,18 +2708,21 @@ function renderSleepSounds(){
   ssTick=setInterval(()=>{ if(!$('#sleep').classList.contains('active')||!$('#ss-play')){ clearInterval(ssTick); ssTick=null; return; } paint(); },5000);
   $('#ss-play').onclick=()=>{
     if(ambOnCount()){ ambFadeStop(); setTimeout(paint,950); return; }
-    const last=(state.settings.ambLast||[]).filter(k=>AMB[k]);
+    const last=(state.settings.ambLast||[]).filter(k=>AMB[k]&&(FREE_SOUNDS.includes(k)||can('sleepSoundPlus')));
     (last.length?last:['rain','brown']).forEach(k=>ambToggle(k,true)); paint();
   };
   $$('#ss-presets .ss-pre').forEach(b=>b.onclick=()=>{ const pr=AMB_PRESETS.find(x=>x.k===b.dataset.k);
+    if(pr.mix.some(m=>!FREE_SOUNDS.includes(m[0])) && !gate('sleepSoundPlus','「'+pr.name+'」情境')) return;
     ambApplyPreset(pr); pr.mix.forEach(([k,v])=>{ const r=$(`.ss-vol[data-k="${k}"]`); if(r) r.value=Math.round(v*100); }); paint(); toast(pr.name+' ✦'); });
-  $$('#ss-grid .ss-tog').forEach(b=>b.onclick=()=>{ const k=b.dataset.k; ambToggle(k, b.getAttribute('aria-pressed')!=='true'); paint(); setTimeout(paint,950); });
+  $$('#ss-grid .ss-tog').forEach(b=>b.onclick=()=>{ const k=b.dataset.k;
+    if(b.getAttribute('aria-pressed')!=='true' && !FREE_SOUNDS.includes(k) && !gate('sleepSoundPlus','「'+AMB[k].name+'」')) return;
+    ambToggle(k, b.getAttribute('aria-pressed')!=='true'); paint(); setTimeout(paint,950); });
   $$('#ss-grid .ss-vol').forEach(r=>r.oninput=()=>setAmbLayerVol(r.dataset.k, r.value/100));
   $$('#ss-timer button').forEach(x=>x.onclick=()=>{ const m=+x.dataset.m; setAmbTimer(m); $$('#ss-timer button').forEach(y=>y.setAttribute('aria-pressed',y===x)); paint(); toast(m?`${m} 分鐘後慢慢淡出`:'不會自動關'); });
   $('#ss-master').oninput=e=>{ const v=e.target.value/100; state.settings.ambVol=v; $('#ss-vv').textContent=e.target.value+'%'; if(ambient) ambient.master.gain.value=Math.max(.0001,v); save(); };
   $('#ss-off').onclick=()=>{ ambFadeStop(); setTimeout(paint,950); toast('助眠音關了'); };
   $('#ss-dim').onclick=dimScreen;
-  $('#ss-guide').onclick=()=>{ state.ui.sleepView='guide'; save(); renderSleep(); $('#sleep').scrollTop=0; };
+  $('#ss-guide').onclick=()=>{ if(!gate('sleepGuide','睡前放鬆導引')) return; state.ui.sleepView='guide'; save(); renderSleep(); $('#sleep').scrollTop=0; };
 }
 function renderSleepGuide(){
   const p=state.profile, src=voiceSource('sleep', true);
@@ -2815,6 +2823,195 @@ function openEntrySheet(e){
   });
 }
 
+/* ---------- ACCOUNT & SUBSCRIPTION (Supabase auth + ECPay 定期定額) ----------
+   The publishable key is meant to ship in the page: row-level security decides what it can read.
+   The subscription row is written only by the ecpay-notify edge function after ECPay's signed
+   callback, so nothing on this device can grant itself a plan. */
+const SB={url:'https://bpgxmnfhahrwwhpizarv.supabase.co',key:'sb_publishable_JfVSa7zlEfZqAWgBPc_dYQ__kGlevv_'};
+const AUTH_KEY='melomood.auth', SUB_KEY='melomood.sub';   // kept apart from the backup/export blob
+/* Paywall switch: off until launch day so people already trying the app aren't locked out.
+   Add ?paywall=1 to the URL to test it. Flip to true when ECPAY_ENV=prod is live. */
+const PAYWALL = false || /[?&]paywall=1/.test(location.search);
+const PLAN_INFO={
+  glow_m:{tier:'glow',name:'Glow 月繳',price:290,per:'月'},
+  glow_y:{tier:'glow',name:'Glow 年繳',price:2490,per:'年'},
+  muse_m:{tier:'muse',name:'Muse 月繳',price:790,per:'月'},
+};
+/* what each feature needs; the free tier keeps journal, breathing, forest and four basic sounds */
+const FEATURE_TIER={sleepGuide:'glow',sleepSoundPlus:'glow',ownVoice:'glow',aiRewrite:'muse'};
+const FREE_SOUNDS=['rain','ocean','white','brown'];
+const TIER_RANK={free:0,glow:1,muse:2};
+const lsGet=k=>{ try{ return JSON.parse(localStorage.getItem(k)||'null'); }catch(e){ return null; } };
+const lsSet=(k,v)=>{ try{ v==null?localStorage.removeItem(k):localStorage.setItem(k,JSON.stringify(v)); }catch(e){} };
+let auth=lsGet(AUTH_KEY), sub=lsGet(SUB_KEY);
+const inPreview=()=>window.self!==window.top;
+const PREVIEW_PAY='你現在開的是預覽頁，瀏覽器在預覽裡擋住了連線。登入和付款請用正式網址打開（直接在 Safari / Chrome 開）。';
+function myTier(){
+  // access lasts until the paid period ends, whether the plan is active, canceled or its renewal failed
+  if(!sub || !sub.current_period_end || new Date(sub.current_period_end)<=new Date()) return 'free';
+  return sub.tier||'free';
+}
+function can(feature){
+  if(!PAYWALL || state.demo) return true;
+  return TIER_RANK[myTier()] >= TIER_RANK[FEATURE_TIER[feature]||'free'];
+}
+/* call before a paid feature: returns true to go ahead, or opens the upgrade sheet */
+function gate(feature, what){
+  if(can(feature)) return true;
+  const t=FEATURE_TIER[feature], muse=t==='muse';
+  sheet(`<h2>${muse?'Muse':'Glow'} 才有的功能</h2><p class="sub">${esc(what)}需要 ${muse?'Muse':'Glow'} 方案。${auth?'':'先用 Email 登入，方案會跟著帳號走，換手機也在。'}</p>
+    ${planButtons(muse?['muse_m']:['glow_m','glow_y'])}
+    <button class="btn ghost block" style="margin-top:8px" id="gt-no">先不用</button>`, b=>{ bindPlanButtons(b); $('#gt-no',b).onclick=closeSheet; });
+  return false;
+}
+async function authFetch(path,{method='GET',body,token}={}){
+  const h={apikey:SB.key,'Content-Type':'application/json'};
+  if(token) h.Authorization='Bearer '+token;
+  const r=await fetch(SB.url+path,{method,headers:h,body:body?JSON.stringify(body):undefined});
+  const txt=await r.text(); let j=null; try{ j=txt?JSON.parse(txt):null; }catch(e){}
+  if(!r.ok) throw Object.assign(new Error(j?.msg||j?.message||j?.error_description||j?.error||('HTTP '+r.status)),{status:r.status,body:j});
+  return j;
+}
+function keepSession(j){
+  auth={access_token:j.access_token,refresh_token:j.refresh_token,expires_at:j.expires_at||Math.floor(Date.now()/1000)+(j.expires_in||3600),email:j.user?.email||auth?.email||'',uid:j.user?.id||auth?.uid};
+  lsSet(AUTH_KEY,auth);
+}
+async function token(){
+  if(!auth) return null;
+  if(auth.expires_at-60 > Date.now()/1000) return auth.access_token;
+  try{ keepSession(await authFetch('/auth/v1/token?grant_type=refresh_token',{method:'POST',body:{refresh_token:auth.refresh_token}})); return auth.access_token; }
+  catch(e){ if(e.status===400||e.status===401){ signOut(true); } return null; }
+}
+const appURL=()=>location.origin+location.pathname;
+async function sendLoginCode(email){
+  await authFetch('/auth/v1/otp?redirect_to='+encodeURIComponent(appURL()),{method:'POST',body:{email,create_user:true}});
+}
+async function verifyLoginCode(email,code){
+  keepSession(await authFetch('/auth/v1/verify',{method:'POST',body:{type:'email',email,token:code}}));
+  await loadSub();
+}
+/* the email's link lands back here with the session in the URL hash */
+async function authFromHash(){
+  if(!/access_token=/.test(location.hash)) return;
+  const h=new URLSearchParams(location.hash.slice(1));
+  history.replaceState(null,'',location.pathname+location.search);
+  try{
+    const at=h.get('access_token'), user=await authFetch('/auth/v1/user',{token:at});
+    keepSession({access_token:at,refresh_token:h.get('refresh_token'),expires_at:+h.get('expires_at')||0,expires_in:+h.get('expires_in')||3600,user});
+    await loadSub(); toast('登入了 ✦ '+(auth.email||''));
+  }catch(e){ toast('登入連結過期了，再寄一次'); }
+}
+async function loadSub(){
+  const t=await token(); if(!t) return sub;
+  try{
+    const rows=await authFetch(`/rest/v1/subscriptions?select=tier,plan,status,source,current_period_end,canceled_at&user_id=eq.${auth.uid}`,{token:t});
+    sub=rows?.[0]||null; lsSet(SUB_KEY,sub);
+  }catch(e){}
+  return sub;
+}
+function signOut(quiet){ auth=null; sub=null; lsSet(AUTH_KEY,null); lsSet(SUB_KEY,null); if(!quiet) toast('登出了'); }
+function openLoginSheet(then){
+  if(inPreview()){ toast(PREVIEW_PAY); return; }
+  sheet(`<h2>用 Email 登入</h2><p class="sub">不用密碼。我們寄一組 6 位數登入碼給你，方案會跟著這個帳號，換手機也在。</p>
+    <div class="field"><label class="label" for="li-email">Email</label><input class="input" id="li-email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" value="${esc(auth?.email||'')}"></div>
+    <button class="btn primary block" id="li-send">寄登入碼</button>
+    <div id="li-step2" style="display:none;margin-top:16px">
+      <div class="field"><label class="label" for="li-code">信裡的 6 位數登入碼</label><input class="input" id="li-code" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="123456" style="font-family:var(--mono);letter-spacing:.3em;font-size:20px"></div>
+      <button class="btn primary block" id="li-ok">登入</button>
+      <p class="note" style="margin-top:8px">也可以直接點信裡的連結。沒收到的話看一下垃圾郵件。</p></div>`, b=>{
+    const email=()=>$('#li-email',b).value.trim().toLowerCase();
+    $('#li-send',b).onclick=async()=>{
+      if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email())){ toast('Email 格式怪怪的'); return; }
+      const btn=$('#li-send',b); btn.disabled=true; btn.textContent='寄送中…';
+      try{ await sendLoginCode(email()); $('#li-step2',b).style.display=''; btn.textContent='再寄一次'; $('#li-code',b).focus(); toast('寄出了，去收信'); }
+      catch(e){ toast(e.status===429?'寄太快了，等一分鐘再試':'寄不出去：'+e.message); btn.textContent='寄登入碼'; }
+      btn.disabled=false;
+    };
+    $('#li-ok',b).onclick=async()=>{
+      const code=$('#li-code',b).value.replace(/\D/g,''); if(code.length<6){ toast('登入碼是 6 位數'); return; }
+      const btn=$('#li-ok',b); btn.disabled=true; btn.textContent='確認中…';
+      try{ await verifyLoginCode(email(),code); closeSheet(); toast('登入了 ✦'); then?then():($('#me').classList.contains('active')&&renderMe()); }
+      catch(e){ toast('登入碼不對或過期了'); btn.disabled=false; btn.textContent='登入'; }
+    };
+  });
+}
+function planButtons(keys){
+  const cur=myTier()!=='free'?sub?.plan:null;
+  return `<div class="plans">${keys.map(k=>{ const P=PLAN_INFO[k];
+    return `<button class="btn ${k==='glow_y'?'soft':'primary'} block" data-plan="${k}" ${cur===k&&sub.status==='active'?'disabled':''}>${cur===k&&sub.status==='active'?'目前方案 · ':''}${esc(P.name)} · NT$${P.price.toLocaleString()} / ${P.per}${k==='glow_y'?' · 省 28%':''}</button>`; }).join('')}</div>
+    <p class="note" style="margin-top:8px">信用卡定期定額，由綠界 ECPay 處理，卡號不經過我們。每${keys.includes('glow_y')&&keys.length===1?'年':'期'}自動扣款，隨時可以在「我 → 方案」取消，取消後用到當期結束。</p>`;
+}
+function bindPlanButtons(root){ $$('[data-plan]',root).forEach(b=>b.onclick=()=>startCheckout(b.dataset.plan)); }
+async function startCheckout(plan){
+  if(inPreview()){ toast(PREVIEW_PAY); return; }
+  if(!auth){ openLoginSheet(()=>startCheckout(plan)); return; }
+  const t=await token(); if(!t){ openLoginSheet(()=>startCheckout(plan)); return; }
+  if(myTier()!=='free' && sub?.source && sub.source!=='ecpay'){ toast('你的方案是在 App Store / Google Play 買的，請在那邊更改'); return; }
+  toast('正在前往綠界付款頁…');
+  try{
+    const r=await fetch(SB.url+'/functions/v1/ecpay-checkout',{method:'POST',headers:{apikey:SB.key,Authorization:'Bearer '+t,'Content-Type':'application/json'},
+      body:JSON.stringify({plan,returnTo:appURL()+'?paid='+plan})});
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok||!j.action) throw new Error(j.error||('HTTP '+r.status));
+    const f=document.createElement('form'); f.method='POST'; f.action=j.action; f.style.display='none';
+    Object.entries(j.fields).forEach(([k,v])=>{ const i=document.createElement('input'); i.type='hidden'; i.name=k; i.value=v; f.appendChild(i); });
+    document.body.appendChild(f); f.submit();
+  }catch(e){ toast(e.message==='payments not configured'?'金流還沒設定好':'沒辦法開始付款：'+e.message); }
+}
+async function cancelPlan(){
+  const t=await token(); if(!t){ openLoginSheet(); return; }
+  try{
+    const r=await fetch(SB.url+'/functions/v1/ecpay-cancel',{method:'POST',headers:{apikey:SB.key,Authorization:'Bearer '+t,'Content-Type':'application/json'},body:'{}'});
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok) throw new Error(j.message||j.error||('HTTP '+r.status));
+    await loadSub(); closeSheet(); renderMe();
+    toast(j.until?`取消了，可以用到 ${fmtDay(j.until)}`:'取消了');
+  }catch(e){ toast(e.message); }
+}
+const fmtDay=iso=>{ const d=new Date(iso); return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`; };
+/* coming back from ECPay: the signed callback can land a few seconds after the browser does */
+async function afterPayment(){
+  const m=location.search.match(/[?&]paid=(\w+)/); if(!m) return;
+  history.replaceState(null,'',location.pathname+location.hash);
+  if(!auth) return;
+  toast('確認付款中…');
+  for(let i=0;i<8;i++){
+    await loadSub();
+    if(myTier()!=='free' && sub.plan===m[1] && sub.status==='active'){ toast(`歡迎加入 ${PLAN_INFO[sub.plan]?.name||''} ✦`); if($('#me').classList.contains('active')) renderMe(); return; }
+    await new Promise(r=>setTimeout(r,2500));
+  }
+  toast('還沒收到綠界的確認。付款成功的話，幾分鐘內會自動開通。');
+}
+function planSection(){
+  const tier=myTier(), P=sub?PLAN_INFO[sub.plan]:null;
+  const status = !auth ? `<div class="card pl-status"><div style="flex:1"><b>還沒登入</b><span>登入後可以訂閱，方案跟著帳號走。</span></div><button class="btn sm soft" id="pl-login">登入</button></div>`
+    : `<div class="card pl-status"><div style="flex:1;min-width:0"><b>${tier==='free'?'Free':esc(P?.name||tier)}${sub&&tier!=='free'&&sub.status==='canceled'?' · 已取消':''}${sub&&tier!=='free'&&sub.status==='past_due'?' · 扣款失敗':''}</b>
+        <span>${esc(auth.email||'')}${tier!=='free'?(sub.status==='active'?` · 下次扣款 ${fmtDay(sub.current_period_end)}`:` · 可以用到 ${fmtDay(sub.current_period_end)}`):''}</span>
+        ${sub&&tier!=='free'&&sub.status==='past_due'?'<span>綠界這期沒扣到款。到期前重新訂閱一次，就不會中斷。</span>':''}</div>
+        <div class="row" style="gap:6px">${tier!=='free'&&sub.status==='active'?'<button class="btn sm ghost" id="pl-cancel">取消</button>':''}<button class="btn sm ghost" id="pl-out">登出</button></div></div>`;
+  const isCur=k=>tier!=='free'&&sub?.plan===k&&sub.status==='active';
+  const btn=(k,label,cls)=>`<button class="btn ${cls} block" style="margin-top:8px" data-plan="${k}" ${isCur(k)?'disabled':''}>${isCur(k)?'目前方案':label}</button>`;
+  return `${status}
+    <div class="plans" style="margin-top:10px">
+      <div class="plan ${tier==='free'&&auth?'best':''}"><div class="pn">Free</div><div class="pp"><b>0</b> /月</div><ul><li>心情與感恩日記 · 呼吸練習 · 森林</li><li>4 種基本助眠音</li><li>系統聲音</li></ul></div>
+      <div class="plan best"><span class="chip moon badge">${tier==='glow'?'目前方案':'最多人選'}</span><div class="pn">Glow</div><div class="pp"><b>290</b> /月 · 年繳 2,490（省 28%）</div><ul><li>無限冥想引導 · 3 種語氣 · 3 個目標</li><li><b>你自己的聲音</b>：錄音室 + 聲音複製</li><li>睡前放鬆導引 · 全部 12 種助眠音與情境</li><li>30 天心情洞察</li></ul>
+        ${btn('glow_m','月繳 NT$290','primary')}${btn('glow_y','年繳 NT$2,490','soft')}</div>
+      <div class="plan"><span class="chip badge" style="${tier==='muse'?'':'display:none'}">目前方案</span><div class="pn">Muse</div><div class="pp"><b>790</b> /月</div><ul><li>Glow 全部功能</li><li><b>AI 深度個人化</b>：引導詞讀你的日記重寫</li><li>每週一封 AI 回顧信 · 目標調頻</li><li>Mumu Soul Care 茶飲 85 折</li></ul>
+        ${btn('muse_m','月繳 NT$790','soft')}</div>
+    </div>
+    <p class="note" style="margin-top:10px">信用卡定期定額，由綠界 ECPay 處理，卡號不經過我們。每期自動扣款，隨時可以在這裡取消，取消後用到當期結束。換方案時，舊的定期扣款會自動停掉。${PAYWALL?'':'<br>目前是試營運，所有功能都先開放。'}</p>`;
+}
+function bindPlanSection(root){
+  bindPlanButtons(root);
+  $('#pl-login',root)&&($('#pl-login',root).onclick=()=>openLoginSheet());
+  $('#pl-out',root)&&($('#pl-out',root).onclick=()=>{ signOut(); renderMe(); });
+  $('#pl-cancel',root)&&($('#pl-cancel',root).onclick=()=>sheet(`<h2>確定要取消嗎？</h2><p class="sub">之後不會再扣款。${sub?.current_period_end?`已經付過的這一期，你可以用到 ${fmtDay(sub.current_period_end)}。`:''}</p>
+    <button class="btn primary block" id="pc-keep">先留著</button><button class="btn ghost block" style="margin-top:8px" id="pc-yes">確定取消</button>`, b=>{
+      $('#pc-keep',b).onclick=closeSheet;
+      $('#pc-yes',b).onclick=()=>{ $('#pc-yes',b).disabled=true; $('#pc-yes',b).textContent='取消中…'; cancelPlan(); };
+    }));
+}
+
 /* ---------- ME ---------- */
 function renderMe(){
   const p=state.profile, v=p.voice||{}, s=state.settings, oc=ownCounts();
@@ -2839,12 +3036,8 @@ function renderMe(){
       <div class="row" style="flex-wrap:wrap;gap:8px">${(p.concerns||[]).map(k=>CONCERNS[k]?`<span class="chip"><i class="sw xs mesh g-${CONCERNS[k].g}"></i>${esc(CONCERNS[k].name)}</span>`:'').join('')||'<span class="note">還沒選</span>'}</div></div>
     <div class="section"><div class="section-h"><h2>我的方向</h2><button class="more" id="me-goals">調整 →</button></div>
       <div class="row" style="flex-wrap:wrap;gap:8px">${p.goals.map(k=>`<span class="chip goal"><i class="sw xs mesh g-${GOALS[k].g}"></i>${esc(GOALS[k].name)}</span>`).join('')||'<span class="note">還沒選目標</span>'}<span class="chip"><i class="sw xs mesh g-${TONES[p.tone]?.g||'slate'}"></i>${esc(TONES[p.tone]?.name||'未選語氣')}</span></div></div>
-    <div class="section"><div class="section-h"><h2>方案</h2><span class="more">NT$ · 月繳</span></div>
-      <div class="plans">
-        <div class="plan"><div class="pn">Free</div><div class="pp"><b>0</b> /月</div><ul><li>1 個目標 · 每日一段 3 分鐘冥想</li><li>系統聲音</li><li>心情與感恩日記</li></ul></div>
-        <div class="plan best"><span class="chip moon badge">最多人選</span><div class="pn">Glow</div><div class="pp"><b>290</b> /月 · 年繳 2,490</div><ul><li>無限冥想引導 · 3 種語氣 · 3 個目標</li><li><b>聲音複製</b>：用你的聲音唸給你聽</li><li>睡前放鬆導引 · 環境音</li><li>30 天心情洞察</li></ul><button class="btn primary block" style="margin-top:14px" id="me-glow">開始 7 天試用</button></div>
-        <div class="plan"><div class="pn">Muse</div><div class="pp"><b>790</b> /月</div><ul><li>Glow 全部功能</li><li><b>AI 深度個人化</b>：引導詞讀你的日記重寫</li><li>每週一封 AI 回顧信 · 目標調頻</li><li>Mumu Soul Care 茶飲 85 折</li></ul></div>
-      </div></div>
+    <div class="section" id="me-plan"><div class="section-h"><h2>方案</h2><span class="more">NT$ · 綠界定期定額</span></div>
+      ${planSection()}</div>
     <div class="section"><div class="section-h"><h2>連接（選填）</h2></div>
       <div class="card"><div class="field"><label class="label" for="k-eleven">ElevenLabs API key · 聲音複製</label><input class="input" id="k-eleven" type="password" placeholder="xi-…" value="${esc(s.elevenKey)}"></div>
       <div class="field"><label class="label" for="k-claude">Claude API key · AI 深度引導詞</label><input class="input" id="k-claude" type="password" placeholder="sk-ant-…" value="${esc(s.claudeKey)}"></div>
@@ -2873,7 +3066,7 @@ function renderMe(){
   $('#me-favs').onclick=()=>go('favs');
   bindItems($('#me'));
   $('#me-edit').onclick=()=>sheet(`<h2>怎麼稱呼你？</h2><p class="sub">引導詞裡會用這個名字叫你。</p><input class="input" id="sh-name" value="${esc(p.name)}" style="margin-bottom:16px"><button class="btn primary block" id="sh-ok">儲存</button>`,b=>{ $('#sh-ok',b).onclick=()=>{ state.profile.name=$('#sh-name',b).value.trim(); save(); closeSheet(); renderMe(); }; });
-  $('#me-glow').onclick=()=>toast('Demo：正式版會接 Stripe / TapPay 訂閱');
+  bindPlanSection($('#me-plan'));
   $('#k-save').onclick=()=>{ state.settings.elevenKey=$('#k-eleven').value.trim(); state.settings.claudeKey=$('#k-claude').value.trim(); if(state.settings.elevenKey&&!state.settings.voiceId){ state.settings.voiceId=DEMO_VOICES.brand.id; state.settings.voiceName=DEMO_VOICES.brand.name; } save(); toast('已儲存'); renderMe(); };
   $('#k-voice').onclick=()=>openVoiceSheet(renderMe);
   // API keys never go into a backup: it ends up pasted into notes apps and chats
@@ -2935,11 +3128,13 @@ function openVoiceSheet(after){
   });
 }
 function openRecorderSheet(){
+  if(!gate('ownVoice','用你自己的聲音')) return;
   sheet(`<h2>錄下你的聲音</h2><p class="sub">唸這段話，30 到 60 秒。唸得像在跟自己說話，不用完美。</p><div id="sh-rec"></div>`,b=>{ sheet._cleanup=mountRecorder($('#sh-rec',b),{onDone:()=>{ closeSheet(); toast('聲音樣本已更新 ✦'); go('me'); }}); });
 }
 /* ---------- studio: one fixed line at a time, no key required ---------- */
 let studioIdx=0; let studioFilter=null;
 function openStudioSheet(onlyKind){
+  if(!gate('ownVoice','用你自己的聲音')) return;
   const all=onlyKind ? studioLines().filter(l=>l.kind===onlyKind) : studioLines();
   if(!all.length) return;
   studioFilter=onlyKind||null;
@@ -3145,6 +3340,7 @@ armForestWatch();
 const onboarded = state.profile.name && (state.profile.goals||[]).length && state.profile.tone;
 if(!onboarded){ startOnboarding(); } else { go('home'); }
 applyLang();
+if(!inPreview()){ authFromHash().then(afterPayment); if(auth) loadSub(); }
 </script>
 </body>
 </html>
