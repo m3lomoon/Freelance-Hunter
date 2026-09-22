@@ -2193,7 +2193,7 @@ function breathCtx(){
   if(breathAC.state==='suspended') breathAC.resume();
   return breathAC;
 }
-function noiseBuffer(ac,sec){
+function breathNoiseBuffer(ac,sec){
   const n=Math.floor(ac.sampleRate*sec), b=ac.createBuffer(1,n,ac.sampleRate), d=b.getChannelData(0);
   let last=0;
   for(let i=0;i<n;i++){ const w=Math.random()*2-1; last=(last+.03*w)/1.03; d[i]=last*3.2; }
@@ -2204,7 +2204,7 @@ function breathCue(kind,sec){
   if(!breathOn) return;
   const ac=breathCtx(); if(!ac) return;
   const t=ac.currentTime, dur=Math.max(.8,sec);
-  const src=ac.createBufferSource(); src.buffer=noiseBuffer(ac,dur+.3);
+  const src=ac.createBufferSource(); src.buffer=breathNoiseBuffer(ac,dur+.3);
   const bp=ac.createBiquadFilter(); bp.type='bandpass'; bp.Q.value=.9;
   const g=ac.createGain();
   const peak = kind==='hold' ? .05 : .13;
@@ -2278,7 +2278,7 @@ const AMB={
   ocean:{name:'海邊',g:'aqua',hint:'一來一回的浪，跟呼吸同頻'},
   forest:{name:'山林裡',g:'jade',hint:'風穿過樹葉，偶爾有鳥'},
   bowl:{name:'頌缽',g:'mint',hint:'每 20 秒一聲，收心用'},
-  cat:{name:'貓咪呼嚕聲',g:'rose',hint:'低頻震動，像貓窩在旁邊睡著了'},
+  cat:{name:'貓咪呼嚕聲',g:'rose',hint:'真實錄音，背景帶點夏夜蟲鳴'},
 };
 let ambient=null;
 function ambCtx(){
@@ -2288,6 +2288,11 @@ function ambCtx(){
     ambient={ctx,master,layers:{}};
   }
   return ambient;
+}
+let catBufferPromise=null;
+function loadCatBuffer(ctx){
+  if(!catBufferPromise) catBufferPromise=fetch('assets/amb-cat-purr.mp3').then(r=>r.arrayBuffer()).then(buf=>ctx.decodeAudioData(buf));
+  return catBufferPromise;
 }
 function noiseBuffer(ctx,type){
   const len=ctx.sampleRate*5, buf=ctx.createBuffer(1,len,ctx.sampleRate), d=buf.getChannelData(0);
@@ -2347,18 +2352,12 @@ function ambOn(kind){
       timer=setTimeout(ring,20000); }; setTimeout(ring,300);
   }
   if(kind==='cat'){
-    // purring is a low-frequency laryngeal rumble (~25-30Hz) riding on a soft rush of air,
-    // with a slow breathing-cycle swell so it doesn't read as a flat mechanical drone
-    const lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=200; lp.connect(g); noise('brown',lp);
-    const purr=ctx.createOscillator(); purr.type='sawtooth'; purr.frequency.value=27;
-    const wobble=ctx.createOscillator(); wobble.type='sine'; wobble.frequency.value=.18;
-    const wobbleGain=ctx.createGain(); wobbleGain.gain.value=3;
-    wobble.connect(wobbleGain); wobbleGain.connect(purr.frequency); wobble.start(); nodes.push(wobble);
-    const purrGain=ctx.createGain(); purrGain.gain.value=.32;
-    purr.connect(purrGain); purrGain.connect(g); purr.start(); nodes.push(purr);
-    const breathLfo=ctx.createOscillator(); breathLfo.type='sine'; breathLfo.frequency.value=.32;
-    const breathGain=ctx.createGain(); breathGain.gain.value=.14;
-    breathLfo.connect(breathGain); breathGain.connect(purrGain.gain); breathLfo.start(); nodes.push(breathLfo);
+    // a real recorded purr loop (synthesis alone never sounded convincing enough)
+    loadCatBuffer(ctx).then(buf=>{
+      if(!ambient?.layers[kind]) return;   // toggled off again before this finished loading
+      const s=ctx.createBufferSource(); s.buffer=buf; s.loop=true; s.connect(g); s.start();
+      nodes.push(s);
+    }).catch(()=>{});
   }
   g.gain.exponentialRampToValueAtTime(kind==='bowl'?1:.55,ctx.currentTime+2.5);
   layers[kind]={g,nodes,stop:()=>{ clearTimeout(timer); nodes.forEach(n=>{try{n.stop()}catch(e){}}); }};
