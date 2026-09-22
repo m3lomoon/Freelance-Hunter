@@ -3,3 +3,8 @@ seen_jobs.json
 __pycache__/
 *.pyc
 .DS_Store
+
+# auto_clipper 輸出/暫存
+clips_output/
+*.mp4
+*.mov
