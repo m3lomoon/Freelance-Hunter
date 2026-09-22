@@ -897,6 +897,22 @@ const THEME_SETS = {
     '我感謝這一刻，因為它只會發生一次。','我感謝我的家，不管它長什麼樣子。','感恩讓我從匱乏，走回豐盛。']},
 };
 function themeScript(key){ const T=THEME_SETS[key]; return T? T.lines.map(t=>({t,kind:'aff',pause:2200})) : []; }
+/* how long a session runs is a choice about how much silence you sit in, not how
+   much is said: this stretches/compresses the *pause* after each line to hit a
+   target duration while the line count and text stay exactly the same. Real
+   breath-pattern steps (a line with an actual .sec count, e.g. "吸氣 4") keep
+   their physiological timing untouched. */
+function scaleToMinutes(lines, minutes){
+  if(!minutes) return lines;
+  const targetMs = minutes*60000;
+  const fixed = l => l.kind==='breath' && l.sec;
+  const spokenMs = lines.reduce((s,l)=> s + (fixed(l)?0:Math.max(600,l.t.length*230)), 0);
+  const lockedMs = lines.reduce((s,l)=> s + (fixed(l)?(l.pause||0):0), 0);
+  const basePauseMs = lines.reduce((s,l)=> s + (fixed(l)?0:(l.pause||0)), 0);
+  const neededPauseMs = Math.max(0, targetMs - spokenMs - lockedMs);
+  const factor = basePauseMs>0 ? neededPauseMs/basePauseMs : 1;
+  return lines.map(l => fixed(l) ? l : {...l, pause:Math.max(300,Math.round((l.pause||0)*factor))});
+}
 /* ---------- scenario script builder ---------- */
 function breathLines(patternKey, rounds){
   const B=BREATHS[patternKey]; if(!B) return [];
@@ -915,7 +931,7 @@ function buildScene(key,{minutes,tone,name}={}){
   S.open.forEach((t,i)=>L(t.replace('{name}',who),'open',i?1600:1800));
   breathLines(S.breath,S.rounds).forEach(l=>lines.push(l));
   (S.steps||[]).forEach(t=>L(t,'vision',5000));
-  const target=Math.max(4,Math.round(mins*2.5));
+  const target=S.aff.length;   // fixed — the curated set, once; duration comes from silence
   const r=rng(key+todayKey()); const affs=shuffle(S.aff,r);
   let p=0;
   for(let i=0;i<target;i++){
@@ -923,7 +939,7 @@ function buildScene(key,{minutes,tone,name}={}){
     if((i+1)%4===0 && T.punch) L(T.punch[p++%T.punch.length],'punch',1400);
   }
   S.close.forEach(t=>L(t,'close',1400));
-  return lines;
+  return scaleToMinutes(lines, mins);
 }
 /* fixed, unshuffled version of a scenario's script: the only stable order that lets
    Recording Studio clips (indexed positionally) line up with playback every time */
@@ -980,6 +996,7 @@ if(!state.journalPrompts) state.journalPrompts={date:'',grat:[],note:'',src:''};
 if(!state.forest) state.forest={trees:[],hiddenAt:null};
 if(!state.profile.lens) state.profile.lens='both';
 if(!state.favLines) state.favLines=[];
+if(!state.ui.sleepMinutes) state.ui.sleepMinutes=12;
 function seed(){
   const g = [['創作','關係'],['工作','身體'],['靈性'],['創作','金錢'],['休息'],['關係','家人'],['工作'],['創作'],['身體','靈性'],['金錢','工作'],['關係'],['創作','靈性']];
   const moods = [4,3,5,4,2,4,3,5,4,3,4,5];
@@ -1001,7 +1018,7 @@ function seed(){
       {id:'demot1',at:Date.now()-1000*60*60*44,min:8,tier:'sprout'},
       {id:'demot2',at:Date.now()-1000*60*60*68,min:97,tier:'giant'},
     ],hiddenAt:null},
-    ui:{goal:'music',minutes:3,view:'lib',scene:null,breath:'physio',before:null},
+    ui:{goal:'music',minutes:3,sleepMinutes:12,view:'lib',scene:null,breath:'physio',before:null},
   };
 }
 
@@ -1021,7 +1038,7 @@ function journalContext(){
 function buildScript({goal, minutes, tone, name, seed}){
   const G = GOALS[goal], T = TONES[tone], r = rng(seed);
   const ctx = journalContext();
-  const count = minutes<=3?8:minutes<=7?16:28;
+  const count = 15;   // fixed — duration comes from silence between lines, not more lines
   const lines = [];
   const L = (t,kind,pause=900)=>lines.push({t,kind,pause});
   L(T.open[0].replace('{name}',name||'你'),'open',1200);
@@ -1034,16 +1051,16 @@ function buildScript({goal, minutes, tone, name, seed}){
   const affs = shuffle([...G.aff, ...cons.flatMap(c=>c.aff)], r);
   let punchIdx = 0;
   for(let i=0;i<count;i++){
-    if(i===8) L('再說一次，慢一點，讓身體聽見。','breath',2500);
-    if(i===16) L('最後一輪，這次是用心說的。','breath',2500);
-    L(affs[i%affs.length],'aff',i>=8?1600:1200);
+    if(i===5) L('再說一次，慢一點，讓身體聽見。','breath',2500);
+    if(i===10) L('最後一輪，這次是用心說的。','breath',2500);
+    L(affs[i%affs.length],'aff',i>=5?1600:1200);
     if((i+1)%4===0) L(T.punch[punchIdx++%T.punch.length],'punch',1100);
   }
   L(G.vision,'vision',2600);
   L('停在這個畫面裡，三次呼吸。','breath',9000);
   L(T.close[0],'close',900);
   L(T.close[1],'close',600);
-  return lines;
+  return scaleToMinutes(lines, minutes);
 }
 /* daily-rotating phrasing for the sleep guide: same relaxation structure and
    countdown every night (that pacing is what makes it work), but the wording
@@ -1061,7 +1078,7 @@ const SLEEP_VARIANTS = {
   aff2:['你安全。你被愛。你已經足夠。','你是安全的，是被愛的，這樣就夠了。'],
   close:['現在，你可以睡了。晚安。','好了，把燈關掉。晚安，明天見。'],
 };
-function buildSleep({goals, name}){
+function buildSleep({goals, name, minutes}){
   const r=rng('sleepvariant'+todayKey()), V=SLEEP_VARIANTS, who=name||'你';
   const lines = []; const L=(t,kind,pause=1800)=>lines.push({t,kind,pause});
   L(pick(V.open1,r)(who),'open',2200);
@@ -1078,7 +1095,7 @@ function buildSleep({goals, name}){
   L(pick(V.punch,r),'punch',2600);
   L(pick(V.aff2,r),'aff',3400);
   L(pick(V.close,r),'close',4000);
-  return lines;
+  return scaleToMinutes(lines, minutes);
 }
 
 /* ---------- optional: Claude deep personalisation ---------- */
@@ -1666,6 +1683,7 @@ function startReal(){
 
 /* ---------- MEDITATE ---------- */
 let mfLines=[], mfSeed=todayKey();
+let sceneMin=null;   // transient per-scenario length override; resets to the scene's own S.min on open
 /* ---------- pre-rendered scenario audio (Melo's cloned voice) ---------- */
 const SCENE_AUDIO = {
   anxiety:{src:'assets/sc-anxiety.mp3',dur:59,
@@ -1872,7 +1890,7 @@ function renderLibrary(){
   $('#add-scene').onclick=openCustomSheet;
   $('#daily-go').onclick=()=>openScene('daily');
 }
-function openScene(k){ state.ui.scene=k; state.ui.view='scene'; state.ui.before=null; save(); renderManifest(); $('#manifest').scrollTop=0; }
+function openScene(k){ state.ui.scene=k; state.ui.view='scene'; state.ui.before=null; sceneMin=null; save(); renderManifest(); $('#manifest').scrollTop=0; }
 function openBreath(k){ state.ui.breath=k; state.ui.view='breath'; save(); renderManifest(); $('#manifest').scrollTop=0; }
 function openThemeSet(k){ state.ui.theme=k; state.ui.view='theme'; save(); renderManifest(); $('#manifest').scrollTop=0; }
 function backToLib(){ stopPlayback(); state.ui.view='lib'; save(); renderManifest(); }
@@ -1883,20 +1901,26 @@ function renderScene(){
   const k=state.ui.scene, p=state.profile;
   if(k==='daily') return renderDaily();
   const S=sceneOf(k); if(!S) return backToLib();
+  if(sceneMin==null) sceneMin=S.min;
   const nameMatches=(state.profile.name||'')==='Melody';   // the recordings greet Melody by name
   const B=BREATHS[S.breath], useAudio=!!SCENE_AUDIO[k] && nameMatches && lang()==='tw' && !(state.settings.elevenKey&&state.settings.voiceId);
   const src= useAudio ? {mode:'pack',label:VOICES[demoVoice()].name,sub:'預錄真人聲音 · '+VOICES[demoVoice()].role,voice:demoVoice()}
                       : voiceSource(k, true);
-  const lines= useAudio ? SCENE_AUDIO[k].lines : src.mode==='own' ? sceneScript(k,p.name) : buildScene(k,{tone:S.tone,name:p.name});
+  const durControllable = !useAudio && src.mode!=='own';   // recorded/pre-rendered clips have a fixed real length
+  const mins = durControllable ? sceneMin : S.min;
+  const lines= useAudio ? SCENE_AUDIO[k].lines : src.mode==='own' ? sceneScript(k,p.name) : buildScene(k,{tone:S.tone,name:p.name,minutes:mins});
   const st=sceneStats(k), fav=isFav('scene:'+k);
   const offerRecord = !useAudio && src.mode==='browser' && chosenVoice()==='mine' && !!SCENES[k];
   if(!useAudio && SCENE_AUDIO[k] && !nameMatches) src.sub=`預錄音檔唸的是別人的名字 · 加金鑰就會唸「${state.profile.name||'你'}」`;
   $('#manifest').innerHTML=`
     <div class="row between" style="margin-bottom:14px"><button class="btn ghost sm" id="sc-back">← 冥想庫</button>
       <button class="btn ghost sm" id="sc-fav" aria-pressed="${fav}">${fav?'★ 已收藏':'☆ 收藏'}</button></div>
-    <div class="topbar"><div><div class="eyebrow">${CATS[S.cat]?.name||'自訂'} · ${S.min} 分鐘</div><h1 class="title">${esc(S.name)}</h1></div></div>
+    <div class="topbar"><div><div class="eyebrow">${CATS[S.cat]?.name||'自訂'} · ${mins} 分鐘</div><h1 class="title">${esc(S.name)}</h1></div></div>
     <div class="vrow">${voiceChip(src)}<button class="vchip" id="v-pace"><b>◷ ${esc(pace().name)}</b><span class="vcaret">▾</span></button>${offerRecord?'<button class="vchip" id="mf-recmine">🎙 錄這一段的聲音</button>':''}</div>
     <p class="note" style="max-width:36ch;margin-bottom:12px">${esc(S.hint||'')}</p>
+    ${durControllable?`<label class="label">想放多久</label>
+    <div class="seg" id="sc-min" style="margin-bottom:14px">${[...new Set([1,3,S.min,7,12])].sort((a,b)=>a-b).map(m=>`<button data-m="${m}" aria-pressed="${m===mins}">${m} 分</button>`).join('')}</div>
+    <p class="note" style="margin:-8px 0 14px">句子數不變，只有中間跟自己相處的安靜時間變長變短。</p>`:''}
     <div class="whycard"><div class="eyebrow">${esc(B.name)} · ${B.steps.map(s=>s[0]+' '+s[1]).join(' → ')}</div><p>${esc(breathWhy(B))}</p></div>
     ${S.metric?`<div class="section"><label class="label">開始前，你的「${esc(S.metric)}」有多強？<span class="note">選了才能看到效果</span></label>
       <div class="dots" id="sc-before">${[...Array(11)].map((_,i)=>`<button data-v="${i}" aria-pressed="${state.ui.before===i}">${i}</button>`).join('')}</div>
@@ -1922,9 +1946,10 @@ function renderScene(){
   $('#sc-amb').onclick=openAmbientSheet;
   $('#mf-pace')&&($('#mf-pace').onclick=()=>openPaceSheet(renderScene));
   $('#sc-ai')&&($('#sc-ai').onclick=()=>aiRewrite(k,S));
+  $$('#sc-min button').forEach(b=>b.onclick=()=>{ sceneMin=+b.dataset.m; renderScene(); });
   $$('#sc-before button').forEach(b=>b.onclick=()=>{ state.ui.before=+b.dataset.v; $$('#sc-before button').forEach(x=>x.setAttribute('aria-pressed',x===b)); });
   bindPlayer('mf', lines, TONES[S.tone||'gentle'].rate, 'manifest', src, {
-    packKey:useAudio?k:null, sceneKey:k, minutes:S.min,
+    packKey:useAudio?k:null, sceneKey:k, minutes:mins,
     onFinish:()=>{ if(S.metric && state.ui.before!=null) askAfter(k,S); }
   });
 }
@@ -1947,6 +1972,7 @@ function renderDaily(){
       <div style="width:12px"></div>
       <div style="flex:1"><label class="label">語氣</label><div class="seg" id="mf-tone">${Object.entries(TONES).map(([k,t])=>`<button data-t="${k}" aria-pressed="${k===p.tone}">${esc(t.name)}</button>`).join('')}</div></div>
     </div>
+    ${fixedScript?'':'<p class="note" style="margin:-10px 0 16px">句子數不變，只有中間跟自己相處的安靜時間變長變短。</p>'}
     <div class="orb-wrap"><div class="orb idle" id="mf-orb"><span class="phase" id="mf-phase">READY</span></div></div>
     <div class="row between" style="margin:8px 0 12px">
       <div class="eyebrow">${lines.length} 句${src.mode==='pack'?' · 預錄音檔':src.mode==='own'?' · 你的聲音':' · 讀了你 '+state.entries.length+' 篇日記'}</div>
@@ -2416,15 +2442,18 @@ let slLines=[];
 function renderSleep(){
   const p=state.profile, src=voiceSource('sleep', true);
   const fixedScript = src.mode==='pack' || src.mode==='own';
-  slLines= !fixedScript ? buildSleep({goals:p.goals,name:p.name})
+  slLines= !fixedScript ? buildSleep({goals:p.goals,name:p.name,minutes:state.ui.sleepMinutes})
     : src.mode==='own' ? DEMO_PACK.sleep.lines.map(l=>({...l,t:withName(l.t)})) : DEMO_PACK.sleep.lines;
   const offerRecord = src.mode==='browser' && chosenVoice()==='mine';
   $('#sleep').innerHTML=`
     <div class="topbar"><div><div class="eyebrow">Sleep · 睡前放鬆導引</div><h1 class="title">帶著目標<br>入睡。</h1></div></div>
     <div class="vrow">${voiceChip(src)}<button class="vchip" id="v-pace"><b>◷ ${esc(pace().name)}</b><span class="vcaret">▾</span></button>${offerRecord?'<button class="vchip" id="sl-recmine">🎙 錄這一段的聲音</button>':''}</div>
     <p class="note" style="max-width:36ch;margin-bottom:10px">入睡前的 θ 波狀態，是大腦最容易接收正向暗示的時候。導引會先放鬆身體、倒數，再把你的 ${p.goals.length} 個目標輕輕放進去。</p>
+    ${fixedScript?'':`<label class="label">想放多久</label>
+    <div class="seg" id="sl-min" style="margin-bottom:14px">${[7,12,20,30].map(m=>`<button data-m="${m}" aria-pressed="${m===state.ui.sleepMinutes}">${m} 分</button>`).join('')}</div>
+    <p class="note" style="margin:-8px 0 14px">句子數不變，只有中間跟自己相處的安靜時間變長變短。</p>`}
     <div class="orb-wrap"><div class="orb sleep idle" id="sl-orb"><span class="phase" id="sl-phase">READY</span></div></div>
-    <div class="row between" style="margin:6px 0 12px"><div class="eyebrow">${slLines.length} 句 · ${src.mode==='pack'?'示範音檔 · 約 2 分鐘':src.mode==='own'?'你的聲音 · 約 2 分鐘':'約 12 分鐘'}</div>
+    <div class="row between" style="margin:6px 0 12px"><div class="eyebrow">${slLines.length} 句 · ${src.mode==='pack'?'示範音檔 · 約 2 分鐘':src.mode==='own'?'你的聲音 · 約 2 分鐘':'約 '+state.ui.sleepMinutes+' 分鐘'}</div>
       <div class="row"><button class="btn sm ghost" id="sl-noise" aria-pressed="false">◌ 環境音</button><button class="btn sm ghost" id="sl-dim">◐ 螢幕鎖定</button></div></div>
     <div class="script" id="sl-script">${slLines.map(l=>`<div class="line ${l.kind}">${esc(l.t)}</div>`).join('')}</div>
     <div class="player">
@@ -2440,6 +2469,7 @@ function renderSleep(){
   bindVoiceChip($('#sleep'), renderSleep);
   $('#v-pace')&&($('#v-pace').onclick=()=>openPaceSheet(renderSleep));
   $('#sl-recmine')&&($('#sl-recmine').onclick=()=>openStudioSheet('sleep'));
+  $$('#sl-min button').forEach(b=>b.onclick=()=>{ state.ui.sleepMinutes=+b.dataset.m; save(); renderSleep(); });
   $('#sl-noise').onclick=openAmbientSheet;
   $('#sl-dim').onclick=()=>{ $('#dim').classList.add('on'); tickClock(); };
 }
