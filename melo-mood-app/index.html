@@ -905,7 +905,7 @@ function themeScript(key){ const T=THEME_SETS[key]; return T? T.lines.map(t=>({t
 function scaleToMinutes(lines, minutes){
   if(!minutes) return lines;
   const targetMs = minutes*60000;
-  const fixed = l => l.kind==='breath' && l.sec;
+  const fixed = l => (l.kind==='breath' && l.sec) || l.lock;
   const spokenMs = lines.reduce((s,l)=> s + (fixed(l)?0:Math.max(600,l.t.length*230)), 0);
   const lockedMs = lines.reduce((s,l)=> s + (fixed(l)?(l.pause||0):0), 0);
   const basePauseMs = lines.reduce((s,l)=> s + (fixed(l)?0:(l.pause||0)), 0);
@@ -922,7 +922,7 @@ function breathLines(patternKey, rounds){
   return out;
 }
 function buildScene(key,{minutes,tone,name}={}){
-  const S=SCENES[key]; if(!S) return [];
+  const S=sceneOf(key); if(!S) return [];
   const T=TONES[tone||S.tone||'gentle'];
   const mins=minutes||S.min;
   const lines=[]; const L=(t,kind,pause)=>lines.push({t,kind,pause});
@@ -944,7 +944,7 @@ function buildScene(key,{minutes,tone,name}={}){
 /* fixed, unshuffled version of a scenario's script: the only stable order that lets
    Recording Studio clips (indexed positionally) line up with playback every time */
 function sceneScript(key,name){
-  const S=SCENES[key]; if(!S) return [];
+  const S=sceneOf(key); if(!S) return [];
   const T=TONES[S.tone||'gentle'];
   const who=name||state.profile.name||'你';
   const lines=[]; const L=(t,kind,pause)=>lines.push({t,kind,pause});
@@ -984,7 +984,7 @@ function load(){
 /* the demo lives behind an explicit choice, so nobody is greeted as Melody */
 function blank(){
   const d=seed();
-  return {...d, demo:false, entries:[], sessions:[], ratings:[], favs:[], favLines:[], custom:{}, journalPrompts:{date:'',grat:[],note:'',src:''},
+  return {...d, demo:false, entries:[], sessions:[], ratings:[], favs:[], favLines:[], custom:{}, forest:{trees:[],hiddenAt:null}, journalPrompts:{date:'',grat:[],note:'',src:''},
     profile:{name:'',concerns:[],goals:[],tone:'',lens:'',voice:{recorded:false},createdAt:todayKey()}};
 }
 function loadDemo(){ Object.assign(state, seed()); save(); go('home'); toast('這是範例資料，隨時可以清掉'); }
@@ -997,6 +997,7 @@ if(!state.forest) state.forest={trees:[],hiddenAt:null};
 if(!state.profile.lens) state.profile.lens='both';
 if(!state.favLines) state.favLines=[];
 if(!state.ui.sleepMinutes) state.ui.sleepMinutes=12;
+if(!state.ui.roundsBy){ state.ui.roundsBy={}; delete state.ui.rounds; }   // rounds used to be one global value
 function seed(){
   const g = [['創作','關係'],['工作','身體'],['靈性'],['創作','金錢'],['休息'],['關係','家人'],['工作'],['創作'],['身體','靈性'],['金錢','工作'],['關係'],['創作','靈性']];
   const moods = [4,3,5,4,2,4,3,5,4,3,4,5];
@@ -1080,7 +1081,7 @@ const SLEEP_VARIANTS = {
 };
 function buildSleep({goals, name, minutes}){
   const r=rng('sleepvariant'+todayKey()), V=SLEEP_VARIANTS, who=name||'你';
-  const lines = []; const L=(t,kind,pause=1800,sec)=>lines.push(sec!=null?{t,kind,pause,sec}:{t,kind,pause});
+  const lines = []; const L=(t,kind,pause=1800,lock)=>lines.push(lock?{t,kind,pause,lock:true}:{t,kind,pause});
   L(pick(V.open1,r)(who),'open',2200);
   L(pick(V.open2,r),'open',2200);
   L(pick(V.open3,r),'open',5000);
@@ -1089,7 +1090,9 @@ function buildSleep({goals, name, minutes}){
   L(pick(V.scan3,r),'aff',3200);
   L(pick(V.scan4,r),'aff',3200);
   L(pick(V.countIntro,r),'open',1800);
-  for(let n=10;n>=1;n--){ const p=n>5?2200:3000; L(n===1?'1……完全放鬆。':`${n}……更深一點。`,'breath',p,p/1000); }   // locked pacing — the chosen duration stretches everything else, not the countdown itself
+  // lock (not .sec): the countdown keeps its pacing when a duration is chosen, but it is
+  // not a breathing instruction, so it must not trigger the inhale/exhale sound cues
+  for(let n=10;n>=1;n--){ const p=n>5?2200:3000; L(n===1?'1……完全放鬆。':`${n}……更深一點。`,'breath',p,true); }
   shuffle(state.profile.concerns||[],r).slice(0,3).forEach(k=>CONCERNS[k]&&L(CONCERNS[k].sleep,'aff',3400));
   shuffle(goals,r).slice(0,3).forEach(g=>GOALS[g].sleep.forEach(s=>L(s,'aff',3400)));
   L(pick(V.punch,r),'punch',2600);
@@ -1283,13 +1286,13 @@ async function loadClip(key){
 }
 /* sequential playback of recorded clips — same pacing/breath-cue path as the ElevenLabs line-stepper */
 async function playOwnPack(kind, lines, onTick, onDone){
-  const t0=Date.now();
+  const t0=Date.now(), session=player.session;
   for(let i=0;i<lines.length;i++){
-    if(!player.playing) return;
+    if(!alive(session)) return;
     const l=lines[i]; onTick&&onTick({idx:i,pct:Math.min(1,(Date.now()-t0)/player.total),done:false});
     if(speakableLine(l)){
       const blob=await loadClip(`${kind}:${i}`);
-      if(!player.playing) return;
+      if(!alive(session)) return;
       if(blob){
         const url=URL.createObjectURL(blob);
         await new Promise((res,rej)=>{ const a=new Audio(url); player.audio=a; a.onended=res; a.onerror=()=>rej(new Error('audio')); a.play().catch(rej); });
@@ -1298,6 +1301,7 @@ async function playOwnPack(kind, lines, onTick, onDone){
     }
     await new Promise(r=>{ player.timer=setTimeout(r, l.pause||800); });
   }
+  if(!alive(session)) return;
   player.playing=false; player.audio=null; onTick&&onTick({idx:-1,pct:1,done:true}); onDone&&onDone();
 }
 
@@ -1311,7 +1315,10 @@ const paced=lines=>lines.map(l=>(l.kind==='breath'&&l.sec) ? l : {...l, pause:Ma
 const pacedRate=r=>Math.max(.7,Math.min(1,(r||.9)*pace().rate/.9));
 
 /* ---------- playback ---------- */
-const player = {timer:null,idx:0,lines:[],onTick:null,playing:false,audio:null,startedAt:0,total:0};
+const player = {timer:null,phaseT:null,idx:0,lines:[],onTick:null,playing:false,audio:null,startedAt:0,total:0,session:0};
+/* every playLines() call gets a new session id; a loop parked on an await (TTS fetch,
+   IndexedDB load, audio.onended) must check it, or it resumes into the next session */
+const alive=s=>player.playing&&player.session===s;
 const ttsCache = new Map();
 function estimateMs(lines, rate){ return lines.reduce((s,l)=>s+Math.max(600,l.t.length*230/rate)+l.pause,0); }
 function langVoice(){
@@ -1323,33 +1330,38 @@ function zhVoice(){
   return vs.find(v=>/zh[-_]TW/i.test(v.lang)&&/Mei|Hsiao|female|Google/i.test(v.name)) || vs.find(v=>/zh[-_]TW/i.test(v.lang)) || vs.find(v=>/^zh/i.test(v.lang)) || null;
 }
 function stopPlayback(){
-  player.playing=false; clearTimeout(player.timer);
+  player.playing=false; clearTimeout(player.timer); clearTimeout(player.phaseT);
   try{ speechSynthesis.cancel(); }catch(e){}
   if(player.audio){ player.audio.pause(); player.audio.src=''; player.audio=null; }
   player.onTick && player.onTick({idx:-1,pct:0,done:false,stopped:true});
 }
 async function playLines(lines, {rate=.9, onTick, onDone, mode='manifest', src, pack}={}){
   stopPlayback();
+  const session=++player.session;
   if(!src || src.mode!=='pack'){ lines=paced(lines); rate=pacedRate(rate); }
   player.lines=lines; player.idx=0; player.playing=true; player.onTick=onTick; player.total=estimateMs(lines,rate); player.startedAt=Date.now();
   if(src?.mode==='pack'){ playPack(pack||DEMO_PACK[mode], onTick, onDone); return; }
   if(src?.mode==='own'){
     try{ await playOwnPack(src.packKind||mode, lines, onTick, onDone); return; }
-    catch(e){ if(!player.playing) return; toast('錄音播放失敗，改用系統聲音'); }
+    catch(e){ if(!alive(session)) return; toast('錄音播放失敗，改用系統聲音'); }
   }
   if(src?.mode==='eleven'){
     try{ await playEleven(lines, rate, onTick, onDone); return; }
-    catch(e){ if(!player.playing) return; toast('ElevenLabs 連不上（'+(e.message||e)+'），改用系統聲音'); }
+    catch(e){ if(!alive(session)) return; toast('ElevenLabs 連不上（'+(e.message||e)+'），改用系統聲音'); }
   }
   if(!('speechSynthesis' in window)){ toast('這個瀏覽器不支援語音播放'); simulate(lines,onTick,onDone); return; }
   const voice = zhVoice();
   const step = ()=>{
-    if(!player.playing) return;
+    if(!alive(session)) return;
     if(player.idx>=lines.length){ player.playing=false; onTick&&onTick({idx:-1,pct:1,done:true}); onDone&&onDone(); return; }
     const l = lines[player.idx];
     onTick&&onTick({idx:player.idx,pct:Math.min(1,(Date.now()-player.startedAt)/player.total),done:false});
-    const u = new SpeechSynthesisUtterance(spoken(l.t).replace(/·/g,'，').replace(/…/g,'，'));
-    u.lang=speechLang(); const v2=langVoice(); if(v2) u.voice=v2; else if(voice) u.voice=voice; u.rate=rate; u.pitch=1;
+    const txt = spoken(l.t).replace(/·/g,'，').replace(/…/g,'，');
+    const u = new SpeechSynthesisUtterance(txt);
+    // a line the EN dictionary couldn't fully translate stays Chinese on screen; read it
+    // with a Chinese voice too instead of feeding Han characters to an English engine
+    const zh = HAN.test(txt) && !speechLang().startsWith('zh');
+    u.lang = zh ? 'zh-TW' : speechLang(); const v2 = zh ? voice : langVoice(); if(v2) u.voice=v2; else if(voice) u.voice=voice; u.rate=rate; u.pitch=1;
     u.onend = ()=>{ player.idx++; player.timer=setTimeout(step, l.pause); };
     u.onerror = ()=>{ player.idx++; player.timer=setTimeout(step, 400); };
     speechSynthesis.speak(u);
@@ -1357,17 +1369,18 @@ async function playLines(lines, {rate=.9, onTick, onDone, mode='manifest', src, 
   step();
 }
 function simulate(lines,onTick,onDone){
-  const step=()=>{ if(!player.playing) return; if(player.idx>=lines.length){player.playing=false;onTick&&onTick({idx:-1,pct:1,done:true});onDone&&onDone();return;}
+  const session=player.session;
+  const step=()=>{ if(!alive(session)) return; if(player.idx>=lines.length){player.playing=false;onTick&&onTick({idx:-1,pct:1,done:true});onDone&&onDone();return;}
     onTick&&onTick({idx:player.idx,pct:player.idx/lines.length,done:false}); const l=lines[player.idx++]; player.timer=setTimeout(step, l.t.length*220+l.pause); };
   step();
 }
 /* pre-rendered pack: one audio file, line highlight from timestamps */
 function playPack(P, onTick, onDone){
-  const A=P.audio ? P.audio[demoVoice()] : P; const a=new Audio(A.src); player.audio=a;
-  a.ontimeupdate=()=>{ const t=a.currentTime; let idx=0; for(let i=0;i<A.at.length;i++){ if(A.at[i]<=t+.05) idx=i; }
+  const A=P.audio ? P.audio[demoVoice()] : P; const a=new Audio(A.src); player.audio=a; const session=player.session;
+  a.ontimeupdate=()=>{ if(!alive(session)) return; const t=a.currentTime; let idx=0; for(let i=0;i<A.at.length;i++){ if(A.at[i]<=t+.05) idx=i; }
     onTick&&onTick({idx,pct:t/(a.duration||A.dur),done:false}); };
-  a.onended=()=>{ player.playing=false; player.audio=null; onTick&&onTick({idx:-1,pct:1,done:true}); onDone&&onDone(); };
-  a.onerror=()=>{ if(!player.playing) return; toast('示範音檔載入失敗，改用系統聲音'); player.audio=null; playLines(P.lines,{onTick,onDone,src:{mode:'browser'}}); };
+  a.onended=()=>{ if(!alive(session)) return; player.playing=false; player.audio=null; onTick&&onTick({idx:-1,pct:1,done:true}); onDone&&onDone(); };
+  a.onerror=()=>{ if(!alive(session)) return; toast('示範音檔載入失敗，改用系統聲音'); player.audio=null; playLines(P.lines,{onTick,onDone,src:{mode:'browser'}}); };
   a.play().catch(()=>{});
 }
 /* live ElevenLabs: one request per line (cached), highlight is exact */
@@ -1398,26 +1411,20 @@ async function ttsLine(text, rate){
 }
 async function playEleven(lines, rate, onTick, onDone){
   const speakable = l=>l.kind!=='breath' || /[一-鿿]{3,}/.test(l.t);
-  const t0=Date.now();
+  const t0=Date.now(), session=player.session;
   for(let i=0;i<lines.length;i++){
-    if(!player.playing) return;
+    if(!alive(session)) return;
     const l=lines[i]; onTick&&onTick({idx:i,pct:Math.min(1,(Date.now()-t0)/player.total),done:false});
     if(speakable(l)){
       const url=await ttsLine(spoken(l.t).replace(/·/g,'，'), rate);
       if(lines[i+1]&&speakable(lines[i+1])) ttsLine(spoken(lines[i+1].t).replace(/·/g,'，'), rate).catch(()=>{});
-      if(!player.playing) return;
+      if(!alive(session)) return;
       await new Promise((res,rej)=>{ const a=new Audio(url); player.audio=a; a.onended=res; a.onerror=()=>rej(new Error('audio')); a.play().catch(rej); });
     }
     await new Promise(r=>{ player.timer=setTimeout(r, l.pause||800); });
   }
+  if(!alive(session)) return;
   player.playing=false; player.audio=null; onTick&&onTick({idx:-1,pct:1,done:true}); onDone&&onDone();
-}
-async function loadVoices(){
-  const res=await fetch('https://api.elevenlabs.io/v1/voices',{headers:{'xi-api-key':state.settings.elevenKey}});
-  if(!res.ok) throw new Error('HTTP '+res.status);
-  const j=await res.json();
-  return j.voices.map(v=>({id:v.voice_id,name:v.name,lang:v.labels?.language||'',cat:v.category}))
-    .sort((a,b)=>(b.cat==='cloned')-(a.cat==='cloned')||(b.lang==='zh')-(a.lang==='zh'));
 }
 
 /* ---------- the picker, present on every listening screen ---------- */
@@ -1429,6 +1436,14 @@ function voiceChip(src){
 function bindVoiceChip(root, after){ const c=$('#v-chip',root||document); if(c) c.onclick=()=>openVoiceSheet(after); }
 
 /* ---------- voice recorder ---------- */
+/* one shared AudioContext for every waveform analyser: creating a fresh one per
+   recording press leaks contexts, and iOS Safari caps how many can exist at once */
+let recAC=null;
+function recCtx(){
+  if(!recAC) recAC=new (window.AudioContext||window.webkitAudioContext)();
+  if(recAC.state==='suspended') recAC.resume();
+  return recAC;
+}
 function mountRecorder(host, {onDone}){
   host.innerHTML = `<div class="rec">
     <div class="read">${esc(readText())}</div>
@@ -1452,7 +1467,7 @@ function mountRecorder(host, {onDone}){
     if(rec&&rec.state==='recording'){ stop(); return; }
     try{
       stream=await navigator.mediaDevices.getUserMedia({audio:true});
-      const ac=new (window.AudioContext||window.webkitAudioContext)(); an=ac.createAnalyser(); an.fftSize=256; ac.createMediaStreamSource(stream).connect(an);
+      const ac=recCtx(); an=ac.createAnalyser(); an.fftSize=256; ac.createMediaStreamSource(stream).connect(an);
       rec=new MediaRecorder(stream); chunks=[]; rec.ondataavailable=e=>chunks.push(e.data);
       rec.onstop=()=>{ blob=new Blob(chunks,{type:rec.mimeType||'audio/webm'}); use.disabled=secs<5; rs.textContent=secs<5?'太短了，至少 5 秒':'錄好了 · 可以試聽或使用'; if(secs>=5){ const a=$('.rt',host); a.style.cursor='pointer'; a.title='試聽'; a.onclick=()=>new Audio(URL.createObjectURL(blob)).play(); } };
       rec.start(); t0=Date.now(); btn.classList.add('on'); btn.setAttribute('aria-label','停止錄音'); rs.textContent='錄音中… 再按一次停止';
@@ -1677,7 +1692,10 @@ function quickMood(v){
 }
 function startReal(){
   if(!confirm('清除範例資料，從你自己的目標開始？')) return;
-  Object.assign(state, seed()); state.demo=false; state.entries=[]; state.sessions=[]; state.ratings=[]; state.favs=[]; state.custom={}; state.profile={name:'',concerns:[],goals:[],tone:'',voice:{recorded:false},createdAt:todayKey()};
+  const keep=state.settings;   // language, keys, voice, pace and reminder are the user's, not the demo's
+  const fresh=blank();
+  Object.keys(state).forEach(k=>delete state[k]);
+  Object.assign(state, fresh, {settings:keep});
   save(); startOnboarding();
 }
 
@@ -1900,6 +1918,7 @@ function sceneOf(k){ return SCENES[k] || (state.custom||{})[k] || null; }
 function renderScene(){
   const k=state.ui.scene, p=state.profile;
   if(k==='daily') return renderDaily();
+  stopPlayback();   // rebuilding the player DOM mid-session would orphan the running one
   const S=sceneOf(k); if(!S) return backToLib();
   if(sceneMin==null) sceneMin=S.min;
   const nameMatches=(state.profile.name||'')==='Melody';   // the recordings greet Melody by name
@@ -1954,6 +1973,7 @@ function renderScene(){
   });
 }
 function renderDaily(){
+  stopPlayback();
   const p=state.profile; if(!p.goals.includes(state.ui.goal)) state.ui.goal=p.goals[0]||'confidence';
   const g=GOALS[state.ui.goal], T=TONES[p.tone||'gentle'];
   const src=voiceSource('manifest', true);
@@ -2002,6 +2022,7 @@ function renderDaily(){
 }
 /* ---------- theme plaza: pure affirmation lists, browsable by topic ---------- */
 function renderThemeSet(){
+  stopPlayback();
   const k=state.ui.theme, T=THEME_SETS[k]; if(!T) return backToLib();
   const src=voiceSource(k, true);
   const lines=themeScript(k);
@@ -2188,7 +2209,7 @@ function refreshPromptFromAI(){
 let pacer=null;
 function renderBreath(){
   const k=state.ui.breath, B=BREATHS[k];
-  const rounds=state.ui.rounds||B.rounds;
+  const rounds=(state.ui.roundsBy||{})[k]||B.rounds;
   const cycle=B.steps.reduce((s,x)=>s+x[1],0);
   $('#manifest').innerHTML=`
     <div class="row between" style="margin-bottom:14px"><button class="btn ghost sm" id="sc-back">← 冥想庫</button>
@@ -2288,15 +2309,15 @@ function openPaceSheet(after){
   });
 }
 function openBreathEdit(k){
-  const B=BREATHS[k];
+  const B=BREATHS[k], cur=(state.ui.roundsBy||{})[k]||B.rounds;   // rounds are per pattern, not one global
   sheet(`<h2>自訂 ${esc(B.name)}</h2><p class="sub">改秒數與回合。做起來舒服最重要，不用勉強。</p>
     ${B.steps.map(([n,s],i)=>`<div class="field"><label class="label">${esc(n)}<b style="float:right;font-family:var(--mono)" id="v${i}">${s} 秒</b></label><input type="range" min="1" max="12" value="${s}" data-i="${i}" class="rng"></div>`).join('')}
-    <div class="field"><label class="label">回合<b style="float:right;font-family:var(--mono)" id="vr">${state.ui.rounds||B.rounds} 回</b></label><input type="range" min="2" max="15" value="${state.ui.rounds||B.rounds}" id="rr" class="rng"></div>
+    <div class="field"><label class="label">回合<b style="float:right;font-family:var(--mono)" id="vr">${cur} 回</b></label><input type="range" min="2" max="15" value="${cur}" id="rr" class="rng"></div>
     <button class="btn primary block" id="bs-ok">套用</button>`, b=>{
-    const vals=B.steps.map(s=>s[1]); let rounds=state.ui.rounds||B.rounds;
+    const vals=B.steps.map(s=>s[1]); let rounds=cur;
     $$('.rng[data-i]',b).forEach(r=>r.oninput=()=>{ const i=+r.dataset.i; vals[i]=+r.value; $('#v'+i,b).textContent=r.value+' 秒'; });
     $('#rr',b).oninput=e=>{ rounds=+e.target.value; $('#vr',b).textContent=rounds+' 回'; };
-    $('#bs-ok',b).onclick=()=>{ B.steps=B.steps.map(([n],i)=>[n,vals[i]]); state.ui.rounds=rounds; save(); closeSheet(); renderBreath(); toast('節奏更新了'); };
+    $('#bs-ok',b).onclick=()=>{ B.steps=B.steps.map(([n],i)=>[n,vals[i]]); state.ui.roundsBy={...(state.ui.roundsBy||{}),[k]:rounds}; save(); closeSheet(); renderBreath(); toast('節奏更新了'); };
   });
 }
 
@@ -2421,10 +2442,11 @@ function openAmbientSheet(){
 function bindPlayer(prefix, lines, rate, type, src, opts={}){
   const play=$(`#${prefix}-play`), orb=$(`#${prefix}-orb`), phase=$(`#${prefix}-phase`), bar=$(`#${prefix}-bar`), time=$(`#${prefix}-time`), list=$(`#${prefix}-script`);
   const pack = src.mode==='pack' ? (SCENE_AUDIO[opts.packKey] || DEMO_PACK[type]) : null;
-  const total = pack ? (pack.audio ? pack.audio[demoVoice()].dur : pack.dur)*1000 : estimateMs(paced(lines),pacedRate(rate)); let phaseT=null;
+  const total = pack ? (pack.audio ? pack.audio[demoVoice()].dur : pack.dur)*1000 : estimateMs(paced(lines),pacedRate(rate));
   time.textContent=`00:00 / ${pad(Math.floor(total/60000))}:${pad(Math.floor(total/1000)%60)}`;
-  const setPlaying=on=>{ play.innerHTML=on?'<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>':'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>'; orb.classList.toggle('idle',!on); if(!on){phase.textContent='READY';clearInterval(phaseT);} };
-  const breathe=()=>{ const seq=[['吸氣',4000],['停',4000],['吐氣',6000]]; let i=0; const step=()=>{ phase.textContent=seq[i][0]; phaseT=setTimeout(()=>{i=(i+1)%3;step();},seq[i][1]); }; step(); };
+  const setPlaying=on=>{ play.innerHTML=on?'<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>':'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>'; orb.classList.toggle('idle',!on); if(!on){phase.textContent='READY';clearTimeout(player.phaseT);} };
+  // the orb's phase timer lives on the player so stopPlayback() (and a re-render mid-session) can clear it
+  const breathe=()=>{ const seq=[['吸氣',4000],['停',4000],['吐氣',6000]]; let i=0; const step=()=>{ phase.textContent=seq[i][0]; player.phaseT=setTimeout(()=>{i=(i+1)%3;step();},seq[i][1]); }; step(); };
   let lastCued=-1;
   play.onclick=()=>{
     if(player.playing){ stopPlayback(); setPlaying(false); return; }
@@ -2447,6 +2469,7 @@ function bindPlayer(prefix, lines, rate, type, src, opts={}){
 /* ---------- SLEEP ---------- */
 let slLines=[];
 function renderSleep(){
+  stopPlayback();
   const p=state.profile, src=voiceSource('sleep', true);
   const fixedScript = src.mode==='pack' || src.mode==='own';
   slLines= !fixedScript ? buildSleep({goals:p.goals,name:p.name,minutes:state.ui.sleepMinutes})
@@ -2588,7 +2611,7 @@ function renderMe(){
       <div class="kv"><span>日記</span><b>${state.entries.length} 篇</b><span>練習時間</span><b>${state.sessions.reduce((a,x)=>a+x.min,0)} 分鐘</b><span>前後評分</span><b>${(state.ratings||[]).length} 次</b><span>加入</span><b>${fmtDate(p.createdAt||todayKey())}</b></div>
       <div class="row" style="margin-top:14px;gap:8px"><button class="btn ghost sm" id="me-export">匯出資料</button><button class="btn ghost sm" id="me-reset">${state.demo?'清除範例，重新開始':'重設'}</button></div></div>`;
   $('#me-rec').onclick=openRecorderSheet;
-  $('#me-studio').onclick=openStudioSheet;
+  $('#me-studio').onclick=()=>openStudioSheet();
   $('#me-goals').onclick=()=>openGoalsSheet(renderMe);
   $('#me-con').onclick=()=>openConcernsSheet(renderMe);
   $$('#me-lang button').forEach(b=>b.onclick=()=>{ setLang(b.dataset.l); renderMe(); });
@@ -2689,7 +2712,7 @@ function renderStudioLine(root){
     if(rec&&rec.state==='recording'){ stop(); return; }
     try{
       stream=await navigator.mediaDevices.getUserMedia({audio:true});
-      const ac=new (window.AudioContext||window.webkitAudioContext)(); an=ac.createAnalyser(); an.fftSize=256; ac.createMediaStreamSource(stream).connect(an);
+      const ac=recCtx(); an=ac.createAnalyser(); an.fftSize=256; ac.createMediaStreamSource(stream).connect(an);
       const chunks=[]; rec=new MediaRecorder(stream); secs=0;
       rec.ondataavailable=e=>chunks.push(e.data);
       rec.onstop=async()=>{
@@ -2719,7 +2742,11 @@ function renderStudioLine(root){
 
 /* ---------- ONBOARDING ---------- */
 let obStep=1; const obSel=new Set(); const obCon=new Set(); let obTone=''; let obLens=''; let obMin=3; let obRecCleanup=null;
-function startOnboarding(){ obStep=1; obSel.clear(); obCon.clear(); obTone=''; obLens=''; obMin=3; go('onboard'); renderOb(); }
+function startOnboarding(){
+  obStep=1; obSel.clear(); obCon.clear(); obTone=''; obLens=''; obMin=3;
+  (state.profile.concerns||[]).forEach(c=>CONCERNS[c]&&obCon.add(c));   // resume what a half-finished run already saved
+  go('onboard'); renderOb();
+}
 function renderOb(){
   $$('.ob-step').forEach(s=>s.classList.toggle('active',+s.dataset.step===obStep));
   $$('.ob-progress i').forEach((i,n)=>i.classList.toggle('on',n<obStep));
@@ -2843,7 +2870,9 @@ $$('.plate .langbar button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.
 if('speechSynthesis' in window){ speechSynthesis.getVoices(); speechSynthesis.onvoiceschanged=()=>speechSynthesis.getVoices(); }
 armReminder();
 armForestWatch();
-if(!state.profile.name){ startOnboarding(); } else { go('home'); }
+// step 1 of onboarding already saves the name; a reload before the end must resume, not skip
+const onboarded = state.profile.name && (state.profile.goals||[]).length && state.profile.tone;
+if(!onboarded){ startOnboarding(); } else { go('home'); }
 applyLang();
 </script>
 </body>
