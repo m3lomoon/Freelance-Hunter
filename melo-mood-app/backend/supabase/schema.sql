@@ -9,7 +9,8 @@ create table if not exists profiles (
   name          text not null default '',
   goals         text[] not null default '{}',          -- wealth | music | love | health | confidence | creative
   tone          text not null default 'gentle',        -- gentle | firm | baddie
-  plan          text not null default 'free',          -- free | glow | muse
+  -- no plan column here: users can write their own profile, so entitlement lives in
+  -- subscriptions (payments.sql), which only edge functions can write
   voice_id      text,                                  -- ElevenLabs voice id (null until cloned)
   voice_sample  text,                                  -- storage path of the consent recording
   voice_consent_at timestamptz,                        -- explicit consent timestamp (required for cloning)
