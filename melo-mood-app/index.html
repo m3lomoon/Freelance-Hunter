@@ -1080,7 +1080,7 @@ const SLEEP_VARIANTS = {
 };
 function buildSleep({goals, name, minutes}){
   const r=rng('sleepvariant'+todayKey()), V=SLEEP_VARIANTS, who=name||'你';
-  const lines = []; const L=(t,kind,pause=1800)=>lines.push({t,kind,pause});
+  const lines = []; const L=(t,kind,pause=1800,sec)=>lines.push(sec!=null?{t,kind,pause,sec}:{t,kind,pause});
   L(pick(V.open1,r)(who),'open',2200);
   L(pick(V.open2,r),'open',2200);
   L(pick(V.open3,r),'open',5000);
@@ -1089,7 +1089,7 @@ function buildSleep({goals, name, minutes}){
   L(pick(V.scan3,r),'aff',3200);
   L(pick(V.scan4,r),'aff',3200);
   L(pick(V.countIntro,r),'open',1800);
-  for(let n=10;n>=1;n--) L(n===1?'1……完全放鬆。':`${n}……更深一點。`,'breath',n>5?2200:3000);
+  for(let n=10;n>=1;n--){ const p=n>5?2200:3000; L(n===1?'1……完全放鬆。':`${n}……更深一點。`,'breath',p,p/1000); }   // locked pacing — the chosen duration stretches everything else, not the countdown itself
   shuffle(state.profile.concerns||[],r).slice(0,3).forEach(k=>CONCERNS[k]&&L(CONCERNS[k].sleep,'aff',3400));
   shuffle(goals,r).slice(0,3).forEach(g=>GOALS[g].sleep.forEach(s=>L(s,'aff',3400)));
   L(pick(V.punch,r),'punch',2600);
@@ -1949,7 +1949,7 @@ function renderScene(){
   $$('#sc-min button').forEach(b=>b.onclick=()=>{ sceneMin=+b.dataset.m; renderScene(); });
   $$('#sc-before button').forEach(b=>b.onclick=()=>{ state.ui.before=+b.dataset.v; $$('#sc-before button').forEach(x=>x.setAttribute('aria-pressed',x===b)); });
   bindPlayer('mf', lines, TONES[S.tone||'gentle'].rate, 'manifest', src, {
-    packKey:useAudio?k:null, sceneKey:k, minutes:mins,
+    packKey:useAudio?k:null, sceneKey:k,
     onFinish:()=>{ if(S.metric && state.ui.before!=null) askAfter(k,S); }
   });
 }
@@ -1998,7 +1998,7 @@ function renderDaily(){
   $('#mf-recmine')&&($('#mf-recmine').onclick=()=>openStudioSheet('manifest'));
   $('#sc-amb').onclick=openAmbientSheet;
   $('#mf-regen')&&($('#mf-regen').onclick=()=>{ mfSeed=String(Math.random()); renderDaily(); toast('換了一版 ✦'); });
-  bindPlayer('mf', lines, TONES[p.tone||'gentle'].rate, 'manifest', src, {packKey:src.mode==='pack'?'manifest':null, sceneKey:'daily', minutes:state.ui.minutes});
+  bindPlayer('mf', lines, TONES[p.tone||'gentle'].rate, 'manifest', src, {packKey:src.mode==='pack'?'manifest':null, sceneKey:'daily'});
 }
 /* ---------- theme plaza: pure affirmation lists, browsable by topic ---------- */
 function renderThemeSet(){
@@ -2076,7 +2076,8 @@ async function aiRewrite(k,S){
   try{
     const l=await generateWithClaude({scene:S, minutes:S.min, tone:S.tone, name:state.profile.name});
     if(l){ $('#mf-script').innerHTML=l.map(x=>`<div class="line ${x.kind}">${esc(x.t)}</div>`).join('');
-      bindPlayer('mf', l, TONES[S.tone||'gentle'].rate, 'manifest', voiceSource('manifest'), {sceneKey:k, minutes:S.min});
+      // never 'own'/'pack': this text is freshly generated and won't line up with any recorded clip
+      bindPlayer('mf', l, TONES[S.tone||'gentle'].rate, k, voiceSource(k), {sceneKey:k});
       toast('AI 讀了你的日記，重寫了這段'); }
   }catch(e){ toast(String(e.message||e)); }
   b.textContent='✦ AI 重寫'; b.disabled=false;
@@ -2209,7 +2210,7 @@ function renderBreath(){
   $('#br-amb').onclick=openAmbientSheet;
   $('#br-edit').onclick=()=>openBreathEdit(k);
   $('#br-snd').onclick=()=>{ setBreathSound(!breathOn); renderBreath(); if(breathOn) breathCue('in',2.2); };
-  const togglePacer=()=>{ if(pacer){ stopPacer(); $('#br-play').textContent='開始'; $('#plabel').textContent='點擊即可開始'; } else { startPacer(k,rounds); $('#br-play').textContent='停止'; } };
+  const togglePacer=()=>{ if(pacer){ stopPacer(); $('#br-play').textContent='開始'; $('#plabel').textContent='點擊即可開始'; $('#pacer').setAttribute('aria-label','點擊開始'); } else { startPacer(k,rounds); $('#br-play').textContent='停止'; $('#pacer').setAttribute('aria-label','點擊停止'); } };
   $('#br-play').onclick=togglePacer;
   $('#pacer').onclick=togglePacer;
   $('#pacer').onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); togglePacer(); } };
@@ -2383,7 +2384,10 @@ function ambOn(kind){
   if(kind==='cat'){
     // a real recorded purr loop (synthesis alone never sounded convincing enough)
     loadCatBuffer(ctx).then(buf=>{
-      if(!ambient?.layers[kind]) return;   // toggled off again before this finished loading
+      // bail if toggled off, or off-then-on again, before this finished loading —
+      // compare the actual nodes array, not just presence, so a stale in-flight
+      // load from a previous on/off cycle can't start playing into a dead gain node
+      if(ambient?.layers[kind]?.nodes!==nodes) return;
       const s=ctx.createBufferSource(); s.buffer=buf; s.loop=true; s.connect(g); s.start();
       nodes.push(s);
     }).catch(()=>{});
