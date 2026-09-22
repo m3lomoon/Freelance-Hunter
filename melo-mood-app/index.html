@@ -1045,22 +1045,39 @@ function buildScript({goal, minutes, tone, name, seed}){
   L(T.close[1],'close',600);
   return lines;
 }
+/* daily-rotating phrasing for the sleep guide: same relaxation structure and
+   countdown every night (that pacing is what makes it work), but the wording
+   around it changes each day so it doesn't go stale on repeat listens */
+const SLEEP_VARIANTS = {
+  open1:[who=>`${who}，今天結束了。你什麼都不用做了。`, who=>`${who}，今天已經很足夠了。剩下的，交給床。`, who=>`${who}，一天結束了。你可以把力氣放下了。`],
+  open2:['讓身體沉進床裡，讓床接住你。','讓身體的重量，一點一點交給床墊。','感覺床貼著你的背，穩穩地接住你。'],
+  open3:['吸氣……慢慢吐氣……讓吐氣比吸氣長一點。','吸一口氣……吐氣的時候，把今天留在身體外面。','深深吸氣……吐氣拉長，像在把緊繃倒出去。'],
+  scan1:['現在，注意你的額頭，讓它放鬆。眼睛周圍，放鬆。下巴，鬆開。','把注意力放到額頭，一點一點鬆開。眼皮變重，下巴也鬆了。'],
+  scan2:['肩膀落下來。手臂變重。手掌打開。','肩膀往下沉，像卸下一整天的重量。手臂鬆開，手掌自然攤平。'],
+  scan3:['胸口很輕，肚子很軟，每一次呼吸都更深一點。','胸口放鬆下來，肚子軟軟的，呼吸自己找到節奏，越來越深。'],
+  scan4:['大腿、小腿、腳掌……全部都放下了。','大腿鬆開，小腿鬆開，腳掌也完全放下了，像沉進地板。'],
+  countIntro:['我會從 10 數到 1。每一個數字，你都更深、更放鬆。','接下來從 10 倒數到 1，每數一個數字，你就往下沉一點。'],
+  punch:['你不需要努力，一切都已經在路上。','不用再想了，今天能做的都做了。'],
+  aff2:['你安全。你被愛。你已經足夠。','你是安全的，是被愛的，這樣就夠了。'],
+  close:['現在，你可以睡了。晚安。','好了，把燈關掉。晚安，明天見。'],
+};
 function buildSleep({goals, name}){
+  const r=rng('sleepvariant'+todayKey()), V=SLEEP_VARIANTS, who=name||'你';
   const lines = []; const L=(t,kind,pause=1800)=>lines.push({t,kind,pause});
-  L(`${name||'你'}，今天結束了。你什麼都不用做了。`,'open',2200);
-  L('讓身體沉進床裡，讓床接住你。','open',2200);
-  L('吸氣……慢慢吐氣……讓吐氣比吸氣長一點。','open',5000);
-  L('現在，注意你的額頭，讓它放鬆。眼睛周圍，放鬆。下巴，鬆開。','aff',3200);
-  L('肩膀落下來。手臂變重。手掌打開。','aff',3200);
-  L('胸口很輕，肚子很軟，每一次呼吸都更深一點。','aff',3200);
-  L('大腿、小腿、腳掌……全部都放下了。','aff',3200);
-  L('我會從 10 數到 1。每一個數字，你都更深、更放鬆。','open',1800);
+  L(pick(V.open1,r)(who),'open',2200);
+  L(pick(V.open2,r),'open',2200);
+  L(pick(V.open3,r),'open',5000);
+  L(pick(V.scan1,r),'aff',3200);
+  L(pick(V.scan2,r),'aff',3200);
+  L(pick(V.scan3,r),'aff',3200);
+  L(pick(V.scan4,r),'aff',3200);
+  L(pick(V.countIntro,r),'open',1800);
   for(let n=10;n>=1;n--) L(n===1?'1……完全放鬆。':`${n}……更深一點。`,'breath',n>5?2200:3000);
-  (state.profile.concerns||[]).slice(0,3).forEach(k=>CONCERNS[k]&&L(CONCERNS[k].sleep,'aff',3400));
-  goals.slice(0,3).forEach(g=>GOALS[g].sleep.forEach(s=>L(s,'aff',3400)));
-  L('你不需要努力，一切都已經在路上。','punch',2600);
-  L('你安全。你被愛。你已經足夠。','aff',3400);
-  L('現在，你可以睡了。晚安。','close',4000);
+  shuffle(state.profile.concerns||[],r).slice(0,3).forEach(k=>CONCERNS[k]&&L(CONCERNS[k].sleep,'aff',3400));
+  shuffle(goals,r).slice(0,3).forEach(g=>GOALS[g].sleep.forEach(s=>L(s,'aff',3400)));
+  L(pick(V.punch,r),'punch',2600);
+  L(pick(V.aff2,r),'aff',3400);
+  L(pick(V.close,r),'close',4000);
   return lines;
 }
 
