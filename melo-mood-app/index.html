@@ -1136,7 +1136,7 @@ const VOICES = {
   mine:{name:'你自己的聲音', role:'你錄的', g:'rose', own:true,
     bio:'自我參照效應：同一句話，用自己的聲音聽，記得比較久、也比較信。免費做法：在「我 → 聲音錄音室」把每日練習、睡前導引、或任何一個情境冥想的固定句子錄一遍（也可以在該段播放頁直接點「錄這一段」），完全不用金鑰、不經過任何第三方。想要句子每次都不一樣、自動生成，才需要錄 30 秒交給 ElevenLabs 複製（需要金鑰）。'},
   system:{name:'系統聲音', role:'裝置內建 · 一定能播', g:'slate', browser:true,
-    bio:'瀏覽器內建的語音，不需要金鑰、不需要網路，任何語言與任何一段引導都能唸。品質比不上前面幾個，但永遠都在。'},
+    bio:'裝置內建的語音，不需要金鑰，任何一段都能唸，會自動挑你手機上最自然的那一個。想更像真人：iPhone 到「設定 → 輔助使用 → 語音內容 → 聲音 → 中文」下載「美佳（高品質）」；電腦用 Edge 開，會有接近真人的「自然」語音。'},
 };
 const DEMO_VOICES = VOICES;   // the pre-rendered packs are keyed by the same names
 const chosenVoice = () => VOICES[state.settings.voice] ? state.settings.voice : 'melo';
@@ -1321,14 +1321,18 @@ const player = {timer:null,phaseT:null,idx:0,lines:[],onTick:null,playing:false,
 const alive=s=>player.playing&&player.session===s;
 const ttsCache = new Map();
 function estimateMs(lines, rate){ return lines.reduce((s,l)=>s+Math.max(600,l.t.length*230/rate)+l.pause,0); }
-function langVoice(){
-  const want=speechLang(), vs=speechSynthesis.getVoices();
-  return vs.find(v=>v.lang&&v.lang.replace('_','-')===want) || vs.find(v=>v.lang&&v.lang.startsWith(want.slice(0,2))) || null;
+/* the first voice a device lists is often its oldest, most robotic one. Neural voices
+   (Edge "Online (Natural)", iOS/macOS "Premium"/"Enhanced", Chrome's Google voices)
+   sound close to human and cost nothing, so rank by quality instead of taking the first. */
+const NATURAL=/natural|neural|online|premium|enhanced|wavenet|studio/i;
+function bestVoice(want){
+  const norm=l=>(l||'').replace('_','-').toLowerCase(), w=norm(want);
+  const vs=speechSynthesis.getVoices().filter(v=>norm(v.lang).startsWith(w.slice(0,2)));
+  const score=v=>(NATURAL.test(v.name)?8:0)+(norm(v.lang)===w?4:0)+(/google/i.test(v.name)?2:0)+(!v.localService?1:0)+(/compact|eloquence|espeak/i.test(v.name)?-6:0);
+  return vs.sort((a,b)=>score(b)-score(a))[0]||null;
 }
-function zhVoice(){
-  const vs = speechSynthesis.getVoices();
-  return vs.find(v=>/zh[-_]TW/i.test(v.lang)&&/Mei|Hsiao|female|Google/i.test(v.name)) || vs.find(v=>/zh[-_]TW/i.test(v.lang)) || vs.find(v=>/^zh/i.test(v.lang)) || null;
-}
+const langVoice=()=>bestVoice(speechLang());
+const zhVoice=()=>bestVoice('zh-TW');
 function stopPlayback(){
   player.playing=false; clearTimeout(player.timer); clearTimeout(player.phaseT);
   try{ speechSynthesis.cancel(); }catch(e){}
@@ -1361,7 +1365,7 @@ async function playLines(lines, {rate=.9, onTick, onDone, mode='manifest', src, 
     // a line the EN dictionary couldn't fully translate stays Chinese on screen; read it
     // with a Chinese voice too instead of feeding Han characters to an English engine
     const zh = HAN.test(txt) && !speechLang().startsWith('zh');
-    u.lang = zh ? 'zh-TW' : speechLang(); const v2 = zh ? voice : langVoice(); if(v2) u.voice=v2; else if(voice) u.voice=voice; u.rate=rate; u.pitch=1;
+    u.lang = zh ? 'zh-TW' : speechLang(); const v2 = zh ? voice : langVoice(); if(v2) u.voice=v2; else if(voice) u.voice=voice; u.rate=rate; u.pitch=.96;
     u.onend = ()=>{ player.idx++; player.timer=setTimeout(step, l.pause); };
     u.onerror = ()=>{ player.idx++; player.timer=setTimeout(step, 400); };
     speechSynthesis.speak(u);
