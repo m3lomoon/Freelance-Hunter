@@ -2196,8 +2196,8 @@ function renderBreath(){
     <div class="vrow"><button class="vchip" id="br-snd" aria-pressed="${breathOn}"><span class="vav mesh g-${breathOn?'mint':'slate'}"></span><b>${breathOn?'呼吸音效 開':'呼吸音效 關'}</b></button></div>
     <p class="note" style="max-width:36ch;margin-bottom:14px">${esc(breathWhy(B))}</p>
     <div class="pacerwrap">
-      <div class="pacer" id="pacer"><div class="pring"></div><div class="pcore" id="pcore"></div>
-        <div class="ptext"><b id="plabel">準備</b><span id="pcount">${cycle} 秒 / 回合</span></div></div>
+      <div class="pacer" id="pacer" role="button" tabindex="0" aria-label="點擊開始" style="cursor:pointer"><div class="pring"></div><div class="pcore" id="pcore"></div>
+        <div class="ptext"><b id="plabel">點擊即可開始</b><span id="pcount">${cycle} 秒 / 回合</span></div></div>
     </div>
     <div class="brmeta"><div><b id="prounds">0</b><span>/ ${rounds} 回合</span></div><div><b id="ptime">00:00</b><span>已練習</span></div><div><b>${B.steps.map(s=>s[1]).join('-')}</b><span>節奏</span></div></div>
     <div class="row" style="gap:10px;margin-top:22px">
@@ -2209,7 +2209,10 @@ function renderBreath(){
   $('#br-amb').onclick=openAmbientSheet;
   $('#br-edit').onclick=()=>openBreathEdit(k);
   $('#br-snd').onclick=()=>{ setBreathSound(!breathOn); renderBreath(); if(breathOn) breathCue('in',2.2); };
-  $('#br-play').onclick=()=>{ if(pacer){ stopPacer(); $('#br-play').textContent='開始'; } else { startPacer(k,rounds); $('#br-play').textContent='停止'; } };
+  const togglePacer=()=>{ if(pacer){ stopPacer(); $('#br-play').textContent='開始'; $('#plabel').textContent='點擊即可開始'; } else { startPacer(k,rounds); $('#br-play').textContent='停止'; } };
+  $('#br-play').onclick=togglePacer;
+  $('#pacer').onclick=togglePacer;
+  $('#pacer').onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); togglePacer(); } };
 }
 /* ---------- breath cues: filtered noise that swells in and falls away ---------- */
 let breathAC=null, breathOn=(()=>{ try{ return localStorage.getItem('melomood.breathsound')!=='0'; }catch(e){ return true; } })();
