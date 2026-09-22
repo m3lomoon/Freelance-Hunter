@@ -2261,6 +2261,7 @@ const AMB={
   ocean:{name:'海邊',g:'aqua',hint:'一來一回的浪，跟呼吸同頻'},
   forest:{name:'山林裡',g:'jade',hint:'風穿過樹葉，偶爾有鳥'},
   bowl:{name:'頌缽',g:'mint',hint:'每 20 秒一聲，收心用'},
+  cat:{name:'貓咪呼嚕聲',g:'rose',hint:'低頻震動，像貓窩在旁邊睡著了'},
 };
 let ambient=null;
 function ambCtx(){
@@ -2327,6 +2328,20 @@ function ambOn(kind){
         og.gain.setValueAtTime(0,t); og.gain.linearRampToValueAtTime(.3/(i+1),t+.06); og.gain.exponentialRampToValueAtTime(.0001,t+8);
         o.connect(og); og.connect(g); o.start(t); o.stop(t+8.5); });
       timer=setTimeout(ring,20000); }; setTimeout(ring,300);
+  }
+  if(kind==='cat'){
+    // purring is a low-frequency laryngeal rumble (~25-30Hz) riding on a soft rush of air,
+    // with a slow breathing-cycle swell so it doesn't read as a flat mechanical drone
+    const lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=200; lp.connect(g); noise('brown',lp);
+    const purr=ctx.createOscillator(); purr.type='sawtooth'; purr.frequency.value=27;
+    const wobble=ctx.createOscillator(); wobble.type='sine'; wobble.frequency.value=.18;
+    const wobbleGain=ctx.createGain(); wobbleGain.gain.value=3;
+    wobble.connect(wobbleGain); wobbleGain.connect(purr.frequency); wobble.start(); nodes.push(wobble);
+    const purrGain=ctx.createGain(); purrGain.gain.value=.32;
+    purr.connect(purrGain); purrGain.connect(g); purr.start(); nodes.push(purr);
+    const breathLfo=ctx.createOscillator(); breathLfo.type='sine'; breathLfo.frequency.value=.32;
+    const breathGain=ctx.createGain(); breathGain.gain.value=.14;
+    breathLfo.connect(breathGain); breathGain.connect(purrGain.gain); breathLfo.start(); nodes.push(breathLfo);
   }
   g.gain.exponentialRampToValueAtTime(kind==='bowl'?1:.55,ctx.currentTime+2.5);
   layers[kind]={g,nodes,stop:()=>{ clearTimeout(timer); nodes.forEach(n=>{try{n.stop()}catch(e){}}); }};
