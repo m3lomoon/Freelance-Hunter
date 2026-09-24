@@ -604,8 +604,9 @@ textarea.input{min-height:90px;resize:vertical}
 
         <div class="ob-step" data-step="5">
           <h1 class="ob-h">錄下<br>你的<span class="lat">聲音</span></h1>
-          <p class="ob-p">唸下面這段話，約 30 到 60 秒。這段樣本會用來複製你的聲音，讓引導由「你」唸給你聽。可以先跳過。</p>
+          <p class="ob-p">唸下面這段話，約 30 到 60 秒。這段樣本會用來複製你的聲音，讓引導由「你」唸給你聽。可以先跳過，之後隨時能在「我」的頁面補錄。</p>
           <div id="ob-rec"></div>
+          <button class="btn ghost sm block" id="ob-skip-rec" style="margin-top:14px">先略過，之後再錄</button>
         </div>
 
         <div class="ob-foot">
@@ -3239,6 +3240,7 @@ $('#ob-next').onclick=()=>{
   save(); renderOb();
 };
 $('#ob-back').onclick=()=>{ if(obStep>1){ obRecCleanup&&obRecCleanup(); obStep--; renderOb(); } };
+$('#ob-skip-rec').onclick=()=>{ obRecCleanup&&obRecCleanup(); finishOb(); };
 function finishOb(){ obRecCleanup&&obRecCleanup(); state.demo=false; state.ui.goal=state.profile.goals[0]; save(); go('home');
   toast(`歡迎，${state.profile.name} ✦`); }
 function concernOptions(selected){ return Object.entries(CONCERNS).map(([k,c])=>`<button class="con" data-k="${k}" aria-pressed="${selected.includes(k)}"><i class="em sw lg mesh g-${c.g}"></i><b>${esc(c.name)}</b><span>${esc(c.hint)}</span></button>`).join(''); }
