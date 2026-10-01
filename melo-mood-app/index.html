@@ -1165,8 +1165,8 @@ async function generateWithClaude({goal, scene, minutes, tone, name}){
 const VOICES = {
   melo:{name:'Melo 的聲音', role:'創辦人 · 複製聲', g:'magenta', id:'cVpaMfwbISlOywwtDanV', pack:'melo',
     bio:'夏沐本人的聲音，用一段 30 秒樣本複製出來的。平靜、貼在耳邊，語速偏慢。App 裡的預錄示範就是這一個。'},
-  deep:{name:'低沉男聲', role:'Ethan Zhang · 深沉磁性', g:'cobalt', id:'brChkoggsUHF1stW6omH', pack:'deep',
-    bio:'低沉、共鳴很厚的男聲。晚上聽、或想要更穩一點的引導時可以換這個。睡前導引特別適合。'},
+  deep:{name:'溫柔男聲', role:'Evan · 溫暖沉穩', g:'cobalt', id:'kbrsaic1zriFXx1pgRYN', pack:'deep',
+    bio:'溫暖、柔和、很穩的男聲。晚上聽、或想要更放鬆的引導時可以換這個。睡前導引特別適合。'},
   brand:{name:'Melo 品牌聲', role:'品牌旁白 · 較明亮', g:'lime', id:'ZGNKRFGTTnfytxotHN56',
     bio:'為 Melo Mood 設計的品牌聲，比複製聲亮一點、精神一點，適合早晨與專注類。目前還在 fine-tune，完成前會自動改用複製聲。'},
   mine:{name:'你自己的聲音', role:'你錄的', g:'rose', own:true,
@@ -3183,7 +3183,8 @@ function openVoiceSheet(after){
       ${on?`<span class="vbio">${esc(V.bio)}</span><span class="vnote">${esc(st.note)}</span>`:''}
     </button>`;
   };
-  const body=()=>Object.keys(VOICES).map(card).join('');
+  // 系統聲音 stays as the silent fallback everywhere else; it's just not something to pick on purpose here
+  const body=()=>Object.keys(VOICES).filter(k=>k!=='system').map(card).join('');
   sheet(`<h2>誰來唸給你聽</h2><p class="sub">每一段引導都用這個聲音。隨時可以換，換了就記住。</p>
     <div id="v-list">${body()}</div>
     <p class="note" style="margin:4px 0 16px">${state.settings.elevenKey?'已連接 ElevenLabs，可以在「我 → 選擇播放聲音」挑帳號裡的其他聲音。':'沒有 ElevenLabs 金鑰時，可以在「我 → 聲音錄音室」錄你自己的聲音，免金鑰；其餘段落用系統聲音。'}</p>
