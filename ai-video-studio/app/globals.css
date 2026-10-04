@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body {
+    @apply bg-ink-950 text-zinc-300 antialiased;
+    font-feature-settings: "ss01", "cv01";
+  }
+
+  /* Minimal, sharp scrollbars to match the editorial vibe */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #23232a;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #2e2e36;
+  }
+
+  ::selection {
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+  }
+}
+
+@layer components {
+  /* Editorial micro-label — the "fashion" caption look */
+  .label {
+    @apply text-[10px] font-medium uppercase tracking-editorial text-slate-fog;
+  }
+
+  /* Hairline divider */
+  .hairline {
+    @apply border-ink-700;
+  }
+
+  /* Glowing interactive surface */
+  .surface {
+    @apply border border-ink-700 bg-ink-850 transition-all duration-300;
+  }
+  .surface:hover {
+    @apply border-ink-500 shadow-glow;
+  }
+
+  /* Ghost button */
+  .btn-ghost {
+    @apply flex items-center gap-2 border border-ink-700 bg-ink-850/60 px-4 py-2
+           text-xs uppercase tracking-wider text-zinc-400 transition-all duration-300
+           hover:border-zinc-500 hover:text-white hover:shadow-glow;
+  }
+
+  /* Primary (inverted) button — high contrast monochrome */
+  .btn-primary {
+    @apply flex items-center justify-center gap-2 bg-white px-4 py-2 text-xs
+           font-medium uppercase tracking-wider text-black transition-all duration-300
+           hover:shadow-glow-strong active:scale-[0.98];
+  }
+}
+
+@layer utilities {
+  /* Hide the native range thumb so the custom diamond marker shows through */
+  .slider-thumb::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    background: transparent;
+    cursor: pointer;
+  }
+  .slider-thumb::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+  }
+}

@@ -1,0 +1,13 @@
+# 核心
+streamlit>=1.35.0
+yt-dlp>=2024.5.1
+anthropic>=0.40.0
+
+# YouTube 字幕（快速取得逐字稿）
+youtube-transcript-api>=0.6.2
+
+# Whisper 語音辨識（無字幕備援，需要 ffmpeg）
+faster-whisper>=1.0.0
+
+# 工具
+requests>=2.31.0
