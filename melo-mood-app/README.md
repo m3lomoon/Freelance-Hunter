@@ -25,6 +25,23 @@
 文字裡的「Melody」會自動換成你自己的名字，唸的時候不會叫錯人。
 想要任何情境冥想都用自己的聲音、句子還能無限生成，才需要錄 30 秒交給 ElevenLabs 複製聲音（見上一節）。
 
+## 方案：Free / Glow / Muse
+
+| 方案 | 內容 | 怎麼做到的 |
+|---|---|---|
+| **Free** | 日記、呼吸、森林、4 種助眠音、4 種急救情境（焦慮/開會/約會/專注）、每天 1 段每日練習、系統聲音 | 全部在手機上 |
+| **Glow** | Free 全部 + 其餘 9 種情境、主題廣場、自訂情境、每日練習不限次數、睡前導引、12 種助眠音、錄音室、30 天心情 + **Melo / Evan 真人聲音唸每一段** | Edge Function `voice`（我們的 ElevenLabs 帳號，句子層級快取） |
+| **Muse** | Glow 全部 + **AI 複製你的聲音**、**AI 讀日記重寫引導詞**、**每週 AI 回顧 + 目標調頻**、Mumu Soul Care 茶飲 85 折 | Edge Functions `voice`（clone）與 `ai`（Claude） |
+
+- 方案以伺服器為準：`subscriptions` 表 + 選用的 `BETA_TIER` 開關，前端只是照著顯示。
+- 每月額度：Glow 6 萬字真人聲音；Muse 15 萬字 + 60 次 AI。聽過的句子會快取，重聽不扣額度。
+- 日記只在 AI 生成的那一次送出，不存在伺服器；AI 聲音可以在「我 → 方案」刪除，連同合成過的音檔。
+- 前端的鎖（`?paywall=1` 或正式開啟 `PAYWALL`）在試營運期間預設關閉；伺服器功能永遠照方案走。
+
+**要上線，在 Supabase → Edge Functions → Secrets 設定：**
+`ELEVENLABS_API_KEY`、`ANTHROPIC_API_KEY`；想讓試用者先體驗，可加 `BETA_TIER=glow` 或 `muse`（所有登入帳號都算這個方案，額度照算）。
+Mumu 折扣碼填在 `index.html` 的 `MUMU={code,url}`，空的時候會員卡片不顯示這一項。
+
 ## 坐上 Melo 雲（自拍分享卡）
 
 冥想結束 →「坐上 Melo 雲拍一張」，或「我 → 分享卡」。前鏡頭即時去背（MediaPipe selfie segmenter，在手機上跑，照片不上傳），
