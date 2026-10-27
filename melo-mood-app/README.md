@@ -42,6 +42,18 @@
 `ELEVENLABS_API_KEY`、`ANTHROPIC_API_KEY`；想讓試用者先體驗，可加 `BETA_TIER=glow` 或 `muse`（所有登入帳號都算這個方案，額度照算）。
 Mumu 折扣碼填在 `index.html` 的 `MUMU={code,url}`，空的時候會員卡片不顯示這一項。
 
+## 網頁版：掃 QR 就能用（募資期間的主要入口）
+
+- **QR code**：`assets/qr.svg`（App 內「我 → 放在手機上 → 給朋友掃」與首頁「分享給朋友」會顯示）；印刷用的卡片在 `share/qr-card.png`。
+  網址換了（例如綁自訂網域）：改 `index.html` 的 `PUBLIC_URL`，再跑 `python3 tools/make_qr.py`，會重做 `assets/qr.svg` 與 `share/qr-card.html`。
+- **安裝到主畫面**：`manifest.webmanifest`；Android Chrome 會跳安裝提示，iPhone 用 Safari「分享 → 加入主畫面」，LINE / IG 內建瀏覽器會提示改用 Safari。
+- **離線**：`sw.js`（頁面網路優先、圖片快取優先；語音檔、Supabase、ElevenLabs、Anthropic 不經過快取）。改版後想強制清舊快取，改 `sw.js` 的 `VERSION`。
+- **法務**：`privacy.html`、`terms.html`（中英雙語）。**發布前要在兩個檔案裡把「客服信箱」填進去**，並請專業人士看過。
+- **刪除帳號**：「我 → 方案 → 刪除帳號」→ Edge Function `delete-account`：先停綠界定期扣款（綠界沒回應就不刪）、刪 ElevenLabs 的 AI 聲音與音檔、最後刪登入帳號；方案、用量、聲音紀錄隨帳號一起消失。
+
+> 原生 App（App Store / Google Play）刻意沒做：需要 Apple 內購取代綠界、原生殼與審核流程，等募資後交給工程師。
+> 現在的網頁版已經把 Apple 會查的基本功（隱私條款、刪帳號、沒有假功能）補齊，之後可以直接接上。
+
 ## 坐上 Melo 雲（自拍分享卡）
 
 冥想結束 →「坐上 Melo 雲拍一張」，或「我 → 分享卡」。前鏡頭即時去背（MediaPipe selfie segmenter，在手機上跑，照片不上傳），

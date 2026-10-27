@@ -7,8 +7,8 @@
    only cache misses count against the monthly cap. The voice sample itself is never stored.
    secrets: ELEVENLABS_API_KEY (+ SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY); optional BETA_TIER */
 import { CAPS, RANK, admin, bump, caller, cors, json, tierOf, usage } from "./_shared/tier.ts";
+import { ELEVEN, forget } from "./_shared/eleven.ts";
 
-const ELEVEN = "https://api.elevenlabs.io/v1";
 const MODEL = "eleven_multilingual_v2";
 const VOICES: Record<string, string> = {
   melo: Deno.env.get("VOICE_MELO") ?? "cVpaMfwbISlOywwtDanV",
@@ -16,15 +16,6 @@ const VOICES: Record<string, string> = {
 };
 const MAX_TEXT = 600;
 const MAX_SAMPLE = 10 * 1024 * 1024;
-
-// a deleted clone takes every sentence ever synthesized in that voice with it
-async function forget(voiceId: string, key: string) {
-  await fetch(`${ELEVEN}/voices/${voiceId}`, { method: "DELETE", headers: { "xi-api-key": key } });
-  const { data: rows } = await admin.from("tts_lines").select("audio_path").eq("voice_id", voiceId);
-  const paths = (rows ?? []).map((r) => r.audio_path as string);
-  for (let i = 0; i < paths.length; i += 500) await admin.storage.from("tts").remove(paths.slice(i, i + 500));
-  await admin.from("tts_lines").delete().eq("voice_id", voiceId);
-}
 
 async function sha256(s: string) {
   const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
