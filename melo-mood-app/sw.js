@@ -3,7 +3,7 @@
    - images, fonts, small assets: cache first, refreshed in the background
    - audio (Range requests), Supabase, ElevenLabs, Anthropic: never touched, always straight to the network
    Bump VERSION to drop old caches. */
-const VERSION = 'v1';
+const VERSION = 'v2';
 const CACHE = 'melomood-' + VERSION;
 const SHELL = ['./', 'manifest.webmanifest', 'assets/icon-192.png', 'assets/icon-512.png'];
 
