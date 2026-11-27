@@ -551,6 +551,22 @@ textarea.input{min-height:90px;resize:vertical}
 .toast{position:absolute;left:50%;bottom:110px;transform:translateX(-50%) translateY(20px);background:var(--text);color:var(--ink);padding:10px 16px;border-radius:var(--r-pill);font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:all .25s;z-index:20;white-space:nowrap;max-width:90%;overflow:hidden;text-overflow:ellipsis}
 .toast.show{opacity:1;transform:translateX(-50%)}
 
+/* 身心健檢 */
+#check{padding-top:30px}
+.ck-prog{display:flex;gap:4px;margin:14px 0 26px}.ck-prog i{flex:1;height:3px;border-radius:2px;background:var(--line)}.ck-prog i.on{background:var(--moon)}
+.ck-q{font-family:var(--display);font-size:clamp(22px,6vw,27px);font-weight:700;line-height:1.4;margin:8px 0 24px}
+.ck-opt{display:block;width:100%;text-align:left;padding:15px 18px;border-radius:var(--r-md);background:var(--raised);border:1px solid transparent;margin-bottom:10px;font-size:16px;color:var(--text)}
+.ck-opt[aria-pressed="true"]{border-color:var(--moon);background:var(--hover)}
+.ck-big{font-family:var(--display);font-size:84px;font-weight:800;line-height:1;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.ck-dim{margin:16px 0}.ck-dim .row{align-items:baseline}
+.ck-dim b{font-size:15px}.ck-dim .v{font-family:var(--mono);font-size:13px;color:var(--muted)}
+.ck-bar{height:8px;border-radius:4px;background:var(--line);overflow:hidden;margin-top:8px}.ck-bar i{display:block;height:100%;border-radius:4px}
+.ck-tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:var(--r-pill);margin-left:8px;color:#0C0C0E}
+.ck-rec{display:flex;justify-content:space-between;align-items:center;width:100%;padding:15px 18px;border-radius:var(--r-md);background:var(--raised);margin-bottom:10px;text-align:left;color:var(--text)}
+.ck-rec span{font-size:12px;color:var(--muted);display:block;margin-top:2px}
+.checkcard{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;padding:16px 18px;border-radius:var(--r-md);background:var(--raised);text-align:left;color:var(--text);margin-bottom:18px;border:1px solid var(--line)}
+.checkcard b{font-size:15px}.checkcard span{display:block;font-size:12px;color:var(--muted);margin-top:3px}
+.checkcard .n{font-family:var(--display);font-size:30px;font-weight:800;font-variant-numeric:tabular-nums}
 .banner{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--r-md);border:1px dashed var(--line-strong);font-size:12px;color:var(--muted);margin-bottom:18px}
 .banner button{color:var(--moon);font-weight:600;margin-left:auto;white-space:nowrap}
 .note{font-size:12px;color:var(--faint);line-height:1.5}
@@ -620,6 +636,7 @@ textarea.input{min-height:90px;resize:vertical}
           <button class="btn primary block" id="ob-listen">先聽 60 秒</button>
           <p class="note" id="ob-listen-note" style="margin:8px 0 18px">一段「焦慮想太多」的急救引導，戴上耳機更好。</p>
           <button class="btn ghost block" id="ob-start">開始設定 · 約 1 分鐘</button>
+          <button class="btn ghost block" id="ob-check" style="margin-top:10px">先做 3 分鐘身心健檢</button>
           <button class="btn ghost sm block" id="ob-demo0" style="margin-top:10px">先看看範例（Melody 的帳號）</button>
           <a class="crowd" id="ob-crowd" target="_blank" rel="noopener" hidden>嘖嘖募資進行中，了解回饋方案 →</a>
           <p class="note" style="margin-top:18px">資料只存在你的手機裡。<a href="privacy.html" style="color:inherit;text-decoration:underline">隱私說明</a></p>
@@ -682,6 +699,7 @@ textarea.input{min-height:90px;resize:vertical}
       <!-- ============ FOREST ============ -->
       <section class="screen" id="forest" aria-label="森林"></section>
       <section class="screen" id="favs" aria-label="收藏"></section>
+      <section class="screen" id="check" aria-label="身心健檢"></section>
     </div>
 
     <nav class="nav" id="nav" aria-label="主選單">
@@ -1732,6 +1750,7 @@ Object.assign(EN,{"這一段還沒有真人錄音 · 先用手機內建聲音":"
 Object.assign(EN,{"Sage":"Sage","女聲 · 溫柔安定":"Female · gentle, grounded","溫暖、安定、貼近耳邊的女聲，節奏不急。想換一個不是 Melo 的女生陪你時選她，情緒低落或焦慮時特別適合。":"A warm, steady female voice close to your ear, never rushed. Pick her for a woman's voice other than Melo; good for low or anxious days.","Ethan":"Ethan","男聲 · 低沉磁性":"Male · deep, smooth","低沉、平滑、有磁性的男聲，比 Evan 更深一點。睡前、想讓腦袋安靜下來的時候適合。":"A deep, smooth, magnetic male voice, a shade deeper than Evan. Good before sleep or when your head needs to go quiet."});
 Object.assign(EN,{"✦ 你正在看 Melody 的範例":"✦ You're looking at Melody's sample","用我的名字開始 →":"Start with my name →","先輸入你的名字，建立你自己的檔案":"Enter your name first to start your own profile"});
 Object.assign(EN,{"清除這台裝置上的日記、收藏和設定，重新開始？":"Erase the journal, favourites and settings on this device and start over?"});
+Object.assign(EN,{"身心健檢": "Wellbeing check", "先做 3 分鐘身心健檢": "Take the 3-minute wellbeing check", "身心健檢 · 3 分鐘": "Wellbeing check · 3 min", "你最近，": "How have you", "好嗎？": "been lately?", "12 題，回想過去兩週就好。看完會知道你的幸福感、平靜、心情和睡眠在哪裡，以及現在最適合你的練習。": "12 questions about the past two weeks. You'll see where your well-being, calm, mood and sleep stand, and which practice suits you right now.", "幸福感": "Well-being", "平靜": "Calm", "心情": "Mood", "睡眠": "Sleep", "開始": "Start", "← 返回": "← Back", "← 上一題": "← Previous", "← 回首頁": "← Home", "從來沒有": "At no time", "有時候": "Some of the time", "少於一半的時間": "Less than half of the time", "超過一半的時間": "More than half of the time", "大部分時間": "Most of the time", "所有時間": "All of the time", "完全沒有": "Not at all", "有幾天": "Several days", "一半以上的天數": "More than half the days", "幾乎每天": "Nearly every day", "過去兩週，這句話有多符合你？": "Over the last two weeks, how true is this for you?", "過去兩週，你有多常被這件事困擾？": "Over the last two weeks, how often have you been bothered by this?", "過去兩週，這件事多常發生？": "Over the last two weeks, how often has this happened?", "我感到心情愉快、精神很好": "I have felt cheerful and in good spirits", "我感到平靜和放鬆": "I have felt calm and relaxed", "我感到充滿活力、精力充沛": "I have felt active and vigorous", "我醒來時感到神清氣爽、休息充足": "I woke up feeling fresh and rested", "我的日常生活充滿讓我感興趣的事": "My daily life has been filled with things that interest me", "感到緊張、焦慮或煩躁": "Feeling nervous, anxious or on edge", "無法停止或控制擔憂": "Not being able to stop or control worrying", "做事時提不起勁或沒有樂趣": "Little interest or pleasure in doing things", "感到心情低落、沮喪或絕望": "Feeling down, depressed or hopeless", "要花超過 30 分鐘才睡得著": "Taking more than 30 minutes to fall asleep", "半夜醒來後很難再睡著": "Waking in the night and struggling to get back to sleep", "起床時還是覺得很累": "Still feeling tired when you get up", "穩定": "Steady", "需要照顧": "Needs care", "亮紅燈": "Red light", "身心指數": "Wellbeing score", "現在最適合你": "Best for you right now", "焦慮急救": "Anxiety rescue", "3 分鐘 · 呼吸加上回到當下": "3 min · breathing and grounding", "走出低潮": "Out of the slump", "給撐不住的那幾天 · 12 句": "For the days you can barely hold on · 12 lines", "睡前放鬆導引": "Wind-down sleep guide", "身體掃描 · 倒數 · 入睡": "Body scan · countdown · sleep", "感恩練習": "Gratitude practice", "把注意力放回已經擁有的": "Bring attention back to what you already have", "用這個結果開始設定 →": "Set up from these results →", "分享結果卡": "Share result card", "重新測": "Retake", "建議兩週後再測一次，看看變化。幸福感參考 WHO-5，心情與平靜參考 PHQ-4，睡眠題目是 Melo Mood 自編。這是自我檢視，不是醫療診斷。": "Take it again in two weeks to see what changed. Well-being follows WHO-5, mood and calm follow PHQ-4, the sleep items are Melo Mood's own. This is a self-check, not a medical diagnosis.", "你的回答顯示最近可能真的不太好過。這不是診斷，但很值得找身心科、諮商師或信任的人聊聊。": "Your answers suggest things may have been genuinely hard lately. This isn't a diagnosis, but it's well worth talking to a doctor, a counsellor or someone you trust.", "3 分鐘，看看你最近的幸福感、心情和睡眠": "3 minutes to see how your well-being, mood and sleep are doing", "你最近好嗎？3 分鐘測測看": "How are you, really? Find out in 3 minutes", "我的身心指數": "My wellbeing score"});
 const EN_KEYS=Object.keys(EN).sort((a,b)=>b.length-a.length);
 const CN_KEYS=Object.keys(CN.phrases).sort((a,b)=>b.length-a.length);
 const HAN=/[\u4e00-\u9fff]/;
@@ -1800,8 +1819,8 @@ function go(id){
   $$('.screen').forEach(s=>s.classList.toggle('active',s.id===id));
   $$('#nav button').forEach(b=>b.toggleAttribute('aria-current',b.dataset.go===id)&&b.setAttribute('aria-current','page'));
   $$('#nav button').forEach(b=>{ if(b.dataset.go!==id) b.removeAttribute('aria-current'); });
-  $('#nav').style.display = (id==='onboard'||id==='favs')?'none':'';
-  ({home:renderHome,manifest:renderManifest,sleep:renderSleep,journal:renderJournal,me:renderMe,favs:renderFavs,forest:renderForest}[id]||(()=>{}))();
+  $('#nav').style.display = (id==='onboard'||id==='favs'||id==='check')?'none':'';
+  ({check:renderCheck,home:renderHome,manifest:renderManifest,sleep:renderSleep,journal:renderJournal,me:renderMe,favs:renderFavs,forest:renderForest}[id]||(()=>{}))();
   $('#'+id).scrollTop=0;
 }
 $$('#nav button').forEach(b=>b.onclick=()=>go(b.dataset.go));
@@ -1916,6 +1935,7 @@ function renderHome(){
       <div class="sosrow">${['anxiety','meeting','date','focus'].map(k=>`<button class="sos mesh g-${SCENES[k].g}" data-scene="${k}"><b>${esc(SCENES[k].name)}</b><i>${SCENES[k].min} MIN</i></button>`).join('')}</div>
     </div>
     ${feedRows()}
+    ${checkCard()}
     <div class="section">
       <div class="section-h"><h2>你的東西</h2></div>
       <div class="quick">
@@ -1932,6 +1952,7 @@ function renderHome(){
   $('#daily-quote').onclick=()=>{ go('manifest'); openThemeSet('inspire'); };
   $('#home-voice').onclick=openRecorderSheet;
   $('#home-invite').onclick=openQrSheet;
+  $('#home-check').onclick=openCheck;
   $('#start-real')&&($('#start-real').onclick=startReal);
   $$('#home-moods .mood').forEach(b=>b.onclick=()=>{ quickMood(+b.dataset.v); renderHome(); toast('心情記錄了 ✦'); });
 }
@@ -3656,6 +3677,131 @@ function renderStudioLine(root){
   sheet._cleanup=()=>{ stop(); cancelAnimationFrame(raf); };
 }
 
+/* ---------- 身心健檢: WHO-5 well-being + PHQ-4 mood and anxiety + three sleep questions ----------
+   Every dimension is scored 0–100 with higher meaning better. WHO-5 (WHO Collaborating Centre, free to use)
+   and PHQ-4 (Kroenke et al., free to use) are screening tools, not diagnoses; the sleep items are our own.
+   Results stay on the device in state.checks. */
+const CK_F5=['從來沒有','有時候','少於一半的時間','超過一半的時間','大部分時間','所有時間'];
+const CK_F3=['完全沒有','有幾天','一半以上的天數','幾乎每天'];
+const CK_STEM={well:'過去兩週，這句話有多符合你？',anx:'過去兩週，你有多常被這件事困擾？',dep:'過去兩週，你有多常被這件事困擾？',sleep:'過去兩週，這件事多常發生？'};
+const CK_QS=[
+  {g:'well',t:'我感到心情愉快、精神很好'},{g:'well',t:'我感到平靜和放鬆'},{g:'well',t:'我感到充滿活力、精力充沛'},
+  {g:'well',t:'我醒來時感到神清氣爽、休息充足'},{g:'well',t:'我的日常生活充滿讓我感興趣的事'},
+  {g:'anx',t:'感到緊張、焦慮或煩躁'},{g:'anx',t:'無法停止或控制擔憂'},
+  {g:'dep',t:'做事時提不起勁或沒有樂趣'},{g:'dep',t:'感到心情低落、沮喪或絕望'},
+  {g:'sleep',t:'要花超過 30 分鐘才睡得著'},{g:'sleep',t:'半夜醒來後很難再睡著'},{g:'sleep',t:'起床時還是覺得很累'}
+].map(q=>({...q,o:q.g==='well'?CK_F5:CK_F3}));
+const CK_DIMS={well:{name:'幸福感',concern:'low'},calm:{name:'平靜',concern:'anxiety'},mood:{name:'心情',concern:'low'},sleep:{name:'睡眠',concern:'sleep'}};
+const CK_REC={
+  calm:{t:'焦慮急救',sub:'3 分鐘 · 呼吸加上回到當下',run:()=>{ go('manifest'); openScene('anxiety'); }},
+  mood:{t:'走出低潮',sub:'給撐不住的那幾天 · 12 句',run:()=>{ go('manifest'); openThemeSet('fightLow'); }},
+  sleep:{t:'睡前放鬆導引',sub:'身體掃描 · 倒數 · 入睡',run:()=>{ if(can('sleepGuide')) state.ui.sleepView='guide'; go('sleep'); }},
+  well:{t:'感恩練習',sub:'把注意力放回已經擁有的',run:()=>{ go('manifest'); openThemeSet('gratitude'); }}
+};
+let ck={phase:'intro',i:0,ans:[],res:null};
+const isOnboarded=()=>!!(state.profile.name && (state.profile.goals||[]).length && state.profile.tone);
+function openCheck(){ ck={phase:'intro',i:0,ans:[],res:null}; go('check'); }
+function ckScore(ans){
+  const sum=g=>CK_QS.reduce((a,q,i)=>a+(q.g===g?ans[i]:0),0);
+  const wellRaw=sum('well'), anx=sum('anx'), dep=sum('dep'), sl=sum('sleep');
+  const s={well:wellRaw*4, calm:Math.round(100-anx/6*100), mood:Math.round(100-dep/6*100), sleep:Math.round(100-sl/9*100)};
+  return {d:todayKey(), s, o:Math.round((s.well+s.calm+s.mood+s.sleep)/4),
+    // the published cut-offs for "worth talking to someone": PHQ-2 or GAD-2 of 3+, WHO-5 of 28 or less
+    flag: dep>=3 || anx>=3 || wellRaw<=7};
+}
+const ckLevel=v=> v>=70?['穩定','var(--jade)'] : v>=40?['需要照顧','#F5B44A'] : ['亮紅燈','var(--rose)'];
+function renderCheck(){
+  const el=$('#check'), back=()=>isOnboarded()?go('home'):startOnboarding(0);
+  if(ck.phase==='intro'){
+    const last=(state.checks||[]).at(-1);
+    el.innerHTML=`<button class="btn ghost sm" id="ck-back">← 返回</button>
+      <div class="eyebrow" style="margin-top:22px">身心健檢 · 3 分鐘</div>
+      <h1 class="ob-h" style="margin-top:8px">你最近，<br>好嗎？</h1>
+      <p class="ob-p">12 題，回想過去兩週就好。看完會知道你的幸福感、平靜、心情和睡眠在哪裡，以及現在最適合你的練習。</p>
+      ${Object.values(CK_DIMS).map(d=>`<div class="ck-rec" style="pointer-events:none"><b>${esc(d.name)}</b></div>`).join('')}
+      <p class="note" style="margin:14px 0 20px"><span>這不是醫療診斷，是幫你看見自己的狀態。結果只存在你的手機裡。</span>${last?` <span>上次：${last.o}</span>`:''}</p>
+      <button class="btn primary block" id="ck-go">開始</button>`;
+    $('#ck-back').onclick=back;
+    $('#ck-go').onclick=()=>{ ck.phase='q'; ck.i=0; ck.ans=[]; renderCheck(); };
+  } else if(ck.phase==='q'){
+    const q=CK_QS[ck.i];
+    el.innerHTML=`<button class="btn ghost sm" id="ck-back">← ${ck.i?'上一題':'返回'}</button>
+      <div class="ck-prog">${CK_QS.map((_,i)=>`<i class="${i<=ck.i?'on':''}"></i>`).join('')}</div>
+      <div class="eyebrow">${esc(CK_STEM[q.g])}</div>
+      <p class="ck-q">${esc(q.t)}</p>
+      ${q.o.map((o,v)=>`<button class="ck-opt" data-v="${v}" aria-pressed="${ck.ans[ck.i]===v}">${esc(o)}</button>`).join('')}
+      <p class="note" style="margin-top:14px">${ck.i+1} / ${CK_QS.length}</p>`;
+    $('#ck-back').onclick=()=>{ if(ck.i){ ck.i--; renderCheck(); } else { ck.phase='intro'; renderCheck(); } };
+    $$('#check .ck-opt').forEach(b=>b.onclick=()=>{
+      ck.ans[ck.i]=+b.dataset.v; b.setAttribute('aria-pressed','true');
+      setTimeout(()=>{   // a beat to see the tap land, then the next question
+        if(ck.i<CK_QS.length-1){ ck.i++; renderCheck(); return; }
+        const prev=(state.checks||[]).at(-1);
+        ck.res=ckScore(ck.ans); ck.prev=prev||null;
+        state.checks=[...(state.checks||[]), ck.res].slice(-30); save();
+        ck.phase='result'; renderCheck(); el.scrollTop=0;
+      },180);
+    });
+  } else {
+    const r=ck.res, prev=ck.prev, lv=ckLevel(r.o);
+    const low=Object.keys(CK_DIMS).filter(k=>r.s[k]<70).sort((a,b)=>r.s[a]-r.s[b]).slice(0,3);
+    const recs=(low.length?low:['well']);
+    el.innerHTML=`<button class="btn ghost sm" id="ck-back">← ${isOnboarded()?'回首頁':'返回'}</button>
+      <div class="eyebrow" style="margin-top:22px"><span>身心指數</span> · ${esc(r.d)}</div>
+      <div class="row" style="align-items:flex-end;gap:14px;margin-top:6px"><span class="ck-big">${r.o}</span>
+        <span style="padding-bottom:12px"><span class="ck-tag" style="margin:0;background:${lv[1]}">${esc(lv[0])}</span>${prev?`<span class="note" style="display:block;margin-top:6px">比上次 ${r.o-prev.o>=0?'+':''}${r.o-prev.o}</span>`:''}</span></div>
+      ${Object.entries(CK_DIMS).map(([k,d])=>{ const v=r.s[k], L=ckLevel(v), dv=prev?v-prev.s[k]:null;
+        return `<div class="ck-dim"><div class="row between"><span><b>${esc(d.name)}</b><span class="ck-tag" style="background:${L[1]}">${esc(L[0])}</span></span>
+          <span class="v">${v}${dv!=null?` · ${dv>=0?'+':''}${dv}`:''}</span></div><div class="ck-bar"><i style="width:${Math.max(3,v)}%;background:${L[1]}"></i></div></div>`; }).join('')}
+      ${r.flag?`<div style="margin:18px 0">${helpNote()}<p class="note" style="margin-top:8px">你的回答顯示最近可能真的不太好過。這不是診斷，但很值得找身心科、諮商師或信任的人聊聊。</p></div>`:''}
+      <div class="section"><div class="section-h"><h2>現在最適合你</h2></div>
+        ${recs.map(k=>`<button class="ck-rec" data-k="${k}"><div><b>${esc(CK_REC[k].t)}</b><span>${esc(CK_REC[k].sub)}</span></div><span>→</span></button>`).join('')}</div>
+      ${isOnboarded()?'':`<button class="btn primary block" id="ck-start" style="margin-top:6px">用這個結果開始設定 →</button>`}
+      <div class="row" style="gap:10px;margin-top:12px"><button class="btn ghost" id="ck-share" style="flex:1">分享結果卡</button><button class="btn ghost" id="ck-again" style="flex:1">重新測</button></div>
+      <p class="note" style="margin-top:18px">建議兩週後再測一次，看看變化。幸福感參考 WHO-5，心情與平靜參考 PHQ-4，睡眠題目是 Melo Mood 自編。這是自我檢視，不是醫療診斷。</p>`;
+    $('#ck-back').onclick=back;
+    $('#ck-again').onclick=openCheck;
+    $('#ck-share').onclick=()=>shareCheckCard(r);
+    $$('#check .ck-rec').forEach(b=>b.onclick=()=>{
+      if(!isOnboarded()){ ckToOnboarding(recs); return; }   // nothing can play before there is a profile
+      CK_REC[b.dataset.k].run();
+    });
+    $('#ck-start')&&($('#ck-start').onclick=()=>ckToOnboarding(recs));
+  }
+}
+// the dimensions that came out lowest become the "最近的狀態" picked in onboarding
+function ckToOnboarding(recs){
+  state.profile.concerns=[...new Set(recs.map(k=>CK_DIMS[k].concern))].slice(0,3); save();
+  startOnboarding(1); setTimeout(()=>$('#ob-name')?.focus(),300);
+}
+function checkCard(){
+  const last=(state.checks||[]).at(-1);
+  const days=last?Math.round((new Date(todayKey())-new Date(last.d))/864e5):0;
+  return `<button class="checkcard" id="home-check"><div><b>身心健檢</b><span>${!last?'3 分鐘，看看你最近的幸福感、心情和睡眠':days>=14?`上次是 ${days} 天前 · 該再測一次了`:days?`${days} 天前測過 · 滿兩週再測最準`:'今天測過 · 兩週後再測，看看變化'}</span></div>
+    ${last?`<span class="n">${last.o}</span>`:'<span>→</span>'}</button>`;
+}
+// the card's QR opens the check itself, so a friend who scans lands straight on the quiz
+async function shareCheckCard(r){
+  const W=1080,H=1350,c=document.createElement('canvas'); c.width=W; c.height=H; const x=c.getContext('2d');
+  const g=x.createLinearGradient(0,0,W,H); g.addColorStop(0,'#141418'); g.addColorStop(1,'#2A1A3A'); x.fillStyle=g; x.fillRect(0,0,W,H);
+  try{ await document.fonts.ready; }catch(e){}
+  const F=(w,px,fam)=>`${w} ${px}px ${fam||'"Noto Sans TC",sans-serif'}`;
+  x.fillStyle='#9B9BA8'; x.font=F(500,34,'"DM Mono",monospace'); x.fillText('MELO MOOD · '+tr('身心健檢'),90,140);
+  x.fillStyle='#F5F5F7'; x.font=F(800,230,'Syne,"Noto Sans TC",sans-serif'); x.fillText(String(r.o),80,390);
+  x.fillStyle='#E4FF57'; x.font=F(700,46); x.fillText(tr('身心指數')+' · '+tr(ckLevel(r.o)[0]),90,530);
+  const col={'var(--jade)':'#4FE0A2','#F5B44A':'#F5B44A','var(--rose)':'#F26AD8'};
+  Object.entries(CK_DIMS).forEach(([k,d],i)=>{ const y=650+i*112, v=r.s[k];
+    x.fillStyle='#F5F5F7'; x.font=F(700,44); x.fillText(tr(d.name),90,y);
+    x.fillStyle='#9B9BA8'; x.font=F(500,40,'"DM Mono",monospace'); x.textAlign='right'; x.fillText(String(v),W-90,y); x.textAlign='left';
+    x.fillStyle='rgba(245,245,247,.12)'; x.fillRect(90,y+26,W-180,18);
+    x.fillStyle=col[ckLevel(v)[1]]; x.fillRect(90,y+26,(W-180)*Math.max(.03,v/100),18); });
+  try{ const qr=new Image(); qr.src='assets/qr-check.svg'; await qr.decode(); x.fillStyle='#fff'; x.fillRect(W-290,H-270,200,200); x.drawImage(qr,W-280,H-260,180,180); }catch(e){}
+  x.fillStyle='#9B9BA8'; x.font=F(500,34); x.fillText(tr('你最近好嗎？3 分鐘測測看'),90,H-170); x.fillText(r.d,90,H-110);
+  const bl=await new Promise(res=>c.toBlob(res,'image/jpeg',.92)), file=new File([bl],`melo-mood-check-${r.d}.jpg`,{type:'image/jpeg'});
+  if(navigator.canShare&&navigator.canShare({files:[file]})){ try{ await navigator.share({files:[file],text:tr('我的身心指數')+` ${r.o} ✦ Melo Mood`}); }catch(e){} return; }
+  const a=document.createElement('a'); a.href=URL.createObjectURL(bl); a.download=file.name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),4000); toast('存好了');
+}
+
 /* ---------- ONBOARDING ---------- */
 const CROWD={url:''};   // 嘖嘖 project page; the welcome screen shows a link once this is set
 let obAudio=null;
@@ -3677,6 +3823,7 @@ function renderOb(){
   if(obStep===0){
     $('#ob-start').onclick=()=>{ obStep=1; renderOb(); };
     $('#ob-demo0').onclick=()=>{ obStopListen(); loadDemo(); };
+    $('#ob-check').onclick=()=>{ obStopListen(); openCheck(); };
     $('#ob-listen').onclick=()=>{
       if(obAudio){ obStopListen(); return; }
       obAudio=new Audio('assets/sc-anxiety.mp3'); obAudio.onended=obStopListen;
@@ -3993,6 +4140,7 @@ armForestWatch();
 if(state.demo) leaveDemo();
 const onboarded = state.profile.name && (state.profile.goals||[]).length && state.profile.tone;
 if(!onboarded){ startOnboarding(); } else { go('home'); }
+if(/[?&]check=1/.test(location.search)) openCheck();
 applyLang();
 if(!inPreview()){ authFromHash().then(afterPayment).then(()=>auth&&loadSrv()); if(auth) loadSub(); }
 </script>
