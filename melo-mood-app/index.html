@@ -1412,18 +1412,18 @@ async function loadClip(key){
   return new Promise((res,rej)=>{ const tx=db.transaction('clips','readonly'); const r=tx.objectStore('clips').get(key); r.onsuccess=()=>res(r.result||null); r.onerror=()=>rej(r.error); });
 }
 /* sequential playback of recorded clips — same pacing/breath-cue path as the ElevenLabs line-stepper */
-async function playOwnPack(kind, lines, onTick, onDone){
+/* one clip per line, then the line's silence; the index is kept on player so a failure can hand over mid-way */
+async function playClips(lines, onTick, onDone, clipUrl){
   const t0=Date.now(), session=player.session;
   for(let i=0;i<lines.length;i++){
     if(!alive(session)) return;
-    const l=lines[i]; onTick&&onTick({idx:i,pct:Math.min(1,(Date.now()-t0)/player.total),done:false});
+    player.idx=i; const l=lines[i]; onTick&&onTick({idx:i,pct:Math.min(1,(Date.now()-t0)/player.total),done:false});
     if(speakableLine(l)){
-      const blob=await loadClip(`${kind}:${i}`);
+      const url=await clipUrl(i);
       if(!alive(session)) return;
-      if(blob){
-        const url=URL.createObjectURL(blob);
-        await new Promise((res,rej)=>{ const a=new Audio(url); player.audio=a; a.onended=res; a.onerror=()=>rej(new Error('audio')); a.play().catch(rej); });
-        URL.revokeObjectURL(url);
+      if(url){
+        try{ await new Promise((res,rej)=>{ const a=new Audio(url); player.audio=a; a.onended=res; a.onerror=()=>rej(new Error('audio')); a.play().catch(rej); }); }
+        finally{ if(url.startsWith('blob:')) URL.revokeObjectURL(url); }
       }
     }
     await new Promise(r=>{ player.timer=setTimeout(r, l.pause||800); });
@@ -1431,6 +1431,11 @@ async function playOwnPack(kind, lines, onTick, onDone){
   if(!alive(session)) return;
   player.playing=false; player.audio=null; onTick&&onTick({idx:-1,pct:1,done:true}); onDone&&onDone();
 }
+function playOwnPack(kind, lines, onTick, onDone){
+  return playClips(lines, onTick, onDone, async i=>{ const blob=await loadClip(`${kind}:${i}`); return blob?URL.createObjectURL(blob):null; });
+}
+/* theme lists read in Melo's voice, one file per line at assets/th/<key>-<i>.mp3; a key goes in here once every line of it is recorded */
+const THEME_AUDIO = {};
 
 /* ---------- pacing: a rushed guide makes people more anxious, not less ---------- */
 const PACES={calm:{name:'很慢',gap:2.1,rate:.82,hint:'句子之間留很長的空白'},
@@ -1485,6 +1490,10 @@ async function playLines(lines, {rate=.9, onTick, onDone, mode='manifest', src, 
   if(src?.mode==='own'){
     try{ await playOwnPack(src.packKind||mode, lines, onTick, onDone); return; }
     catch(e){ if(!alive(session)) return; toast('錄音播放失敗，改用系統聲音'); }
+  }
+  if(src?.mode==='clips'){
+    try{ await playClips(lines, onTick, onDone, i=>`assets/th/${src.packKind}-${i}.mp3`); return; }
+    catch(e){ if(!alive(session)) return; toast('預錄聲音載入失敗，改用系統聲音'); lines=lines.slice(player.idx); player.idx=0; }
   }
   if(src?.mode==='eleven'){
     try{ await playEleven(lines, rate, onTick, onDone); return; }
@@ -2240,7 +2249,10 @@ function helpNote(){
 function renderThemeSet(){
   stopPlayback();
   const k=state.ui.theme, T=THEME_SETS[k]; if(!T) return backToLib();
-  const src=voiceSource(k, true);
+  let src=voiceSource(k, true);
+  // the lists carry no names, so the recordings fit everyone reading in Chinese; someone who picked the device voice keeps it
+  if(src.mode==='browser' && THEME_AUDIO[k] && chosenVoice()!=='system' && lang()!=='en')
+    src={mode:'clips', label:VOICES.melo.name, sub:'預錄真人聲音 · '+VOICES.melo.role, voice:'melo', packKind:k};
   const lines=themeScript(k);
   const fav=isFav('theme:'+k);
   const offerRecord = src.mode==='browser' && chosenVoice()==='mine';
