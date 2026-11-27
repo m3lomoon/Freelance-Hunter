@@ -1259,7 +1259,9 @@ const VOICES = {
     bio:'裝置內建的語音，不用連接碼，任何一段都能唸，會自動挑你手機上最自然的那一個。想更像真人：iPhone 到「設定 → 輔助使用 → 語音內容 → 聲音 → 中文」下載「美佳（高品質）」；電腦用 Edge 開，會有接近真人的「自然」語音。'},
 };
 const DEMO_VOICES = VOICES;   // the pre-rendered packs are keyed by the same names
-const chosenVoice = () => VOICES[state.settings.voice] ? state.settings.voice : 'melo';
+// the brand voice is offered only once something can actually speak with it; until then it would sound like the device voice
+const brandReady = () => !!state.settings.elevenKey || libReady('brand') || !!srvVoice('brand');
+const chosenVoice = () => { const k=state.settings.voice; return !VOICES[k] || (k==='brand' && !brandReady()) ? 'melo' : k; };
 /* what this voice can actually do right now, and why */
 function voiceStatus(k){
   const V=VOICES[k], s=state.settings;
@@ -1273,6 +1275,7 @@ function voiceStatus(k){
   }
   if(s.elevenKey) return {ok:true, mode:'eleven', id:V.id, note:'即時合成'};
   if(srvVoice(k)) return {ok:true, mode:'server', note:'真人聲音 · 每一段都能唸'};
+  if(libReady(k)) return {ok:true, mode:'clips', note:'真人聲音 · 情境冥想、每日練習、睡前導引與主題清單'};
   return {ok:false, mode:'pack', note:'只有預錄的幾段 · Glow 會員每一段都用真人聲音'};
 }
 const DEMO_PACK = {
@@ -1344,7 +1347,7 @@ function voiceSource(kind, exact){
   if(st.mode==='eleven'){ s.voiceId=st.id; s.voiceName=V.name;
     return {mode:'eleven', label:V.name, sub:V.role, voice:k}; }
   const sv=srvVoice(k), viaServer=()=> sv ? {mode:'server', label:V.name, sub:'真人聲音 · '+V.role, voice:k, srv:sv} : null;
-  return pickSource(kind, exact, k, V, viaServer) || viaServer() || {mode:'browser', label:'系統聲音', sub:'連接 ElevenLabs 或去錄音室錄，就能用你的聲音', voice:'system'};
+  return pickSource(kind, exact, k, V, viaServer) || viaServer() || {mode:'browser', label:'系統聲音', sub:'這一段還沒有真人錄音 · 先用手機內建聲音', voice:'system'};
 }
 /* recorded audio first (free and exact), then the server voice, then the device voice */
 function pickSource(kind, exact, k, V, viaServer){
@@ -1356,12 +1359,12 @@ function pickSource(kind, exact, k, V, viaServer){
   }
   const P=DEMO_PACK[kind];
   if(!P) return null;
-  if(lang()!=='tw') return viaServer() || {mode:'browser', label:'系統聲音', sub:'預錄音檔只有中文版 · 連接 ElevenLabs 可用任何語言', voice:'system'};
+  if(lang()!=='tw') return viaServer() || {mode:'browser', label:'系統聲音', sub:'真人錄音只有中文版 · 先用手機內建聲音', voice:'system'};
   // the recordings call the listener Melody by name; anyone else gets a voice that says theirs
-  if((state.profile.name||'')!=='Melody') return viaServer() || {mode:'browser', label:'系統聲音', sub:`預錄音檔唸的是別人的名字 · 連接 ElevenLabs 就會唸「${state.profile.name||'你'}」`, voice:'system'};
+  if((state.profile.name||'')!=='Melody') return viaServer() || {mode:'browser', label:'系統聲音', sub:'這一段還沒有真人錄音 · 先用手機內建聲音', voice:'system'};
   const fits = kind==='sleep' || (state.ui.goal===P.goal && state.profile.tone===P.tone && state.ui.minutes===P.minutes);
   if(fits){ const v=VOICES[demoVoice()]; return {mode:'pack', label:v.name, sub:'預錄示範 · '+v.role, voice:demoVoice()}; }
-  return viaServer() || {mode:'browser', label:'系統聲音', sub:`${V.name}要連接 ElevenLabs 才能唸這一段 · 先用系統聲音`, voice:'system'};
+  return viaServer() || {mode:'browser', label:'系統聲音', sub:'這一段還沒有真人錄音 · 先用手機內建聲音', voice:'system'};
 }
 function ownSub(kind){ if(kind==='sleep') return '你錄的睡前導引'; if(kind==='manifest') return '你錄的每日練習'; const S=SCENES[kind]||THEME_SETS[kind]; return S?`你錄的「${S.name}」`:'你的聲音'; }
 
@@ -1419,7 +1422,7 @@ async function playClips(lines, onTick, onDone, clipUrl){
     if(!alive(session)) return;
     player.idx=i; const l=lines[i]; onTick&&onTick({idx:i,pct:Math.min(1,(Date.now()-t0)/player.total),done:false});
     if(speakableLine(l)){
-      const url=await clipUrl(i);
+      const url=await clipUrl(i,l);
       if(!alive(session)) return;
       if(url){
         try{ await new Promise((res,rej)=>{ const a=new Audio(url); player.audio=a; a.onended=res; a.onerror=()=>rej(new Error('audio')); a.play().catch(rej); }); }
@@ -1436,6 +1439,35 @@ function playOwnPack(kind, lines, onTick, onDone){
 }
 /* theme lists read in Melo's voice, one file per line at assets/th/<key>-<i>.mp3; a key goes in here once every line of it is recorded */
 const THEME_AUDIO = {};
+
+/* ---------- voice library: every fixed line recorded once per voice, shared by every screen ----------
+   assets/v/<voice>/<hash>.mp3, hash = FNV-1a of the line with the listener's name taken out
+   (tools/voice_lines.js lists the lines, tools/voice_lib.py cuts the takes and writes assets/v/index.json) */
+let voiceLib=null;   // {melo:Set, deep:Set} once the index has loaded
+function fnv(t){ let h=0x811c9dc5; for(const ch of t){ h^=ch.codePointAt(0); h=Math.imul(h,0x01000193)>>>0; } return h.toString(16).padStart(8,'0'); }
+// the recordings never say a name: "嗨，小明。" is recorded as "嗨。", "小明，聽好了" as "聽好了"
+function libText(t,name){
+  let s=t;
+  for(const n of [name,'＿'].filter(Boolean)) s=s.split(n).join('\u0000');
+  s=s.replace(/^(嗨，|Okay )?你(?=[，。])/,'$1\u0000');   // with no name set the openings say 你 where the name goes
+  return s.replace(/\u0000/g,'').replace(/^[，、\s]+/,'').replace(/\s*，(?=[。，！？])/g,'').replace(/\s+，/g,'，').trim();
+}
+const libKey=l=>speakableLine(l)?fnv(libText(l.t,state.profile.name||'')):null;
+const libReady=k=>!!voiceLib?.[k]?.size;
+// switch a device-voice source to recorded clips when the chosen voice has every spoken line of this script
+function libUpgrade(src, lines){
+  const k=chosenVoice();
+  if(src.mode!=='browser' || !libReady(k) || lang()==='en') return src;
+  if(lines.some(l=>{ const h=libKey(l); return h && !voiceLib[k].has(h); })) return src;
+  const V=VOICES[k];
+  return Object.assign(src,{mode:'clips', lib:true, label:V.name, sub:'真人聲音 · '+V.role, voice:k});
+}
+fetch('assets/v/index.json').then(r=>r.ok?r.json():null).then(j=>{
+  if(!j) return;
+  voiceLib={}; for(const [k,a] of Object.entries(j)) voiceLib[k]=new Set(a);
+  // a screen drawn before the index arrived still shows the device voice; redraw it unless something is playing
+  if(!player.playing){ const id=$('.screen.active')?.id; if(id==='manifest') renderManifest(); else if(id==='sleep') renderSleep(); }
+}).catch(()=>{});
 
 /* ---------- pacing: a rushed guide makes people more anxious, not less ---------- */
 const PACES={calm:{name:'很慢',gap:2.1,rate:.82,hint:'句子之間留很長的空白'},
@@ -1492,7 +1524,10 @@ async function playLines(lines, {rate=.9, onTick, onDone, mode='manifest', src, 
     catch(e){ if(!alive(session)) return; toast('錄音播放失敗，改用系統聲音'); }
   }
   if(src?.mode==='clips'){
-    try{ await playClips(lines, onTick, onDone, i=>`assets/th/${src.packKind}-${i}.mp3`); return; }
+    // a line the library doesn't have (an AI rewrite, say) hands the rest over to the device voice instead of going silent
+    const url = src.lib ? (i,l)=>{ const h=libKey(l); if(h && !voiceLib?.[src.voice]?.has(h)) throw new Error('clip'); return h&&`assets/v/${src.voice}/${h}.mp3`; }
+                        : i=>`assets/th/${src.packKind}-${i}.mp3`;
+    try{ await playClips(lines, onTick, onDone, url); return; }
     catch(e){ if(!alive(session)) return; toast('預錄聲音載入失敗，改用系統聲音'); lines=lines.slice(player.idx); player.idx=0; }
   }
   if(src?.mode==='eleven'){
@@ -1688,6 +1723,7 @@ Object.assign(EN,{"說出五個你看得到的東西。不用出聲，心裡數�
 Object.assign(EN,{"完成 ✦":"Done ✦","帶著這個頻率走進今天。":"Carry this frequency into your day.","坐上 Melo 雲拍一張":"Sit on the Melo cloud for a photo","自拍去背，連同今天的冥想時間做成限動卡":"A cut-out selfie plus today's meditation time, story-sized","先不用":"Not now","坐上 Melo 雲":"Sit on the Melo cloud","把你從背景裡抱出來，放到雲上。":"We lift you out of the background and onto the cloud.","雲正在飄過來…":"The cloud is drifting in…","3 秒後拍":"Shoot in 3 seconds","從相簿選一張":"Choose from photos","分享到限動":"Share to story","存到相簿":"Save","重拍":"Retake","照片只在這台裝置上處理，不會上傳。":"Your photo is processed on this device and never uploaded.","坐上 Melo 雲自拍 →":"Cloud selfie →","這裡開不了相機 · 用「從相簿選一張」":"No camera here · use “Choose from photos”","開不了相機 · 用「從相簿選一張」":"Camera unavailable · use “Choose from photos”","雲沒載入，重開一次試試":"The cloud didn't load — try reopening","去背沒載入 · 先用圓框拍":"Cut-out didn't load · using a round frame","靠近鏡頭一點，讓雲找到你":"Come a little closer so the cloud can find you","把你放上雲…":"Placing you on the cloud…","沒找到人 · 用圓框代替":"No one found · using a round frame","相機還沒打開":"Camera isn't on yet","這張照片打不開":"Couldn't open that photo","存好了，去 IG 限動選這張":"Saved — pick it in your IG story","存好了":"Saved","今天冥想":"Meditated today","累積":"Sessions","連續":"Streak","總時數":"Total","今天在 Melo Mood 的雲上冥想了":"Meditated on the Melo Mood cloud today for","持平，明天再試一次":"Steady — try again tomorrow","記錄了，有時候會這樣":"Logged. Some days are like that"});
 Object.assign(EN,{"分享給朋友":"Share with a friend","掃 QR 就能用":"Scan a QR code to use it","掃一下就能用":"Scan and it just works","朋友用手機相機掃這個 QR code，就會在瀏覽器打開 Melo Mood，不用下載。":"A friend scans this QR code with their phone camera and Melo Mood opens in the browser. Nothing to download.","傳連結給朋友":"Send the link to a friend","複製連結":"Copy link","連結複製好了":"Link copied","連結複製好了，貼給朋友就好":"Link copied. Paste it to a friend.","iPhone 用 Safari 開，點分享鈕 → 加入主畫面，就像 App 一樣。":"On iPhone open it in Safari, tap Share → Add to Home Screen, and it works like an app.","我在用 Melo Mood：用自己的聲音唸冥想引導給自己聽。":"I'm using Melo Mood: guided meditations read in my own voice.","放在手機上":"Put it on your phone","不用下載":"No download","給朋友掃 QR code →":"Show a friend the QR code →","已經在主畫面了 ✦ 像 App 一樣開啟，沒網路也能開。":"Already on your home screen ✦ It opens like an app, even offline.","裝到主畫面":"Add to home screen","像 App 一樣全螢幕開啟，沒網路也能開。":"Opens full screen like an app, even offline.","點 Safari 下方的":"Tap the","分享鈕":"Share button","（方形加箭頭）":" (a square with an arrow) at the bottom of Safari","往下滑，選":"Scroll down and choose","加入主畫面":"Add to Home Screen","點":"Tap","新增":"Add","，主畫面就多一個 Melo Mood":", and Melo Mood appears on your home screen","要用 Safari 開才有這個選項。":"This option only appears in Safari.","你現在在 LINE / IG 的內建瀏覽器裡，沒辦法安裝。點右上角「⋯」→ 用 Safari（或 Chrome）開啟，再回來這裡。":"You're inside the LINE / IG built-in browser, which can't install apps. Tap the ⋯ at the top right, open in Safari (or Chrome), then come back here.","Chrome 右上角選單 →":"Chrome menu at the top right →","安裝應用程式":"Install app","（或「加到主畫面」）。":" (or \"Add to Home screen\").","隱私權政策":"Privacy Policy","服務條款":"Terms of Service","登入即表示你同意":"By signing in you agree to the ","與":" and ","訂閱即表示你同意":"By subscribing you agree to the ","刪除帳號":"Delete account","刪除帳號？":"Delete your account?","會永久刪掉":"This permanently deletes ","這個登入帳號，還有雲端上的方案紀錄、用量，以及 AI 複製的聲音（連 ElevenLabs 那邊一起刪）。刪了就回不來。":", your plan record and usage in the cloud, and your AI voice (including the copy at ElevenLabs). It can't be undone.","日記、心情和錄音本來就只存在這支手機上，不會因為刪帳號消失。":"Your journal, moods and recordings only live on this phone, so deleting the account doesn't remove them.","同時清除這支手機上的日記、設定和錄音":"Also clear the journal, settings and recordings on this phone","永久刪除":"Delete permanently","刪除中…":"Deleting…","帳號刪除了":"Account deleted","、停止之後的每期扣款":", stops future charges","綠界沒有回應，扣款還沒停掉，所以先不刪。晚點再試":"ECPay didn't respond, so billing isn't stopped yet and nothing was deleted. Try again later.","你的方案是在 App Store / Google Play 訂的，請先到那邊取消":"Your plan was bought in the App Store / Google Play. Cancel it there first.","刪除失敗，晚點再試":"Delete failed. Try again later.","裝好了 ✦ 去主畫面找它":"Installed ✦ Find it on your home screen"});
 Object.assign(EN,{"先聽 60 秒":"Listen for 60 seconds","停止":"Stop","一段「焦慮想太多」的急救引導，戴上耳機更好。":"A rescue guide for racing thoughts (in Chinese). Headphones help.","開始設定 · 約 1 分鐘":"Set up · about 1 minute","隱私說明":"Privacy","資料只存在你的手機裡。":"Your data stays on your phone.","AI 讀你的目標與日記，寫出專屬引導，再用聲音唸給你聽。免下載、免註冊。":"AI reads your goals and journal, writes a guide just for you, then reads it aloud. No download, no sign-up.","這個瀏覽器不能自動播放，請再點一次":"This browser blocked autoplay. Tap once more.","嘖嘖募資進行中，了解回饋方案 →":"Crowdfunding is live. See the rewards →"});
+Object.assign(EN,{"這一段還沒有真人錄音 · 先用手機內建聲音":"No studio recording for this one yet · using your phone's voice","真人錄音只有中文版 · 先用手機內建聲音":"Studio recordings are Chinese only · using your phone's voice","也可以在「我 → 聲音錄音室」錄你自己的聲音，完全免費。":"You can also record your own voice in Me → Recording Studio, free.","真人聲音 · 情境冥想、每日練習、睡前導引與主題清單":"Real voice · moments, daily practice, sleep guide and theme lists","預錄聲音載入失敗，改用系統聲音":"Couldn't load the recording; using your phone's voice"});
 const EN_KEYS=Object.keys(EN).sort((a,b)=>b.length-a.length);
 const CN_KEYS=Object.keys(CN.phrases).sort((a,b)=>b.length-a.length);
 const HAN=/[\u4e00-\u9fff]/;
@@ -2148,7 +2184,7 @@ function renderScene(){
   const lines= useAudio ? SCENE_AUDIO[k].lines : src.mode==='own' ? sceneScript(k,p.name) : buildScene(k,{tone:S.tone,name:p.name,minutes:mins});
   const st=sceneStats(k), fav=isFav('scene:'+k);
   const offerRecord = !useAudio && src.mode==='browser' && chosenVoice()==='mine' && !!SCENES[k];
-  if(!useAudio && SCENE_AUDIO[k] && !nameMatches) src.sub=`預錄音檔唸的是別人的名字 · 連接 ElevenLabs 就會唸「${state.profile.name||'你'}」`;
+  libUpgrade(src, lines);
   $('#manifest').innerHTML=`
     <div class="row between" style="margin-bottom:14px"><button class="btn ghost sm" id="sc-back">← 冥想庫</button>
       <button class="btn ghost sm" id="sc-fav" aria-pressed="${fav}">${fav?'★ 已收藏':'☆ 收藏'}</button></div>
@@ -2199,6 +2235,7 @@ function renderDaily(){
   const fixedScript = src.mode==='pack' || src.mode==='own';
   const lines= !fixedScript ? buildScript({goal:state.ui.goal,minutes:state.ui.minutes,tone:p.tone||'gentle',name:p.name,seed:mfSeed+state.ui.goal+state.ui.minutes})
     : src.mode==='own' ? DEMO_PACK.manifest.lines.map(l=>({...l,t:withName(l.t)})) : DEMO_PACK.manifest.lines;
+  libUpgrade(src, lines);
   const offerRecord = src.mode==='browser' && chosenVoice()==='mine';
   $('#manifest').innerHTML=`
     <div class="row between" style="margin-bottom:14px"><button class="btn ghost sm" id="sc-back">← 冥想庫</button></div>
@@ -2250,10 +2287,11 @@ function renderThemeSet(){
   stopPlayback();
   const k=state.ui.theme, T=THEME_SETS[k]; if(!T) return backToLib();
   let src=voiceSource(k, true);
-  // the lists carry no names, so the recordings fit everyone reading in Chinese; someone who picked the device voice keeps it
-  if(src.mode==='browser' && THEME_AUDIO[k] && chosenVoice()!=='system' && lang()!=='en')
-    src={mode:'clips', label:VOICES.melo.name, sub:'預錄真人聲音 · '+VOICES.melo.role, voice:'melo', packKind:k};
   const lines=themeScript(k);
+  libUpgrade(src, lines);
+  // the per-list files are Melo's voice, so only someone listening to Melo gets them
+  if(src.mode==='browser' && THEME_AUDIO[k] && chosenVoice()==='melo' && lang()!=='en')
+    src={mode:'clips', label:VOICES.melo.name, sub:'真人聲音 · '+VOICES.melo.role, voice:'melo', packKind:k};
   const fav=isFav('theme:'+k);
   const offerRecord = src.mode==='browser' && chosenVoice()==='mine';
   $('#manifest').innerHTML=`
@@ -2925,6 +2963,7 @@ function renderSleepGuide(){
   const fixedScript = src.mode==='pack' || src.mode==='own';
   slLines= !fixedScript ? buildSleep({goals:p.goals,name:p.name,minutes:state.ui.sleepMinutes})
     : src.mode==='own' ? DEMO_PACK.sleep.lines.map(l=>({...l,t:withName(l.t)})) : DEMO_PACK.sleep.lines;
+  libUpgrade(src, slLines);
   const offerRecord = src.mode==='browser' && chosenVoice()==='mine';
   $('#sleep').innerHTML=`
     <button class="btn sm ghost" id="sl-back" style="margin-bottom:8px">← 助眠音</button>
@@ -3501,10 +3540,10 @@ function openVoiceSheet(after){
     </button>`;
   };
   // 系統聲音 stays as the silent fallback everywhere else; it's just not something to pick on purpose here
-  const body=()=>Object.keys(VOICES).filter(k=>k!=='system').map(card).join('');
+  const body=()=>Object.keys(VOICES).filter(k=>k!=='system' && (k!=='brand' || brandReady())).map(card).join('');
   sheet(`<h2>誰來唸給你聽</h2><p class="sub">每一段引導都用這個聲音。隨時可以換，換了就記住。</p>
     <div id="v-list">${body()}</div>
-    <p class="note" style="margin:4px 0 16px">${state.settings.elevenKey?'已連接 ElevenLabs，可以在「我 → 選擇播放聲音」挑帳號裡的其他聲音。':'沒有連接 ElevenLabs 時，可以在「我 → 聲音錄音室」錄你自己的聲音，完全免費；其餘段落用系統聲音。'}</p>
+    <p class="note" style="margin:4px 0 16px">${state.settings.elevenKey?'已連接 ElevenLabs，可以在「我 → 選擇播放聲音」挑帳號裡的其他聲音。':'也可以在「我 → 聲音錄音室」錄你自己的聲音，完全免費。'}</p>
     ${srvCan('glow')||state.settings.elevenKey?'':'<button class="btn ghost sm block" id="v-glow" style="margin:-6px 0 14px">Glow：Melo 與 Evan 用真人聲音唸每一段 →</button>'}
     <button class="btn primary block" id="v-ok">選這個聲音</button>`, b=>{
     $('#v-glow',b)&&($('#v-glow',b).onclick=()=>upsell('glow','真人聲音唸每一段引導'));

@@ -1,9 +1,9 @@
 /* Melo Mood service worker: the app opens offline after the first visit.
-   - the page and manifest: network first (a new version shows up as soon as there is a connection), cached copy when offline
+   - the page, manifest and json indexes: network first (a new version shows up as soon as there is a connection), cached copy when offline
    - images, fonts, small assets: cache first, refreshed in the background
    - audio (Range requests), Supabase, ElevenLabs, Anthropic: never touched, always straight to the network
    Bump VERSION to drop old caches. */
-const VERSION = 'v2';
+const VERSION = 'v3';
 const CACHE = 'melomood-' + VERSION;
 const SHELL = ['./', 'manifest.webmanifest', 'assets/icon-192.png', 'assets/icon-512.png'];
 
@@ -23,7 +23,7 @@ self.addEventListener('fetch', e => {
   if (!sameOrigin && !font) return;
   if (/\.(mp3|mp4|webm|m4a)$/i.test(url.pathname)) return;
 
-  const page = req.mode === 'navigate' || /\.(webmanifest)$/.test(url.pathname);
+  const page = req.mode === 'navigate' || /\.(webmanifest|json)$/.test(url.pathname);   // json: the voice index must never be stale
   e.respondWith(page ? networkFirst(req) : cacheFirst(req));
 });
 

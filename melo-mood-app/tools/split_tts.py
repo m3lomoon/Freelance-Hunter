@@ -35,7 +35,9 @@ def duration(src):
     return float(out)
 
 
-def main(src, key, n):
+def cut(src, dsts):
+    """Cut src into len(dsts) files at its longest pauses; returns the clip lengths, or exits without writing."""
+    n = len(dsts)
     total = duration(src)
     found = silences(src)
     gaps = [(s, e) for s, e in found if s > 0.05 and e < total - 0.05]
@@ -48,16 +50,22 @@ def main(src, key, n):
     for s, e in cuts:
         bounds += [s + PAD, e - PAD]
     bounds.append(min(total, tail))
-    OUT.mkdir(parents=True, exist_ok=True)
-    for i in range(n):
+    lengths = []
+    for i, dst in enumerate(dsts):
         a, b = bounds[2 * i], bounds[2 * i + 1]
-        dst = OUT / f"{key}-{i}.mp3"
+        Path(dst).parent.mkdir(parents=True, exist_ok=True)
         subprocess.run(
             ["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-i", src, "-ss", f"{a:.3f}", "-to", f"{b:.3f}",
              "-ac", "1", "-b:a", "48k", str(dst)],
             check=True,
         )
-        print(f"{dst.name}: {b - a:.2f}s")
+        lengths.append(b - a)
+    return lengths
+
+
+def main(src, key, n):
+    for i, sec in enumerate(cut(src, [OUT / f"{key}-{i}.mp3" for i in range(n)])):
+        print(f"{key}-{i}.mp3: {sec:.2f}s")
 
 
 if __name__ == "__main__":
