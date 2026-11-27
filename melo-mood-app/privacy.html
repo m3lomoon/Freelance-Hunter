@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>隱私權政策 · Melo Mood</title>
+<meta name="robots" content="index,follow">
+<link rel="icon" href="assets/icon-192.png">
+<style>
+  :root{--bg:#0D0D10;--text:#F5F5F7;--muted:#9B9BA8;--line:rgba(245,245,247,.12);--moon:#E4FF57}
+  @media (prefers-color-scheme:light){:root{--bg:#FAFAF7;--text:#17171B;--muted:#5C5C68;--line:rgba(0,0,0,.12);--moon:#5A6B00}}
+  *{box-sizing:border-box} html{background:var(--bg)}
+  body{margin:0 auto;max-width:720px;padding:32px 20px 80px;background:var(--bg);color:var(--text);
+    font:16px/1.8 "Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif}
+  a{color:var(--moon)} h1{font-size:28px;margin:8px 0 4px} h2{font-size:18px;margin:36px 0 8px}
+  .meta,.lang{color:var(--muted);font-size:14px} table{width:100%;border-collapse:collapse;font-size:14.5px;margin:10px 0}
+  td,th{border-bottom:1px solid var(--line);padding:8px 6px;text-align:left;vertical-align:top} th{color:var(--muted);font-weight:500}
+  ul{padding-left:20px} li{margin:4px 0} hr{border:0;border-top:1px solid var(--line);margin:48px 0}
+  .back{font-size:14px}
+</style>
+</head>
+<body>
+<p class="back"><a href="./">← 回到 Melo Mood</a> · <a href="#en">English</a></p>
+<h1>隱私權政策</h1>
+<p class="meta">最後更新：2026 年 10 月 27 日 · 適用於 Melo Mood 網頁版（以下稱「本服務」）</p>
+
+<p>先講重點：<b>你的日記、心情分數和錄音檔，只存在你自己的裝置上，不會傳到我們的伺服器。</b>只有你主動登入、訂閱，或使用需要雲端的聲音與 AI 功能時，才會有少量資料離開你的手機，下面逐項說明。</p>
+
+<h2>1. 只存在你裝置上的資料</h2>
+<ul>
+  <li>名字、目標、日記、感恩清單、心情分數、練習紀錄、前後評分、收藏、設定、你錄的聲音檔。</li>
+  <li>存放在瀏覽器的 localStorage 與 IndexedDB。我們沒有這些資料的副本；清除瀏覽器資料、換手機或刪掉主畫面圖示，資料就會消失，所以請定期用「我 → 匯出備份」。</li>
+</ul>
+
+<h2>2. 登入與訂閱時，我們會處理的資料</h2>
+<table>
+  <tr><th>資料</th><th>為什麼</th><th>保存多久</th></tr>
+  <tr><td>Email</td><td>用登入碼登入；方案跟著帳號走</td><td>直到你刪除帳號</td></tr>
+  <tr><td>方案、狀態、到期日</td><td>決定你能用哪些功能</td><td>直到你刪除帳號</td></tr>
+  <tr><td>每月用量（真人聲音字數、AI 次數）</td><td>公平使用額度</td><td>直到你刪除帳號</td></tr>
+  <tr><td>付款紀錄（訂單編號、金額、時間、綠界回傳的交易資訊）</td><td>對帳、退款、稅務與法令要求</td><td>依法令保存，不含你的 Email，帳號刪除後仍會保留</td></tr>
+</table>
+<p>信用卡號由綠界科技（ECPay）處理，不經過我們，我們看不到也不會儲存。</p>
+
+<h2>3. 使用雲端功能時，資料會送到哪裡</h2>
+<table>
+  <tr><th>功能</th><th>送出什麼</th><th>送給誰</th></tr>
+  <tr><td>Glow 真人聲音（Melo / Evan）</td><td>要朗讀的那一句文字</td><td>ElevenLabs（經我們的伺服器）。合成好的音檔會存在我們的私有儲存空間，供重複播放；同一句、同一聲音只合成一次</td></tr>
+  <tr><td>Muse AI 複製你的聲音</td><td>你錄的聲音樣本（30–60 秒），且必須先勾選同意</td><td>ElevenLabs（經我們的伺服器）。<b>樣本本身我們不留存</b>，只留下聲音 ID；用這個聲音合成的音檔屬於你的帳號</td></tr>
+  <tr><td>Muse AI 重寫引導詞 / 每週回顧</td><td>你最近的幾篇日記摘要（心情、標籤、感謝、筆記，各自截短）與練習統計</td><td>Anthropic（經我們的伺服器）。只用於當次請求，<b>我們不儲存</b>你的日記內容；Anthropic 依其條款處理</td></tr>
+  <tr><td>自己的 ElevenLabs / Claude 連接碼（選填）</td><td>你貼的連接碼只存在你的裝置；要唸的句子或日記由你的裝置直接送到那兩家服務</td><td>ElevenLabs、Anthropic（不經過我們）</td></tr>
+  <tr><td>網頁字型、Spotify 嵌入、去背模型</td><td>載入時你的 IP 位址與瀏覽器資訊會被這些服務看到</td><td>Google Fonts、Spotify、jsDelivr；只在你開啟相關畫面時載入</td></tr>
+</table>
+<p>相機與麥克風：只在你按下「錄音」或「坐上 Melo 雲自拍」時，經你的同意才開啟。自拍的去背在你的手機上完成，照片不會上傳。</p>
+
+<h2>4. 我們不做的事</h2>
+<ul>
+  <li>不放廣告、不做行為追蹤、不使用第三方分析工具、不出售或出租你的資料。</li>
+  <li>不會把你的日記用來訓練任何 AI 模型。</li>
+</ul>
+
+<h2>5. 你的權利</h2>
+<ul>
+  <li><b>刪除帳號：</b>「我 → 方案 → 刪除帳號」。會停止之後的扣款，並刪除你的登入帳號、方案紀錄、用量、AI 聲音（含 ElevenLabs 上的聲音與用它合成的音檔）。</li>
+  <li><b>刪除 AI 聲音：</b>「我 → 方案 → AI 複製你的聲音 → 刪除」。</li>
+  <li><b>備份與帶走資料：</b>「我 → 匯出備份」。</li>
+  <li>想查詢、更正或有其他要求，請寄信到下方聯絡信箱。</li>
+</ul>
+
+<h2>6. 兒童</h2>
+<p>本服務不是為 13 歲以下兒童設計，我們不會刻意蒐集他們的資料。</p>
+
+<h2>7. 這不是醫療服務</h2>
+<p>Melo Mood 是陪你練習的工具，不是醫療、心理治療或診斷。如果你現在很辛苦：安心專線 <a href="tel:1925">1925</a>（24 小時）、生命線 <a href="tel:1995">1995</a>、張老師 <a href="tel:1980">1980</a>。</p>
+
+<h2>8. 變更與聯絡</h2>
+<p>政策有重大修改時，會在 App 內提醒並更新上方日期。聯絡信箱：<b>［發布前請填入客服信箱］</b></p>
+
+<hr>
+<h1 id="en">Privacy Policy</h1>
+<p class="meta">Last updated: 27 Oct 2026 · Applies to the Melo Mood web app ("the Service").</p>
+<p><b>In short: your journal, mood scores and recordings stay on your own device and are not sent to our servers.</b> Only when you sign in, subscribe, or use the cloud voice and AI features does a small amount of data leave your phone.</p>
+
+<h2>On your device only</h2>
+<p>Name, goals, journal, gratitude lists, mood scores, practice history, ratings, favourites, settings and your voice recordings live in your browser (localStorage / IndexedDB). We hold no copy. Use "Me → Export backup" before switching phones.</p>
+
+<h2>What we process when you sign in or subscribe</h2>
+<ul>
+  <li><b>Email</b> (login by one-time code), <b>plan, status and renewal date</b>, and <b>monthly usage</b> counters (voice characters, AI calls) — kept until you delete your account.</li>
+  <li><b>Payment records</b> (order number, amount, time, transaction data returned by ECPay) — kept as required for accounting and law; they do not contain your email and remain after account deletion. Card numbers are handled by ECPay and never reach us.</li>
+</ul>
+
+<h2>Cloud features and third parties</h2>
+<ul>
+  <li><b>Glow voices:</b> the sentence to be read is sent to ElevenLabs through our server; the audio is cached in our private storage so identical sentences are synthesized once.</li>
+  <li><b>Muse voice clone:</b> your 30–60 second sample (only after you tick consent) is sent to ElevenLabs through our server. We do not keep the sample, only the voice ID.</li>
+  <li><b>Muse AI scripts and weekly review:</b> short excerpts of your recent journal entries and practice stats are sent to Anthropic through our server for that single request. We do not store them.</li>
+  <li><b>Your own ElevenLabs / Claude keys (optional):</b> stored only on your device; requests go from your device straight to those services.</li>
+  <li>Google Fonts, Spotify embeds and jsDelivr (selfie cut-out model) see your IP address when those parts load.</li>
+</ul>
+<p>Camera and microphone are used only when you tap record or the cloud selfie, with your permission. Selfie cut-out runs on your phone; photos are not uploaded.</p>
+
+<h2>What we do not do</h2>
+<p>No ads, no behavioural tracking, no third-party analytics, no selling of data, and no training of AI models on your journal.</p>
+
+<h2>Your rights</h2>
+<p><b>Delete account:</b> Me → Plan → Delete account (stops future charges; removes your account, plan record, usage, and your AI voice including the copy at ElevenLabs). <b>Delete AI voice:</b> Me → Plan → AI voice → Delete. <b>Take your data:</b> Me → Export backup. Other requests: write to the contact address below.</p>
+
+<h2>Children</h2>
+<p>The Service is not designed for children under 13.</p>
+
+<h2>Not medical care</h2>
+<p>Melo Mood is a practice tool, not medical care, therapy or diagnosis. If you are in crisis, contact local emergency services or a crisis line (Taiwan: 1925, 1995, 1980).</p>
+
+<h2>Contact</h2>
+<p><b>[Fill in the support email before publishing]</b></p>
+</body>
+</html>
