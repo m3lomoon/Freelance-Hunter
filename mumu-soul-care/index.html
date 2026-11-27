@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mumu Soul Care · 療癒茶飲</title>
+<meta name="description" content="為忙碌的日子準備的療癒茶飲。每包附一個 QR，掃了就能聽一段專屬的聲音引導。加入預購名單，第一批開賣先通知你。">
+<!-- remove this line on launch day so search engines can find the site -->
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#F4EEE4">
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+<link rel="canonical" href="https://m3lomoon.github.io/Freelance-Hunter/mumu-soul-care/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Mumu Soul Care">
+<meta property="og:title" content="Mumu Soul Care · 一杯茶的時間，把自己慢慢接回來">
+<meta property="og:description" content="療癒茶飲 × 專屬聲音引導。加入預購名單，第一批開賣先通知你。">
+<meta property="og:url" content="https://m3lomoon.github.io/Freelance-Hunter/mumu-soul-care/">
+<meta property="og:image" content="https://m3lomoon.github.io/Freelance-Hunter/mumu-soul-care/assets/og.jpg">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&family=Noto+Sans+TC:wght@400;500;700&family=Cormorant+Garamond:ital,wght@0,500;1,500&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap"></noscript>
+<style>
+/* one place to retune the whole brand: colours first, then the two font stacks */
+:root{
+  --paper:#F4EEE4; --paper-2:#EBE2D3; --ink:#2A241F; --muted:#6F655A; --line:rgba(42,36,31,.14);
+  --tea:#2F4A3A; --tea-ink:#F4EEE4; --clay:#C97B5A; --honey:#D9B26F; --blush:#E9C9BC;
+  --serif:"Noto Serif TC","Songti TC","PMingLiU",serif;
+  --sans:"Noto Sans TC",system-ui,-apple-system,"PingFang TC","Microsoft JhengHei",sans-serif;
+  --latin:"Cormorant Garamond","Noto Serif TC",serif;
+  --r:22px; --gut:max(20px,env(safe-area-inset-left));
+  color-scheme:light;
+}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.75}
+a{color:inherit}
+img{display:block;max-width:100%}
+.wrap{width:min(1080px,100% - 2*var(--gut));margin-inline:auto}
+section{padding:72px 0}
+.eyebrow{font-family:var(--latin);font-style:italic;font-size:19px;color:var(--clay);letter-spacing:.02em}
+h1,h2,h3{font-family:var(--serif);font-weight:700;line-height:1.3;letter-spacing:.01em}
+h1{font-size:clamp(32px,7vw,54px);text-wrap:balance}
+h2{font-size:clamp(26px,4.6vw,38px);text-wrap:balance}
+h3{font-size:20px}
+.lead{font-size:clamp(16px,2.6vw,19px);color:var(--muted);max-width:34em;margin-top:18px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:0 28px;border-radius:999px;border:1.5px solid var(--tea);background:var(--tea);color:var(--tea-ink);font:500 16px/1 var(--sans);text-decoration:none;cursor:pointer;transition:transform .15s,background .15s}
+.btn:hover{transform:translateY(-1px)}
+.btn:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid var(--honey);outline-offset:3px}
+.btn.ghost{background:transparent;color:var(--tea)}
+.row{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+
+/* photo slots: drop a real image at the path and it replaces the colour field automatically */
+.ph{position:relative;overflow:hidden;border-radius:var(--r);background:var(--paper-2)}
+.ph>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.ph.f1{background:radial-gradient(70% 80% at 25% 20%,#F6D9C4 0,rgba(246,217,196,0) 60%),radial-gradient(80% 90% at 85% 90%,#C97B5A 0,rgba(201,123,90,0) 62%),#E8C9B2}
+.ph.f2{background:radial-gradient(70% 80% at 80% 15%,#F1E2B8 0,rgba(241,226,184,0) 60%),radial-gradient(80% 90% at 15% 90%,#D9B26F 0,rgba(217,178,111,0) 62%),#EAD9AE}
+.ph.f3{background:radial-gradient(70% 80% at 20% 15%,#BBD0C0 0,rgba(187,208,192,0) 60%),radial-gradient(80% 90% at 90% 90%,#2F4A3A 0,rgba(47,74,58,0) 64%),#97B3A0}
+.ph.f4{background:radial-gradient(70% 80% at 70% 20%,#E9C9BC 0,rgba(233,201,188,0) 60%),radial-gradient(80% 90% at 10% 95%,#8E6B7A 0,rgba(142,107,122,0) 62%),#D5B4B4}
+.ph .cap{position:absolute;left:14px;bottom:12px;font:500 12px/1 var(--sans);letter-spacing:.08em;color:rgba(42,36,31,.55)}
+.ph img+.cap{display:none}
+
+/* hero */
+.nav{display:flex;justify-content:space-between;align-items:center;padding:18px 0}
+.logo{font-family:var(--latin);font-size:24px;font-weight:500;text-decoration:none;letter-spacing:.01em}
+.logo i{font-style:italic;color:var(--clay)}
+.nav a.small{font-size:14px;color:var(--muted)}
+.hero{padding:28px 0 64px}
+.hero-grid{display:grid;gap:34px;align-items:center}
+.hero .ph{aspect-ratio:4/5;max-height:560px}
+@media(min-width:820px){.hero-grid{grid-template-columns:1.1fr .9fr;gap:56px}}
+
+/* three moments */
+.moments{display:grid;gap:18px;margin-top:36px}
+@media(min-width:760px){.moments{grid-template-columns:repeat(3,1fr)}}
+.moment .ph{aspect-ratio:1/1;margin-bottom:16px}
+.moment .tag{font:500 13px/1 var(--sans);letter-spacing:.1em;color:var(--clay)}
+.moment h3{margin:8px 0 6px}
+.moment p{color:var(--muted);font-size:15px}
+.soon{display:inline-block;margin-top:10px;padding:4px 12px;border:1px dashed var(--line);border-radius:999px;font-size:12px;color:var(--muted)}
+
+/* tea x voice */
+.pair{background:var(--tea);color:var(--tea-ink);border-radius:32px;padding:clamp(28px,6vw,64px);display:grid;gap:30px;align-items:center}
+.pair .eyebrow{color:var(--honey)}
+.pair p{color:rgba(244,238,228,.8);margin-top:14px;max-width:32em}
+.steps{display:grid;gap:12px;counter-reset:s;list-style:none;padding:0}
+.steps li{counter-increment:s;display:flex;gap:14px;align-items:flex-start;padding:16px 18px;border-radius:18px;background:rgba(244,238,228,.08)}
+.steps li::before{content:counter(s);flex:none;width:30px;height:30px;border-radius:50%;background:var(--honey);color:var(--tea);font:700 14px/30px var(--sans);text-align:center}
+.btn.light{background:var(--paper);border-color:var(--paper);color:var(--tea)}
+@media(min-width:820px){.pair{grid-template-columns:1fr 1fr}}
+
+/* story */
+.story{display:grid;gap:30px;align-items:center}
+.story .ph{aspect-ratio:4/5;max-height:520px}
+.story p{margin-top:16px;color:var(--muted)}
+@media(min-width:820px){.story{grid-template-columns:.8fr 1.2fr;gap:56px}}
+
+/* waitlist */
+.join{background:var(--paper-2);border-radius:32px;padding:clamp(26px,6vw,56px);text-align:center}
+.join .lead{margin-inline:auto}
+form{display:grid;gap:12px;max-width:440px;margin:28px auto 0;text-align:left}
+label.f{display:grid;gap:6px;font-size:14px;color:var(--muted)}
+input[type=email],input[type=text]{width:100%;min-height:52px;padding:0 18px;border-radius:14px;border:1.5px solid var(--line);background:var(--paper);color:var(--ink);font:400 16px var(--sans)}
+.consent{display:flex;gap:10px;align-items:flex-start;font-size:13px;color:var(--muted);line-height:1.6}
+.consent input{margin-top:4px;width:18px;height:18px;accent-color:var(--tea);flex:none}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.msg{min-height:1.6em;text-align:center;font-size:15px}
+.msg.ok{color:var(--tea);font-weight:500}.msg.err{color:#A23B2A}
+.join .done{display:none}
+.join.sent form{display:none}.join.sent .done{display:block}
+.done h3{margin-top:6px}
+
+/* faq + footer */
+details{border-bottom:1px solid var(--line);padding:18px 0}
+summary{cursor:pointer;font:500 17px var(--sans);list-style:none;display:flex;justify-content:space-between;gap:16px}
+summary::after{content:"+";color:var(--clay);font-size:22px;line-height:1}
+details[open] summary::after{content:"–"}
+details p{margin-top:10px;color:var(--muted);font-size:15px}
+footer{padding:44px 0 56px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}
+footer .wrap{display:flex;flex-wrap:wrap;gap:12px 28px;justify-content:space-between}
+.fine{margin-top:14px;font-size:12px;line-height:1.7}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.btn{transition:none}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <nav class="nav" aria-label="主選單">
+    <a class="logo" href="./">Mumu <i>Soul</i> Care</a>
+    <a class="small" href="#join">預購名單</a>
+  </nav>
+</div>
+
+<header class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <p class="eyebrow">healing tea · 療癒茶飲</p>
+      <h1 style="margin-top:12px">一杯茶的時間，<br>把自己慢慢接回來。</h1>
+      <p class="lead">為忙碌的日子準備的療癒茶飲。每一包都附一個 QR，掃了就能聽一段為你說的聲音引導。</p>
+      <div class="row">
+        <a class="btn" href="#join">加入預購名單</a>
+        <a class="btn ghost" href="https://m3lomoon.github.io/Freelance-Hunter/melo-mood-app/" rel="noopener">先聽一段引導</a>
+      </div>
+    </div>
+    <figure class="ph f1" aria-label="Mumu Soul Care 茶飲主視覺">
+      <img src="assets/hero.jpg" alt="Mumu Soul Care 茶飲" width="800" height="1000" fetchpriority="high" onerror="this.remove()">
+      <span class="cap">HERO PHOTO · assets/hero.jpg</span>
+    </figure>
+  </div>
+</header>
+
+<section aria-labelledby="t-moments" style="padding-top:24px">
+  <div class="wrap">
+    <p class="eyebrow">three moments</p>
+    <h2 id="t-moments" style="margin-top:8px">一天裡，需要被照顧的三個時刻</h2>
+    <div class="moments">
+      <article class="moment">
+        <figure class="ph f2"><img src="assets/moment-1.jpg" alt="" loading="lazy" onerror="this.remove()"><span class="cap">assets/moment-1.jpg</span></figure>
+        <span class="tag">MORNING</span>
+        <h3>起床前的五分鐘</h3>
+        <p>在手機和訊息搶走你之前，先給自己一杯熱的。</p>
+        <span class="soon">口味即將公布</span>
+      </article>
+      <article class="moment">
+        <figure class="ph f4"><img src="assets/moment-2.jpg" alt="" loading="lazy" onerror="this.remove()"><span class="cap">assets/moment-2.jpg</span></figure>
+        <span class="tag">AFTERNOON</span>
+        <h3>下午那個撐不住的時候</h3>
+        <p>三分鐘，慢慢喝完，再決定要不要繼續衝。</p>
+        <span class="soon">口味即將公布</span>
+      </article>
+      <article class="moment">
+        <figure class="ph f3"><img src="assets/moment-3.jpg" alt="" loading="lazy" onerror="this.remove()"><span class="cap">assets/moment-3.jpg</span></figure>
+        <span class="tag">NIGHT</span>
+        <h3>睡前的最後一杯</h3>
+        <p>把今天放下來，讓聲音帶你進入夜晚。</p>
+        <span class="soon">口味即將公布</span>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section aria-labelledby="t-pair">
+  <div class="wrap">
+    <div class="pair">
+      <div>
+        <p class="eyebrow">tea × voice</p>
+        <h2 id="t-pair" style="margin-top:8px">喝茶的同時，<br>也有人對你說話。</h2>
+        <p>茶負責溫暖身體，聲音負責安靜下來。包裝上的 QR 連到 Melo Mood，用 Melody 的聲音陪你做一段短短的冥想引導。不用下載 app，也不用註冊。</p>
+        <div class="row"><a class="btn light" href="https://m3lomoon.github.io/Freelance-Hunter/melo-mood-app/" rel="noopener">試聽 60 秒</a></div>
+      </div>
+      <ol class="steps">
+        <li><span><b>沖一杯</b><br>水一倒，香氣先到。</span></li>
+        <li><span><b>掃包裝上的 QR</b><br>手機直接開，免下載。</span></li>
+        <li><span><b>戴上耳機，喝完這一杯</b><br>其他的，交給這幾分鐘。</span></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<section aria-labelledby="t-story">
+  <div class="wrap story">
+    <figure class="ph f4" aria-label="創辦人">
+      <img src="assets/founder.jpg" alt="夏沐 Melody" loading="lazy" onerror="this.remove()">
+      <span class="cap">FOUNDER · assets/founder.jpg</span>
+    </figure>
+    <div>
+      <p class="eyebrow">our story</p>
+      <h2 id="t-story" style="margin-top:8px">從一個很累的人，做給很累的人</h2>
+      <!-- DRAFT: replace with Melody's own words before sharing the link -->
+      <p>我是夏沐，一個創作者，也是一個很常忘記照顧自己的人。</p>
+      <p>Mumu Soul Care 是我給自己的答案：把喝茶、聲音和一點安靜的時間放在同一個儀式裡。它不會替你解決所有事，但會讓你在最忙的那天，有三分鐘屬於自己。</p>
+    </div>
+  </div>
+</section>
+
+<section id="join" aria-labelledby="t-join" style="padding-top:24px">
+  <div class="wrap">
+    <div class="join" id="joinbox">
+      <p class="eyebrow">first batch</p>
+      <h2 id="t-join" style="margin-top:8px">第一批開賣，先通知你</h2>
+      <p class="lead">留下 Email，第一批上線時我們會寫信給你，只寫這一件事。</p>
+      <form id="jf" novalidate>
+        <label class="f">Email
+          <input type="email" id="jf-email" name="email" autocomplete="email" inputmode="email" placeholder="you@example.com" required maxlength="254">
+        </label>
+        <label class="f">怎麼稱呼你（選填）
+          <input type="text" id="jf-name" name="name" autocomplete="given-name" maxlength="40">
+        </label>
+        <div class="hp" aria-hidden="true"><label>不要填這格<input type="text" id="jf-hp" tabindex="-1" autocomplete="off"></label></div>
+        <label class="consent"><input type="checkbox" id="jf-ok">
+          <span>我同意 Mumu Soul Care 用這個 Email 寄開賣通知。資料只用在這件事，隨時回信就能刪除。<a href="privacy.html">隱私說明</a></span>
+        </label>
+        <button class="btn" type="submit" id="jf-go">加入名單</button>
+        <p class="msg" id="jf-msg" role="status" aria-live="polite"></p>
+      </form>
+      <div class="done" role="status">
+        <h3>收到了。</h3>
+        <p class="lead" style="margin-top:10px">第一批上線時，會先寫信給你。<br>在那之前，先去聽一段引導吧。</p>
+        <div class="row" style="justify-content:center"><a class="btn" href="https://m3lomoon.github.io/Freelance-Hunter/melo-mood-app/" rel="noopener">開啟 Melo Mood</a></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section aria-labelledby="t-faq" style="padding-top:8px">
+  <div class="wrap" style="max-width:760px">
+    <h2 id="t-faq">常見問題</h2>
+    <div style="margin-top:22px">
+      <details><summary>什麼時候開賣？</summary><p>第一批的日期和口味確定後，會先寄信給名單上的人。</p></details>
+      <details><summary>QR 一定要用嗎？要付費嗎？</summary><p>不一定。茶本身可以單純喝。QR 連到的試聽引導是免費的，不用下載也不用註冊。</p></details>
+      <details><summary>這是治療或醫療產品嗎？</summary><p>不是。Mumu Soul Care 是一杯茶加上一段安靜的時間，是生活裡的小儀式，不能取代醫療或專業協助。如果你正處於很辛苦的狀態，請聯絡 1925 安心專線（24 小時）。</p></details>
+      <details><summary>成分、過敏資訊和保存方式？</summary><p>正式上市前會完整標示在包裝與這個頁面。</p></details>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>© Mumu Soul Care · by 夏沐 Melody</span>
+    <span><a href="privacy.html">隱私說明</a> · <a href="https://m3lomoon.github.io/Freelance-Hunter/melo-mood-app/" rel="noopener">Melo Mood</a></span>
+  </div>
+</footer>
+
+<script>
+(()=>{
+  // the same Supabase project as Melo Mood; the key is the public publishable one, and the table only accepts inserts
+  const SB={url:'https://bpgxmnfhahrwwhpizarv.supabase.co',key:'sb_publishable_JfVSa7zlEfZqAWgBPc_dYQ__kGlevv_'};
+  const $=s=>document.querySelector(s);
+  // where the visitor came from (?src=zeczec, ?src=pack...) is saved with the sign-up so we can tell what worked
+  let src=''; try{ src=(new URLSearchParams(location.search).get('src')||'').replace(/[^\w.-]/g,'').slice(0,60); }catch(e){}
+  const say=(t,c)=>{ const m=$('#jf-msg'); m.textContent=t; m.className='msg'+(c?' '+c:''); };
+  $('#jf').addEventListener('submit',async e=>{
+    e.preventDefault();
+    const email=$('#jf-email').value.trim().toLowerCase();
+    if($('#jf-hp').value) return;   // a bot filled the hidden field
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)||email.length>254) return say('Email 看起來不太對，再檢查一下。','err');
+    if(!$('#jf-ok').checked) return say('請先勾選同意，才能寄通知給你。','err');
+    const go=$('#jf-go'); go.disabled=true; say('送出中…');
+    try{
+      const r=await fetch(SB.url+'/rest/v1/mumu_waitlist',{method:'POST',
+        headers:{apikey:SB.key,'Content-Type':'application/json',Prefer:'return=minimal'},
+        body:JSON.stringify({email,name:$('#jf-name').value.trim().slice(0,40)||null,source:src||null})});
+      // 409 = this address is already on the list; it looks the same as a new sign-up so the list can't be probed
+      if(!r.ok && r.status!==409) throw new Error(r.status);
+      $('#joinbox').classList.add('sent');
+    }catch(err){ say('現在連不上，請稍後再試一次。','err'); go.disabled=false; }
+  });
+})();
+</script>
+</body>
+</html>
