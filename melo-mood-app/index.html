@@ -1446,6 +1446,9 @@ const THEME_AUDIO = {};
    assets/v/<voice>/<hash>.mp3, hash = FNV-1a of the line with the listener's name taken out
    (tools/voice_lines.js lists the lines, tools/voice_lib.py cuts the takes and writes assets/v/index.json) */
 let voiceLib=null;   // {melo:Set, deep:Set} once the index has loaded
+// the claude.ai preview can't hold hundreds of files, so its build ships each voice as one json of base64 clips
+const VOICE_BUNDLED=!!window.VOICE_BUNDLED, bundles={};
+const bundleClip=(voice,h)=>(bundles[voice]||=fetch(`assets/v/${voice}.json`).then(r=>r.json())).then(b=>b[h]?'data:audio/mpeg;base64,'+b[h]:null);
 function fnv(t){ let h=0x811c9dc5; for(const ch of t){ h^=ch.codePointAt(0); h=Math.imul(h,0x01000193)>>>0; } return h.toString(16).padStart(8,'0'); }
 // the recordings never say a name: "嗨，小明。" is recorded as "嗨。", "小明，聽好了" as "聽好了"
 function libText(t,name){
@@ -1527,7 +1530,7 @@ async function playLines(lines, {rate=.9, onTick, onDone, mode='manifest', src, 
   }
   if(src?.mode==='clips'){
     // a line the library doesn't have (an AI rewrite, say) hands the rest over to the device voice instead of going silent
-    const url = src.lib ? (i,l)=>{ const h=libKey(l); if(h && !voiceLib?.[src.voice]?.has(h)) throw new Error('clip'); return h&&`assets/v/${src.voice}/${h}.mp3`; }
+    const url = src.lib ? (i,l)=>{ const h=libKey(l); if(h && !voiceLib?.[src.voice]?.has(h)) throw new Error('clip'); return h && (VOICE_BUNDLED ? bundleClip(src.voice,h) : `assets/v/${src.voice}/${h}.mp3`); }
                         : i=>`assets/th/${src.packKind}-${i}.mp3`;
     try{ await playClips(lines, onTick, onDone, url); return; }
     catch(e){ if(!alive(session)) return; toast('預錄聲音載入失敗，改用系統聲音'); lines=lines.slice(player.idx); player.idx=0; }
