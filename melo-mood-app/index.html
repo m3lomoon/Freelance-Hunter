@@ -1730,6 +1730,8 @@ Object.assign(EN,{"分享給朋友":"Share with a friend","掃 QR 就能用":"Sc
 Object.assign(EN,{"先聽 60 秒":"Listen for 60 seconds","停止":"Stop","一段「焦慮想太多」的急救引導，戴上耳機更好。":"A rescue guide for racing thoughts (in Chinese). Headphones help.","開始設定 · 約 1 分鐘":"Set up · about 1 minute","隱私說明":"Privacy","資料只存在你的手機裡。":"Your data stays on your phone.","AI 讀你的目標與日記，寫出專屬引導，再用聲音唸給你聽。免下載、免註冊。":"AI reads your goals and journal, writes a guide just for you, then reads it aloud. No download, no sign-up.","這個瀏覽器不能自動播放，請再點一次":"This browser blocked autoplay. Tap once more.","嘖嘖募資進行中，了解回饋方案 →":"Crowdfunding is live. See the rewards →"});
 Object.assign(EN,{"這一段還沒有真人錄音 · 先用手機內建聲音":"No studio recording for this one yet · using your phone's voice","真人錄音只有中文版 · 先用手機內建聲音":"Studio recordings are Chinese only · using your phone's voice","也可以在「我 → 聲音錄音室」錄你自己的聲音，完全免費。":"You can also record your own voice in Me → Recording Studio, free.","真人聲音 · 情境冥想、每日練習、睡前導引與主題清單":"Real voice · moments, daily practice, sleep guide and theme lists","預錄聲音載入失敗，改用系統聲音":"Couldn't load the recording; using your phone's voice"});
 Object.assign(EN,{"Sage":"Sage","女聲 · 溫柔安定":"Female · gentle, grounded","溫暖、安定、貼近耳邊的女聲，節奏不急。想換一個不是 Melo 的女生陪你時選她，情緒低落或焦慮時特別適合。":"A warm, steady female voice close to your ear, never rushed. Pick her for a woman's voice other than Melo; good for low or anxious days.","Ethan":"Ethan","男聲 · 低沉磁性":"Male · deep, smooth","低沉、平滑、有磁性的男聲，比 Evan 更深一點。睡前、想讓腦袋安靜下來的時候適合。":"A deep, smooth, magnetic male voice, a shade deeper than Evan. Good before sleep or when your head needs to go quiet."});
+Object.assign(EN,{"✦ 你正在看 Melody 的範例":"✦ You're looking at Melody's sample","用我的名字開始 →":"Start with my name →","先輸入你的名字，建立你自己的檔案":"Enter your name first to start your own profile"});
+Object.assign(EN,{"清除這台裝置上的日記、收藏和設定，重新開始？":"Erase the journal, favourites and settings on this device and start over?"});
 const EN_KEYS=Object.keys(EN).sort((a,b)=>b.length-a.length);
 const CN_KEYS=Object.keys(CN.phrases).sort((a,b)=>b.length-a.length);
 const HAN=/[\u4e00-\u9fff]/;
@@ -1881,7 +1883,7 @@ function renderHome(){
   const today=state.entries.find(e=>e.date===todayKey());
   const mins=state.sessions.reduce((s,x)=>s+x.min,0);
   $('#home').innerHTML=`
-    ${state.demo?`<div class="banner">✦ 你正在看範例資料<button id="start-real">開始我的旅程 →</button></div>`:''}
+    ${state.demo?`<div class="banner">✦ 你正在看 Melody 的範例<button id="start-real">用我的名字開始 →</button></div>`:''}
     <div class="topbar">
       <div><div class="eyebrow">${greeting()} · ${esc(T.name)}</div><h1 class="title">${esc(p.name||'你')}，<br>今天想練習什麼？</h1></div>
       <div class="date">週${weekday()}<b>${new Date().getDate()}</b></div>
@@ -1938,13 +1940,17 @@ function quickMood(v){
   if(e){ e.mood=v; } else { state.entries.push({id:'e'+Date.now(),date:todayKey(),mood:v,gratitude:[],note:'',tags:[]}); }
   save();
 }
-function startReal(){
-  if(!confirm('清除範例資料，從你自己的目標開始？')) return;
+/* the sample account is a look around, never an identity: leaving it always goes through "what's your name" */
+function leaveDemo(){
   const keep=state.settings;   // language, keys, voice, pace and reminder are the user's, not the demo's
   const fresh=blank();
   Object.keys(state).forEach(k=>delete state[k]);
   Object.assign(state, fresh, {settings:keep});
-  save(); startOnboarding();
+  save();
+}
+function startReal(){
+  stopPlayback(); leaveDemo(); startOnboarding(1);
+  setTimeout(()=>$('#ob-name')?.focus(), 300);
 }
 
 /* ---------- MEDITATE ---------- */
@@ -3245,6 +3251,7 @@ function srvVoice(k){
 }
 function openLoginSheet(then){
   if(inPreview()){ toast(PREVIEW_PAY); return; }
+  if(state.demo){ toast('先輸入你的名字，建立你自己的檔案'); startReal(); return; }   // an account must never be born as the sample Melody
   sheet(`<h2>用 Email 登入</h2><p class="sub">不用密碼。我們寄一組 6 位數登入碼給你，方案會跟著這個帳號，換手機也在。</p>
     <div class="field"><label class="label" for="li-email">Email</label><input class="input" id="li-email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" value="${esc(auth?.email||'')}"></div>
     <button class="btn primary block" id="li-send">寄登入碼</button>
@@ -3499,7 +3506,7 @@ function renderMe(){
   bindInstallSection($('#me'));
   $('#rm-on').onclick=()=>{ const t=$('#rm-time').value; if(!t) return; state.settings.reminder=t; save(); armReminder(); renderMe(); toast('提醒設在每天 '+t); };
   $('#rm-off')&&($('#rm-off').onclick=()=>{ state.settings.reminder=''; save(); armReminder(); renderMe(); toast('提醒關掉了'); });
-  $('#me-reset').onclick=startReal;
+  $('#me-reset').onclick=()=>{ if(!state.demo && !confirm(tr('清除這台裝置上的日記、收藏和設定，重新開始？'))) return; startReal(); };
 }
 function openGoalsSheet(after){
   sheet(`<h2>你的方向</h2><p class="sub">最多 3 個。引導詞會輪流圍著它們寫。</p><div class="opts" id="sh-goals">${goalOptions(state.profile.goals)}</div><button class="btn primary block" id="sh-ok" style="margin-top:18px">完成</button>`,b=>{
@@ -3654,10 +3661,10 @@ const CROWD={url:''};   // 嘖嘖 project page; the welcome screen shows a link 
 let obAudio=null;
 function obStopListen(){ if(obAudio){ obAudio.pause(); obAudio=null; } const b=$('#ob-listen'); if(b) b.textContent='先聽 60 秒'; }
 let obStep=1; const obSel=new Set(); const obCon=new Set(); let obTone=''; let obLens=''; let obMin=3; let obRecCleanup=null;
-function startOnboarding(){
+function startOnboarding(step){
   obSel.clear(); obCon.clear(); obTone=''; obLens=''; obMin=3;
   (state.profile.concerns||[]).forEach(c=>CONCERNS[c]&&obCon.add(c));   // resume what a half-finished run already saved
-  obStep=(state.profile.name||obCon.size)?1:0;   // a brand-new visitor meets the welcome screen first, not a form
+  obStep=step ?? ((state.profile.name||obCon.size)?1:0);   // a brand-new visitor meets the welcome screen first, not a form
   go('onboard'); renderOb();
 }
 function renderOb(){
@@ -3982,6 +3989,8 @@ if('speechSynthesis' in window){ speechSynthesis.getVoices(); speechSynthesis.on
 armReminder();
 armForestWatch();
 // step 1 of onboarding already saves the name; a reload before the end must resume, not skip
+// someone who only looked at the sample account comes back to the welcome screen, not as Melody
+if(state.demo) leaveDemo();
 const onboarded = state.profile.name && (state.profile.goals||[]).length && state.profile.tone;
 if(!onboarded){ startOnboarding(); } else { go('home'); }
 applyLang();
