@@ -1249,19 +1249,21 @@ async function generateOnServer({goal, scene, minutes, tone, name}){
 const VOICES = {
   melo:{name:'Melo 的聲音', role:'創辦人 · 複製聲', g:'magenta', id:'cVpaMfwbISlOywwtDanV', pack:'melo',
     bio:'夏沐本人的聲音，用一段 30 秒樣本複製出來的。平靜、貼在耳邊，語速偏慢。App 裡的預錄示範就是這一個。'},
+  sage:{name:'Sage', role:'女聲 · 溫柔安定', g:'jade', id:'APSIkVZudNbPAwyPoeVO',
+    bio:'溫暖、安定、貼近耳邊的女聲，節奏不急。想換一個不是 Melo 的女生陪你時選她，情緒低落或焦慮時特別適合。'},
   deep:{name:'溫柔男聲', role:'Evan · 溫暖沉穩', g:'cobalt', id:'kbrsaic1zriFXx1pgRYN', pack:'deep',
     bio:'溫暖、柔和、很穩的男聲。晚上聽、或想要更放鬆的引導時可以換這個。睡前導引特別適合。'},
-  brand:{name:'Melo 品牌聲', role:'品牌旁白 · 較明亮', g:'lime', id:'ZGNKRFGTTnfytxotHN56',
-    bio:'為 Melo Mood 設計的品牌聲，比複製聲亮一點、精神一點，適合早晨與專注類。目前還在 fine-tune，完成前會自動改用複製聲。'},
+  ethan:{name:'Ethan', role:'男聲 · 低沉磁性', g:'ember', id:'brChkoggsUHF1stW6omH',
+    bio:'低沉、平滑、有磁性的男聲，比 Evan 更深一點。睡前、想讓腦袋安靜下來的時候適合。'},
   mine:{name:'你自己的聲音', role:'你錄的', g:'rose', own:true,
     bio:'自我參照效應：同一句話，用自己的聲音聽，記得比較久、也比較信。免費做法：在「我 → 聲音錄音室」把每日練習、睡前導引、或任何一個情境冥想的固定句子錄一遍（也可以在該段播放頁直接點「錄這一段」），完全不用連接碼、不經過任何第三方。想要句子每次都不一樣、自動生成，才需要錄 30 秒交給 ElevenLabs 複製（要先在進階設定連接）。'},
   system:{name:'系統聲音', role:'裝置內建 · 一定能播', g:'slate', browser:true,
     bio:'裝置內建的語音，不用連接碼，任何一段都能唸，會自動挑你手機上最自然的那一個。想更像真人：iPhone 到「設定 → 輔助使用 → 語音內容 → 聲音 → 中文」下載「美佳（高品質）」；電腦用 Edge 開，會有接近真人的「自然」語音。'},
 };
 const DEMO_VOICES = VOICES;   // the pre-rendered packs are keyed by the same names
-// the brand voice is offered only once something can actually speak with it; until then it would sound like the device voice
-const brandReady = () => !!state.settings.elevenKey || libReady('brand') || !!srvVoice('brand');
-const chosenVoice = () => { const k=state.settings.voice; return !VOICES[k] || (k==='brand' && !brandReady()) ? 'melo' : k; };
+// a voice is offered only once something can actually speak with it; otherwise picking it would just sound like the device voice
+const voiceReady = k => { const V=VOICES[k]; return !!V && (V.own || V.browser || !!V.pack || !!state.settings.elevenKey || libReady(k) || !!srvVoice(k)); };
+const chosenVoice = () => { const k=state.settings.voice; return voiceReady(k) ? k : 'melo'; };
 /* what this voice can actually do right now, and why */
 function voiceStatus(k){
   const V=VOICES[k], s=state.settings;
@@ -1724,6 +1726,7 @@ Object.assign(EN,{"完成 ✦":"Done ✦","帶著這個頻率走進今天。":"C
 Object.assign(EN,{"分享給朋友":"Share with a friend","掃 QR 就能用":"Scan a QR code to use it","掃一下就能用":"Scan and it just works","朋友用手機相機掃這個 QR code，就會在瀏覽器打開 Melo Mood，不用下載。":"A friend scans this QR code with their phone camera and Melo Mood opens in the browser. Nothing to download.","傳連結給朋友":"Send the link to a friend","複製連結":"Copy link","連結複製好了":"Link copied","連結複製好了，貼給朋友就好":"Link copied. Paste it to a friend.","iPhone 用 Safari 開，點分享鈕 → 加入主畫面，就像 App 一樣。":"On iPhone open it in Safari, tap Share → Add to Home Screen, and it works like an app.","我在用 Melo Mood：用自己的聲音唸冥想引導給自己聽。":"I'm using Melo Mood: guided meditations read in my own voice.","放在手機上":"Put it on your phone","不用下載":"No download","給朋友掃 QR code →":"Show a friend the QR code →","已經在主畫面了 ✦ 像 App 一樣開啟，沒網路也能開。":"Already on your home screen ✦ It opens like an app, even offline.","裝到主畫面":"Add to home screen","像 App 一樣全螢幕開啟，沒網路也能開。":"Opens full screen like an app, even offline.","點 Safari 下方的":"Tap the","分享鈕":"Share button","（方形加箭頭）":" (a square with an arrow) at the bottom of Safari","往下滑，選":"Scroll down and choose","加入主畫面":"Add to Home Screen","點":"Tap","新增":"Add","，主畫面就多一個 Melo Mood":", and Melo Mood appears on your home screen","要用 Safari 開才有這個選項。":"This option only appears in Safari.","你現在在 LINE / IG 的內建瀏覽器裡，沒辦法安裝。點右上角「⋯」→ 用 Safari（或 Chrome）開啟，再回來這裡。":"You're inside the LINE / IG built-in browser, which can't install apps. Tap the ⋯ at the top right, open in Safari (or Chrome), then come back here.","Chrome 右上角選單 →":"Chrome menu at the top right →","安裝應用程式":"Install app","（或「加到主畫面」）。":" (or \"Add to Home screen\").","隱私權政策":"Privacy Policy","服務條款":"Terms of Service","登入即表示你同意":"By signing in you agree to the ","與":" and ","訂閱即表示你同意":"By subscribing you agree to the ","刪除帳號":"Delete account","刪除帳號？":"Delete your account?","會永久刪掉":"This permanently deletes ","這個登入帳號，還有雲端上的方案紀錄、用量，以及 AI 複製的聲音（連 ElevenLabs 那邊一起刪）。刪了就回不來。":", your plan record and usage in the cloud, and your AI voice (including the copy at ElevenLabs). It can't be undone.","日記、心情和錄音本來就只存在這支手機上，不會因為刪帳號消失。":"Your journal, moods and recordings only live on this phone, so deleting the account doesn't remove them.","同時清除這支手機上的日記、設定和錄音":"Also clear the journal, settings and recordings on this phone","永久刪除":"Delete permanently","刪除中…":"Deleting…","帳號刪除了":"Account deleted","、停止之後的每期扣款":", stops future charges","綠界沒有回應，扣款還沒停掉，所以先不刪。晚點再試":"ECPay didn't respond, so billing isn't stopped yet and nothing was deleted. Try again later.","你的方案是在 App Store / Google Play 訂的，請先到那邊取消":"Your plan was bought in the App Store / Google Play. Cancel it there first.","刪除失敗，晚點再試":"Delete failed. Try again later.","裝好了 ✦ 去主畫面找它":"Installed ✦ Find it on your home screen"});
 Object.assign(EN,{"先聽 60 秒":"Listen for 60 seconds","停止":"Stop","一段「焦慮想太多」的急救引導，戴上耳機更好。":"A rescue guide for racing thoughts (in Chinese). Headphones help.","開始設定 · 約 1 分鐘":"Set up · about 1 minute","隱私說明":"Privacy","資料只存在你的手機裡。":"Your data stays on your phone.","AI 讀你的目標與日記，寫出專屬引導，再用聲音唸給你聽。免下載、免註冊。":"AI reads your goals and journal, writes a guide just for you, then reads it aloud. No download, no sign-up.","這個瀏覽器不能自動播放，請再點一次":"This browser blocked autoplay. Tap once more.","嘖嘖募資進行中，了解回饋方案 →":"Crowdfunding is live. See the rewards →"});
 Object.assign(EN,{"這一段還沒有真人錄音 · 先用手機內建聲音":"No studio recording for this one yet · using your phone's voice","真人錄音只有中文版 · 先用手機內建聲音":"Studio recordings are Chinese only · using your phone's voice","也可以在「我 → 聲音錄音室」錄你自己的聲音，完全免費。":"You can also record your own voice in Me → Recording Studio, free.","真人聲音 · 情境冥想、每日練習、睡前導引與主題清單":"Real voice · moments, daily practice, sleep guide and theme lists","預錄聲音載入失敗，改用系統聲音":"Couldn't load the recording; using your phone's voice"});
+Object.assign(EN,{"Sage":"Sage","女聲 · 溫柔安定":"Female · gentle, grounded","溫暖、安定、貼近耳邊的女聲，節奏不急。想換一個不是 Melo 的女生陪你時選她，情緒低落或焦慮時特別適合。":"A warm, steady female voice close to your ear, never rushed. Pick her for a woman's voice other than Melo; good for low or anxious days.","Ethan":"Ethan","男聲 · 低沉磁性":"Male · deep, smooth","低沉、平滑、有磁性的男聲，比 Evan 更深一點。睡前、想讓腦袋安靜下來的時候適合。":"A deep, smooth, magnetic male voice, a shade deeper than Evan. Good before sleep or when your head needs to go quiet."});
 const EN_KEYS=Object.keys(EN).sort((a,b)=>b.length-a.length);
 const CN_KEYS=Object.keys(CN.phrases).sort((a,b)=>b.length-a.length);
 const HAN=/[\u4e00-\u9fff]/;
@@ -3540,7 +3543,7 @@ function openVoiceSheet(after){
     </button>`;
   };
   // 系統聲音 stays as the silent fallback everywhere else; it's just not something to pick on purpose here
-  const body=()=>Object.keys(VOICES).filter(k=>k!=='system' && (k!=='brand' || brandReady())).map(card).join('');
+  const body=()=>Object.keys(VOICES).filter(k=>k!=='system' && voiceReady(k)).map(card).join('');
   sheet(`<h2>誰來唸給你聽</h2><p class="sub">每一段引導都用這個聲音。隨時可以換，換了就記住。</p>
     <div id="v-list">${body()}</div>
     <p class="note" style="margin:4px 0 16px">${state.settings.elevenKey?'已連接 ElevenLabs，可以在「我 → 選擇播放聲音」挑帳號裡的其他聲音。':'也可以在「我 → 聲音錄音室」錄你自己的聲音，完全免費。'}</p>
